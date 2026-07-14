@@ -1,0 +1,1629 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- PWA -->
+  <link rel="manifest" href="site.webmanifest">
+  <meta name="theme-color" content="#020406">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Padel Bella Vista">
+  <title>Jugadores — Padel Bella Vista</title>
+  <meta name="description" content="Directorio completo de jugadores de pádel. Buscá por nombre, género, categoría, nivel, país, provincia, altura, edad y más.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Cormorant:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    /* ===== HEADER ===== */
+    #main-header {
+      position:fixed; top:0; left:0; right:0; z-index:100;
+      background:rgba(7,11,16,0.97); backdrop-filter:blur(20px);
+      border-bottom:1px solid var(--border-subtle);
+      transition:all .3s ease;
+    }
+    .header-inner { display:flex; align-items:center; justify-content:space-between; height:64px; gap:24px; }
+    .logo-icon { width:38px; height:38px; background:linear-gradient(135deg,var(--accent-primary),var(--accent-orange)); border-radius:var(--radius-md); display:flex; align-items:center; justify-content:center; font-size:20px; }
+    .logo-text .logo-name { font-family:var(--font-display); font-size:22px; letter-spacing:2px; }
+    .logo-text .logo-tagline { font-size:9px; text-transform:uppercase; letter-spacing:2px; color:var(--accent-primary); font-weight:600; }
+    .main-nav { display:flex; align-items:center; gap:2px; }
+    .nav-link { padding:7px 12px; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.5px; color:var(--text-secondary); border-radius:var(--radius-sm); transition:all .15s; }
+    .nav-link:hover, .nav-link.active { color:var(--text-primary); background:rgba(255,255,255,.06); }
+    .nav-link.active { color:var(--accent-primary); }
+    #menu-toggler { display:none; width:38px; height:38px; align-items:center; justify-content:center; background:var(--bg-elevated); border-radius:var(--radius-sm); color:var(--text-primary); font-size:18px; border:1px solid var(--border-subtle); }
+    #mobile-menu { display:none; position:fixed; top:64px; left:0; right:0; background:rgba(7,11,16,.98); backdrop-filter:blur(20px); border-bottom:1px solid var(--border-subtle); padding:16px; z-index:99; flex-direction:column; gap:4px; }
+    #mobile-menu.open { display:flex; }
+    #mobile-menu .nav-link { padding:10px 14px; font-size:14px; border-bottom:1px solid var(--border-subtle); }
+
+    /* ===== PAGE HERO ===== */
+    .page-hero {
+      padding: 100px 0 48px;
+      background: linear-gradient(180deg, var(--bg-base) 0%, var(--bg-surface) 100%);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .page-hero-inner { display:flex; align-items:flex-end; justify-content:space-between; gap:24px; flex-wrap:wrap; }
+    .page-hero h1 { font-family:var(--font-display); font-size:clamp(40px,6vw,72px); text-transform:uppercase; letter-spacing:2px; line-height:.95; }
+    .page-hero h1 span { color:var(--accent-primary); }
+    .page-hero-meta { display:flex; gap:16px; align-items:center; margin-top:14px; flex-wrap:wrap; }
+    .page-hero-meta .stat-badge { background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:8px 16px; text-align:center; }
+    .page-hero-meta .stat-badge .num { font-family:var(--font-display); font-size:26px; color:var(--accent-primary); display:block; }
+    .page-hero-meta .stat-badge .lbl { font-size:10px; text-transform:uppercase; letter-spacing:1.5px; color:var(--text-muted); }
+
+    /* ===== LAYOUT ===== */
+    .players-layout {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 0;
+      min-height: calc(100vh - 200px);
+    }
+
+    /* ===== FILTROS SIDEBAR ===== */
+    .filters-sidebar {
+      position: sticky;
+      top: 72px;
+      height: calc(100vh - 72px);
+      overflow-y: auto;
+      background: var(--bg-surface);
+      border-right: 1px solid var(--border-subtle);
+      padding: 24px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .filter-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    .filter-header h3 {
+      font-family: var(--font-display);
+      font-size: 20px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .filter-reset {
+      font-size: 11px;
+      color: var(--accent-primary);
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      font-weight: 600;
+      background: none;
+      border: none;
+      padding: 0;
+    }
+
+    .filter-reset:hover { text-decoration: underline; }
+
+    .filter-block {
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 16px;
+    }
+
+    .filter-block-title {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--accent-primary);
+      font-family: var(--font-mono);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .filter-search-box {
+      position: relative;
+    }
+
+    .filter-search-box input {
+      width: 100%;
+      padding: 10px 14px 10px 36px;
+      background: var(--bg-elevated);
+      border: 1.5px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: 14px;
+      outline: none;
+      transition: all .15s;
+    }
+
+    .filter-search-box input:focus {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .filter-search-icon {
+      position: absolute;
+      left: 11px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 14px;
+      pointer-events: none;
+    }
+
+    .filter-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .filter-chip {
+      padding: 5px 12px;
+      border-radius: 100px;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1.5px solid var(--border-subtle);
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all .15s;
+      white-space: nowrap;
+    }
+
+    .filter-chip:hover  { border-color: var(--accent-primary); color: var(--accent-primary); }
+    .filter-chip.active { background: var(--accent-primary); border-color: var(--accent-primary); color: white; }
+
+    .filter-chip.fem-active  { background: #e91e8c; border-color: #e91e8c; color: white; }
+    .filter-chip.masc-active { background: var(--accent-primary); border-color: var(--accent-primary); color: white; }
+
+    .range-block { display:flex; flex-direction:column; gap:6px; }
+    .range-row { display:flex; gap:8px; align-items:center; }
+    .range-row input[type="number"] {
+      width: 70px;
+      padding: 7px 8px;
+      background: var(--bg-elevated);
+      border: 1.5px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-size: 13px;
+      font-family: var(--font-mono);
+      outline: none;
+      text-align: center;
+      transition: all .15s;
+    }
+    .range-row input[type="number"]:focus { border-color: var(--accent-primary); }
+    .range-sep { font-size: 12px; color: var(--text-muted); }
+
+    /* ===== MAIN CONTENT ===== */
+    .players-main {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .players-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .players-count {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .players-count strong {
+      color: var(--accent-primary);
+      font-family: var(--font-mono);
+    }
+
+    .toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sort-select {
+      padding: 8px 32px 8px 12px;
+      background: var(--bg-elevated);
+      border: 1.5px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: 13px;
+      outline: none;
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M9.5 4L6 8L2.5 4' stroke='%238BA8C4' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+    }
+
+    .view-toggle { display:flex; gap:4px; }
+    .view-btn {
+      width:36px; height:36px; display:flex; align-items:center; justify-content:center;
+      background:var(--bg-elevated); border:1.5px solid var(--border-subtle);
+      border-radius:var(--radius-sm); cursor:pointer; transition:all .15s; font-size:14px;
+    }
+    .view-btn.active { background:rgba(0,180,216,.15); border-color:var(--accent-primary); }
+
+    /* ===== GRID VIEW ===== */
+    .players-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 16px;
+    }
+
+    .player-card {
+      background: var(--bg-card);
+      border: 1.5px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      cursor: pointer;
+      transition: all .25s;
+      position: relative;
+    }
+
+    .player-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--accent-primary);
+      box-shadow: 0 8px 30px rgba(0,180,216,.15);
+    }
+
+    .player-card-img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      object-position: top;
+      background: var(--bg-elevated);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 64px;
+      color: var(--text-muted);
+    }
+
+    .player-card-img-el {
+      width:100%; height:200px; object-fit:cover; object-position:top;
+    }
+
+    .player-card-rank {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: rgba(7,11,16,.85);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 3px 8px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--gold);
+    }
+
+    .player-card-gender {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 28px; height: 28px;
+      background: rgba(7,11,16,.85);
+      backdrop-filter: blur(10px);
+      border-radius: 50%;
+      display: flex; align-items:center; justify-content:center;
+      font-size: 14px;
+    }
+
+    .player-card-body { padding: 14px; }
+    .player-card-name { font-weight:800; font-size:16px; color:var(--text-primary); }
+    .player-card-nickname { font-size:12px; color:var(--text-muted); margin-top:1px; }
+
+    .player-card-tags {
+      display: flex; flex-wrap:wrap; gap:5px; margin: 10px 0;
+    }
+
+    .player-card-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .pc-stat { text-align:center; }
+    .pc-stat .val { font-family:var(--font-mono); font-size:15px; font-weight:700; color:var(--accent-primary); display:block; }
+    .pc-stat .key { font-size:10px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); }
+
+    .player-card-footer {
+      display: flex; gap:6px; padding:10px 14px; border-top:1px solid var(--border-subtle);
+    }
+
+    /* ===== TABLE VIEW ===== */
+    .players-table { width:100%; border-collapse:collapse; }
+    .players-table th {
+      padding:10px 14px; text-align:left; font-size:11px; text-transform:uppercase;
+      letter-spacing:1.5px; color:var(--text-muted); border-bottom:1px solid var(--border-subtle);
+      font-family:var(--font-mono); white-space:nowrap; cursor:pointer;
+    }
+    .players-table th:hover { color:var(--accent-primary); }
+    .players-table td { padding:12px 14px; border-bottom:1px solid var(--border-subtle); font-size:14px; vertical-align:middle; }
+    .players-table tr:hover td { background:rgba(0,180,216,.04); }
+    .players-table tr:last-child td { border-bottom:none; }
+    .tbl-player { display:flex; align-items:center; gap:10px; }
+    .tbl-avatar {
+      width:36px; height:36px; border-radius:50%; background:var(--bg-elevated);
+      border:2px solid var(--border-subtle); display:flex; align-items:center;
+      justify-content:center; font-size:14px; flex-shrink:0; overflow:hidden;
+    }
+    .tbl-avatar img { width:100%; height:100%; object-fit:cover; }
+    .tbl-name { font-weight:700; color:var(--text-primary); }
+    .tbl-nick { font-size:12px; color:var(--text-muted); }
+    .tbl-pts { font-family:var(--font-mono); color:var(--accent-primary); font-weight:700; }
+
+    /* ===== EMPTY STATE ===== */
+    .empty-state {
+      text-align:center; padding:80px 24px; display:flex; flex-direction:column;
+      align-items:center; gap:16px;
+    }
+    .empty-icon { font-size:64px; opacity:.4; }
+    .empty-title { font-family:var(--font-display); font-size:28px; color:var(--text-secondary); text-transform:uppercase; }
+    .empty-sub { font-size:14px; color:var(--text-muted); }
+
+    /* ===== MODAL PERFIL JUGADOR ===== */
+    .profile-modal { max-width:780px; }
+    .profile-hero {
+      position:relative; height:220px; overflow:hidden; border-radius:var(--radius-lg) var(--radius-lg) 0 0;
+    }
+    .profile-hero img { width:100%; height:100%; object-fit:cover; }
+    .profile-hero::after {
+      content:''; position:absolute; inset:0;
+      background:linear-gradient(to top, rgba(13,21,32,1) 0%, transparent 60%);
+    }
+    .profile-hero-data {
+      position:absolute; bottom:20px; left:24px; right:24px; z-index:1;
+      display:flex; align-items:flex-end; justify-content:space-between;
+    }
+    .profile-name { font-family:var(--font-display); font-size:36px; text-transform:uppercase; letter-spacing:1px; }
+    .profile-meta { font-size:14px; color:rgba(255,255,255,.7); margin-top:4px; }
+    .profile-stats-grid {
+      display:grid; grid-template-columns:repeat(4,1fr); gap:1px;
+      background:var(--border-subtle); border:1px solid var(--border-subtle);
+      border-radius:var(--radius-md); overflow:hidden; margin-bottom:20px;
+    }
+    .profile-stat {
+      background:var(--bg-elevated); padding:14px; text-align:center;
+    }
+    .profile-stat .val { font-family:var(--font-display); font-size:28px; color:var(--accent-primary); }
+    .profile-stat .key { font-size:10px; text-transform:uppercase; letter-spacing:1.5px; color:var(--text-muted); margin-top:2px; }
+    .profile-detail-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .profile-detail-item {
+      background:var(--bg-elevated); border:1px solid var(--border-subtle);
+      border-radius:var(--radius-md); padding:10px 14px;
+      display:flex; align-items:center; gap:10px;
+    }
+    .profile-detail-item .pdi-icon { font-size:18px; }
+    .profile-detail-item .pdi-key { font-size:10px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); }
+    .profile-detail-item .pdi-val { font-size:14px; font-weight:600; color:var(--text-primary); }
+
+    /* ===== MODAL ADMIN ===== */
+    .admin-modal { max-width:820px; }
+    .admin-form-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .admin-form-grid.three { grid-template-columns:1fr 1fr 1fr; }
+    .section-sep {
+      font-size:10px; text-transform:uppercase; letter-spacing:2px;
+      color:var(--accent-primary); font-family:var(--font-mono);
+      padding:14px 0 10px; border-bottom:1px solid var(--border-subtle); margin-bottom:4px;
+      grid-column: 1 / -1;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media(max-width:900px) {
+      .players-layout { grid-template-columns:1fr; }
+      .filters-sidebar { position:relative; height:auto; border-right:none; border-bottom:1px solid var(--border-subtle); }
+      .main-nav { display:none; }
+      #menu-toggler { display:flex; }
+    }
+
+    @media(max-width:600px) {
+      .players-grid { grid-template-columns:1fr 1fr; }
+      .admin-form-grid { grid-template-columns:1fr; }
+    }
+
+    /* animate */
+    [data-animate] { opacity:0; transform:translateY(16px); transition:opacity .5s ease, transform .5s ease; }
+    [data-animate].animated { opacity:1; transform:translateY(0); }
+  </style>
+</head>
+<body>
+<div id="toast-container"></div>
+
+<!-- HEADER -->
+<header id="main-header">
+  <div class="container">
+    <div class="header-inner">
+      <a href="index.html" class="header-logo" style="gap:14px; display:flex; align-items:center;">
+        <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
+          <rect width="38" height="38" rx="10" fill="url(#pbv-grad-jg)"/>
+          <defs>
+            <linearGradient id="pbv-grad-jg" x1="0" y1="0" x2="38" y2="38" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#0F4C81"/>
+              <stop offset="60%" stop-color="#1E6B59"/>
+              <stop offset="100%" stop-color="#F28C2B" stop-opacity=".7"/>
+            </linearGradient>
+          </defs>
+          <ellipse cx="17" cy="16" rx="8" ry="10" stroke="#E9DFC8" stroke-width="1.4" fill="none"/>
+          <line x1="17" y1="10" x2="17" y2="22" stroke="#E9DFC8" stroke-width="1" opacity=".6"/>
+          <line x1="11" y1="16" x2="23" y2="16" stroke="#E9DFC8" stroke-width="1" opacity=".6"/>
+          <circle cx="20" cy="10" r="2.5" fill="#F28C2B" opacity=".9"/>
+          <line x1="17" y1="26" x2="17" y2="33" stroke="#E9DFC8" stroke-width="2" stroke-linecap="round"/>
+          <path d="M7 30 Q10 28 13 30 Q16 32 19 30 Q22 28 25 30 Q28 32 31 30" stroke="#E9DFC8" stroke-width="1.2" fill="none" opacity=".5"/>
+          <path d="M9 33 Q12 31 15 33 Q18 35 21 33 Q24 31 27 33" stroke="#E9DFC8" stroke-width="1" fill="none" opacity=".3"/>
+        </svg>
+        <div class="logo-text">
+          <div class="logo-name" style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:15px;letter-spacing:1px;line-height:1;color:#E9DFC8;">
+            PADEL <span style="color:#F28C2B;">BELLA VISTA</span>
+          </div>
+          <div class="logo-tagline" style="font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:2.5px;color:#8BA186;text-transform:uppercase;margin-top:3px;">
+            Naturaleza · Deporte · Comunidad
+          </div>
+        </div>
+      </a>
+      <nav class="main-nav">
+        <a href="index.html" class="nav-link">Inicio</a>
+        <a href="jugadores.html" class="nav-link active">Jugadores</a>
+        <a href="torneos.html" class="nav-link">Torneos</a>
+        <a href="ranking.html" class="nav-link">Ranking</a>
+        <a href="canchas.html" class="nav-link">Canchas</a>
+        <a href="noticias.html" class="nav-link">Noticias</a>
+      </nav>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button id="theme-toggle" class="theme-toggle-btn" data-icon="sun" data-size="16" title="Cambiar tema"></button>
+        <button class="btn btn-primary btn-sm" id="btn-add-player">+ Agregar jugador</button>
+        <button id="menu-toggler" aria-label="Menú">☰</button>
+      </div>
+    </div>
+  </div>
+</header>
+<div id="mobile-menu">
+  <a href="index.html" class="nav-link"><span data-icon="home" style="margin-right:8px; vertical-align:middle;"></span>Inicio</a>
+  <a href="jugadores.html" class="nav-link"><span data-icon="users" style="margin-right:8px; vertical-align:middle;"></span>Jugadores</a>
+  <a href="torneos.html" class="nav-link"><span data-icon="trophy" style="margin-right:8px; vertical-align:middle;"></span>Torneos</a>
+  <a href="ranking.html" class="nav-link"><span data-icon="ranking" style="margin-right:8px; vertical-align:middle;"></span>Ranking</a>
+  <a href="canchas.html" class="nav-link"><span data-icon="court" style="margin-right:8px; vertical-align:middle;"></span>Canchas</a>
+  <a href="noticias.html" class="nav-link"><span data-icon="news" style="margin-right:8px; vertical-align:middle;"></span>Noticias</a>
+</div>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <div class="container">
+    <div class="page-hero-inner">
+      <div>
+        <div style="font-family:var(--font-mono); font-size:11px; letter-spacing:3px; color:var(--accent-primary); text-transform:uppercase; margin-bottom:10px;">directorio completo</div>
+        <h1>Jugadores <span>del Litoral</span></h1>
+        <div class="page-hero-meta">
+          <div class="stat-badge"><span class="num" id="stat-total">0</span><span class="lbl">Total</span></div>
+          <div class="stat-badge"><span class="num" id="stat-masc">0</span><span class="lbl">Masculino</span></div>
+          <div class="stat-badge"><span class="num" id="stat-fem">0</span><span class="lbl">Femenino</span></div>
+          <div class="stat-badge"><span class="num" id="stat-countries">4</span><span class="lbl">Países</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="players-layout">
+
+  <!-- SIDEBAR FILTROS -->
+  <aside class="filters-sidebar">
+    <div class="filter-header">
+      <h3>🔍 Filtros</h3>
+      <button class="filter-reset" id="btn-reset-filters">Limpiar todo</button>
+    </div>
+
+    <!-- Búsqueda -->
+    <div class="filter-block">
+      <div class="filter-block-title">Búsqueda</div>
+      <div class="filter-search-box">
+        <span class="filter-search-icon" data-icon="search" data-size="14" style="color:var(--text-muted);"></span>
+        <input type="text" id="filter-search" placeholder="Nombre, apodo, club..." style="padding-left:36px;">
+      </div>
+    </div>
+
+    <!-- Género -->
+    <div class="filter-block">
+      <div class="filter-block-title">Género</div>
+      <div class="filter-chips" id="chips-gender">
+        <button class="filter-chip active" data-value="todos">Todos</button>
+        <button class="filter-chip" data-value="masculino">Masculino</button>
+        <button class="filter-chip" data-value="femenino">Femenino</button>
+      </div>
+    </div>
+
+    <!-- Categoría -->
+    <div class="filter-block">
+      <div class="filter-block-title">Categoría</div>
+      <div class="filter-chips" id="chips-category">
+        <button class="filter-chip active" data-value="todos">Todas</button>
+      </div>
+    </div>
+
+
+
+    <!-- País -->
+    <div class="filter-block">
+      <div class="filter-block-title">País</div>
+      <div class="filter-chips" id="chips-country">
+        <button class="filter-chip active" data-value="todos">Todos</button>
+        <button class="filter-chip" data-value="argentina">Argentina</button>
+        <button class="filter-chip" data-value="uruguay">Uruguay</button>
+        <button class="filter-chip" data-value="brasil">Brasil</button>
+        <button class="filter-chip" data-value="paraguay">Paraguay</button>
+      </div>
+    </div>
+
+    <!-- Provincia -->
+    <div class="filter-block">
+      <div class="filter-block-title">Provincia / Dpto.</div>
+      <select class="form-select" id="filter-province" style="width:100%;">
+        <option value="todos">Todas las provincias</option>
+      </select>
+    </div>
+
+    <!-- Mano dominante -->
+    <div class="filter-block">
+      <div class="filter-block-title">Mano dominante</div>
+      <div class="filter-chips" id="chips-hand">
+        <button class="filter-chip active" data-value="todos">Todas</button>
+        <button class="filter-chip" data-value="derecha">Derecha</button>
+        <button class="filter-chip" data-value="izquierda">Izquierda</button>
+        <button class="filter-chip" data-value="ambidiestro">Ambidiestro</button>
+      </div>
+    </div>
+
+    <!-- Posición -->
+    <div class="filter-block">
+      <div class="filter-block-title">Posición</div>
+      <div class="filter-chips" id="chips-position">
+        <button class="filter-chip active" data-value="todos">Todas</button>
+        <button class="filter-chip" data-value="drive">Drive</button>
+        <button class="filter-chip" data-value="reves">Revés</button>
+        <button class="filter-chip" data-value="ambas">Ambas</button>
+      </div>
+    </div>
+
+    <!-- Edad -->
+    <div class="filter-block">
+      <div class="filter-block-title">Edad</div>
+      <div class="range-block">
+        <div class="range-row">
+          <input type="number" id="filter-age-min" placeholder="Min" min="10" max="80" value="">
+          <span class="range-sep">—</span>
+          <input type="number" id="filter-age-max" placeholder="Máx" min="10" max="80" value="">
+          <span class="range-sep" style="font-size:11px; color:var(--text-muted);">años</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Altura -->
+    <div class="filter-block">
+      <div class="filter-block-title">Altura</div>
+      <div class="range-block">
+        <div class="range-row">
+          <input type="number" id="filter-height-min" placeholder="Min" min="140" max="220" value="">
+          <span class="range-sep">—</span>
+          <input type="number" id="filter-height-max" placeholder="Máx" min="140" max="220" value="">
+          <span class="range-sep" style="font-size:11px; color:var(--text-muted);">cm</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Peso -->
+    <div class="filter-block">
+      <div class="filter-block-title">Peso</div>
+      <div class="range-block">
+        <div class="range-row">
+          <input type="number" id="filter-weight-min" placeholder="Min" min="40" max="130" value="">
+          <span class="range-sep">—</span>
+          <input type="number" id="filter-weight-max" placeholder="Máx" min="40" max="130" value="">
+          <span class="range-sep" style="font-size:11px; color:var(--text-muted);">kg</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="height:24px;"></div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="players-main">
+    <!-- Toolbar -->
+    <div class="players-toolbar">
+      <div class="players-count">
+        Mostrando <strong id="results-count">0</strong> jugadores
+        <span id="filter-active-label" style="color:var(--accent-orange); font-size:12px;"></span>
+      </div>
+      <div class="toolbar-right">
+        <select class="sort-select" id="sort-select">
+          <option value="ranking">↑ Ranking</option>
+          <option value="nombre">A–Z Nombre</option>
+          <option value="edad">Edad</option>
+          <option value="altura">Altura</option>
+        </select>
+        <div class="view-toggle">
+          <button class="view-btn active" id="btn-view-grid" title="Vista grilla"><span data-icon="grid" data-size="14"></span></button>
+          <button class="view-btn" id="btn-view-table" title="Vista lista"><span data-icon="list" data-size="14"></span></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Resultados -->
+    <div id="players-grid" class="players-grid"></div>
+    <div id="players-table-wrap" style="display:none; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); overflow:hidden;">
+      <table class="players-table" id="players-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Jugador</th>
+            <th>País</th>
+            <th>Provincia</th>
+            <th>Género</th>
+            <th>Categoría</th>
+
+            <th>Edad</th>
+            <th>Altura</th>
+            <th>Pts</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="players-tbody"></tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<!-- ===== MODAL: PERFIL JUGADOR ===== -->
+<div class="modal-overlay" id="modal-profile">
+  <div class="modal profile-modal">
+    <div class="modal-header">
+      <h2>Perfil del Jugador</h2>
+      <button class="modal-close" onclick="closeModal('modal-profile')">✕</button>
+    </div>
+    <div class="modal-body" id="profile-modal-body"></div>
+  </div>
+</div>
+
+<!-- ===== MODAL: ADMIN JUGADOR ===== -->
+<div class="modal-overlay" id="modal-admin-player">
+  <div class="modal admin-modal">
+    <div class="modal-header">
+      <h2 id="admin-modal-title">Nuevo Jugador</h2>
+      <button class="modal-close" onclick="closeModal('modal-admin-player')">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="admin-player-form" onsubmit="handlePlayerFormSubmit(event)" novalidate>
+        <input type="hidden" id="edit-player-id" value="">
+
+        <!-- FOTO -->
+        <div class="form-group" style="margin-bottom:16px;">
+          <label class="form-label">Foto del jugador</label>
+          <div class="photo-upload-area" style="padding:20px;">
+            <input type="file" accept="image/*" id="admin-photo-input" style="display:none;">
+            <div class="photo-upload-icon" data-icon="upload" data-size="20"></div>
+            <p class="photo-upload-text"><strong>Clic o arrastrá</strong> para subir foto</p>
+            <p style="font-size:11px;color:var(--text-muted);margin-top:4px;">JPG, PNG, WebP · Máx 5MB</p>
+          </div>
+          <div id="photo-preview-container" style="display:none; margin-top:8px; text-align:center;">
+            <img id="photo-preview-img" style="width:100px; height:100px; object-fit:cover; border-radius:50%; border:2px solid var(--accent-primary);" alt="Preview">
+          </div>
+        </div>
+
+        <div class="admin-form-grid">
+          <div class="section-sep">01 · Datos personales</div>
+
+          <div class="form-group">
+            <label class="form-label">Nombre *</label>
+            <input type="text" name="first_name" class="form-input" placeholder="Nombre" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Apellido *</label>
+            <input type="text" name="last_name" class="form-input" placeholder="Apellido" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Apodo</label>
+            <input type="text" name="nickname" class="form-input" placeholder="Ej: El Mati">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Fecha de nacimiento *</label>
+            <input type="date" name="birthdate" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Instagram</label>
+            <input type="text" name="instagram" class="form-input" placeholder="@usuario">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Club / Complejo</label>
+            <input type="text" name="club" class="form-input" placeholder="Ej: Palmeras Pádel">
+          </div>
+
+          <div class="section-sep">02 · Ubicación</div>
+
+          <div class="form-group">
+            <label class="form-label">País *</label>
+            <select name="country" class="form-select" id="admin-country" data-country-select="admin" required>
+              <option value="">Seleccionar país</option>
+              <option value="argentina">Argentina</option>
+              <option value="uruguay">Uruguay</option>
+              <option value="brasil">Brasil</option>
+              <option value="paraguay">Paraguay</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Provincia / Departamento *</label>
+            <select name="province" class="form-select" id="admin-province" data-province-select="admin" disabled required>
+              <option value="">Primero seleccioná un país</option>
+            </select>
+          </div>
+          <div class="form-group" style="grid-column:1/-1;">
+            <label class="form-label">Ciudad</label>
+            <input type="text" name="city" class="form-input" placeholder="Ej: Bella Vista">
+          </div>
+
+          <div class="section-sep">03 · Características</div>
+
+          <div class="form-group">
+            <label class="form-label">Género *</label>
+            <select name="gender" class="form-select" required>
+              <option value="">Seleccionar</option>
+              <option value="masculino">Masculino</option>
+              <option value="femenino">Femenino</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Mano dominante *</label>
+            <select name="dominant_hand" class="form-select" required>
+              <option value="">Seleccionar</option>
+              <option value="derecha">Derecha</option>
+              <option value="izquierda">Izquierda</option>
+              <option value="ambidiestro">Ambidiestro</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Posición *</label>
+            <select name="position" class="form-select" required>
+              <option value="">Seleccionar</option>
+              <option value="drive">Drive (derecha)</option>
+              <option value="reves">Revés (izquierda)</option>
+              <option value="ambas">Ambas posiciones</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Altura (cm) *</label>
+            <input type="number" name="height" class="form-input" placeholder="Ej: 178" min="140" max="220" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Peso (kg)</label>
+            <input type="number" name="weight" class="form-input" placeholder="Ej: 75" min="40" max="130">
+          </div>
+
+          <div class="section-sep">04 · Nivel de juego</div>
+
+          <div class="form-group" style="grid-column: 1 / -1;">
+            <label class="form-label">Categoría *</label>
+            <select name="category" class="form-select" id="admin-category" required>
+              <option value="">Seleccionar</option>
+            </select>
+          </div>
+          <div class="section-sep">05 · Estadísticas y estado</div>
+
+          <div class="form-group">
+            <label class="form-label">Puntos de Ranking</label>
+            <input type="number" name="ranking_points" id="admin-points" class="form-input" min="0" value="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Compañero Habitual</label>
+            <select name="partner_id" id="admin-partner" class="form-select">
+              <option value="">Sin compañero</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Estado del jugador</label>
+            <select name="active" id="admin-active" class="form-select">
+              <option value="true">Activo</option>
+              <option value="false">Inactivo</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">% de Victorias</label>
+            <input type="number" name="win_rate" id="admin-win-rate" class="form-input" min="0" max="100" value="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Torneos Disputados</label>
+            <input type="number" name="tournaments_played" id="admin-tournaments-played" class="form-input" min="0" value="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Títulos Ganados</label>
+            <input type="number" name="titles" id="admin-titles" class="form-input" min="0" value="0">
+          </div>
+          <div class="form-group" style="grid-column: 1 / -1;">
+            <label class="form-label">URL de la foto de perfil (Opcional)</label>
+            <input type="text" name="photo" id="admin-photo-url" class="form-input" placeholder="ej. assets/images/player_action.png">
+          </div>
+
+          <div class="form-group" style="grid-column:1/-1;">
+            <label class="form-label">Biografía / descripción</label>
+            <textarea name="bio" class="form-textarea" rows="2" placeholder="Breve descripción del jugador..."></textarea>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-admin-player')">Cancelar</button>
+      <button class="btn btn-primary" onclick="document.getElementById('admin-player-form').requestSubmit()">
+        Guardar jugador
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: CONFIRMAR ELIMINAR ===== -->
+<div class="modal-overlay" id="modal-confirm-delete">
+  <div class="modal" style="max-width:440px;">
+    <div class="modal-header">
+      <h2>Confirmar eliminación</h2>
+      <button class="modal-close" onclick="closeModal('modal-confirm-delete')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="color:var(--text-secondary); font-size:15px;">
+        ¿Estás segura de que querés eliminar a <strong id="delete-player-name" style="color:var(--accent-red);"></strong> del directorio?
+        Esta acción no se puede deshacer.
+      </p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-confirm-delete')">Cancelar</button>
+      <button class="btn" style="background:var(--accent-red); color:white;" id="confirm-delete-btn">Sí, eliminar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="js/icons.js"></script>
+<script src="js/data.js"></script>
+<script src="js/main.js"></script>
+<script>
+/* ================================================
+   ESTADO DE FILTROS
+   ================================================ */
+const state = {
+  filters: {
+    search:'', gender:'todos', category:'todos', level:'todos',
+    country:'todos', province:'todos', hand:'todos', position:'todos',
+    age_min:'', age_max:'', height_min:'', height_max:'', weight_min:'', weight_max:''
+  },
+  sort: 'ranking',
+  view: 'grid',
+  currentPhotoData: null,
+  editingPlayerId: null,
+  pendingDeleteId: null
+};
+
+/* ================================================
+   INICIALIZAR FILTROS DINÁMICOS
+   ================================================ */
+function initFilterOptions() {
+  // Categorías
+  const catContainer = document.getElementById('chips-category');
+  CATEGORIES.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'filter-chip';
+    btn.dataset.value = cat;
+    btn.textContent = cat;
+    catContainer.appendChild(btn);
+  });
+
+  // Niveles
+  const lvlContainer = document.getElementById('chips-level');
+  if (lvlContainer) {
+    LEVELS.forEach(lvl => {
+      const btn = document.createElement('button');
+      btn.className = 'filter-chip';
+      btn.dataset.value = lvl;
+      btn.textContent = lvl;
+      lvlContainer.appendChild(btn);
+    });
+  }
+
+  // Admin selects
+  const catSel = document.getElementById('admin-category');
+  if (catSel) {
+    catSel.innerHTML = '<option value="">Seleccionar</option>';
+    CATEGORIES.forEach(c => catSel.innerHTML += `<option value="${c}">${c} categoría</option>`);
+  }
+}
+
+/* ================================================
+   CHIPS — selector exclusivo
+   ================================================ */
+function initChips() {
+  document.querySelectorAll('.filter-chips').forEach(group => {
+    const key = {
+      'chips-gender':   'gender',
+      'chips-category': 'category',
+      'chips-level':    'level',
+      'chips-country':  'country',
+      'chips-hand':     'hand',
+      'chips-position': 'position'
+    }[group.id];
+
+    if (!key) return;
+
+    group.addEventListener('click', e => {
+      const btn = e.target.closest('.filter-chip');
+      if (!btn) return;
+      group.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.filters[key] = btn.dataset.value;
+
+      // Si cambió país → actualizar provincias en filtro sidebar
+      if (key === 'country') updateProvinceFilter(btn.dataset.value);
+
+      renderPlayers();
+    });
+  });
+}
+
+/* ================================================
+   PROVINCIA FILTER (sidebar)
+   ================================================ */
+function updateProvinceFilter(country) {
+  const sel = document.getElementById('filter-province');
+  sel.innerHTML = '<option value="todos">Todas las provincias</option>';
+  state.filters.province = 'todos';
+
+  if (country && country !== 'todos' && REGIONS[country]) {
+    REGIONS[country].provinces.forEach(p => {
+      sel.innerHTML += `<option value="${p}">${p}</option>`;
+    });
+  } else {
+    // Todas las provincias de todos los países
+    Object.values(REGIONS).forEach(r => {
+      r.provinces.forEach(p => {
+        sel.innerHTML += `<option value="${p}">${p}</option>`;
+      });
+    });
+  }
+}
+
+/* ================================================
+   TEXTO INPUTS — debounce
+   ================================================ */
+function initTextFilters() {
+  const searchInput = document.getElementById('filter-search');
+  searchInput.addEventListener('input', debounce(() => {
+    state.filters.search = searchInput.value.trim();
+    renderPlayers();
+  }, 250));
+
+  document.getElementById('filter-province').addEventListener('change', e => {
+    state.filters.province = e.target.value;
+    renderPlayers();
+  });
+
+  ['age','height','weight'].forEach(field => {
+    ['min','max'].forEach(bound => {
+      const id = `filter-${field}-${bound}`;
+      document.getElementById(id)?.addEventListener('input', debounce(() => {
+        state.filters[`${field}_${bound}`] = document.getElementById(id).value;
+        renderPlayers();
+      }, 400));
+    });
+  });
+
+  document.getElementById('sort-select').addEventListener('change', e => {
+    state.sort = e.target.value;
+    renderPlayers();
+  });
+}
+
+/* ================================================
+   RESET FILTROS
+   ================================================ */
+function resetFilters() {
+  state.filters = {
+    search:'', gender:'todos', category:'todos', level:'todos',
+    country:'todos', province:'todos', hand:'todos', position:'todos',
+    age_min:'', age_max:'', height_min:'', height_max:'', weight_min:'', weight_max:''
+  };
+
+  document.getElementById('filter-search').value = '';
+  document.getElementById('filter-province').value = 'todos';
+  ['age-min','age-max','height-min','height-max','weight-min','weight-max'].forEach(id => {
+    const el = document.getElementById('filter-' + id);
+    if (el) el.value = '';
+  });
+
+  document.querySelectorAll('.filter-chips .filter-chip').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.value === 'todos');
+  });
+
+  updateProvinceFilter('todos');
+  renderPlayers();
+}
+
+/* ================================================
+   RESET FILTROS
+   ================================================ */
+function sortPlayers(players) {
+  return [...players].sort((a, b) => {
+    switch(state.sort) {
+      case 'nombre':  return a.last_name.localeCompare(b.last_name);
+      case 'edad':    return (a.age || 0) - (b.age || 0);
+      case 'altura':  return (b.height || 0) - (a.height || 0);
+      case 'ranking':
+      default:
+        return (b.ranking_points || 0) - (a.ranking_points || 0);
+    }
+  });
+}
+
+/* ================================================
+   RENDER PLAYERS
+   ================================================ */
+function renderPlayers() {
+  const filtered = filterPlayers(state.filters);
+  const sorted   = sortPlayers(filtered);
+
+  // Update counts
+  document.getElementById('results-count').textContent = sorted.length;
+  const total = DB.players.length;
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-masc').textContent = DB.players.filter(p=>p.gender==='masculino').length;
+  document.getElementById('stat-fem').textContent  = DB.players.filter(p=>p.gender==='femenino').length;
+
+  // Active filter label
+  const activeFilters = Object.entries(state.filters).filter(([k,v]) => v && v !== 'todos' && v !== '').length;
+  const label = document.getElementById('filter-active-label');
+  label.textContent = activeFilters ? `(${activeFilters} filtro${activeFilters>1?'s':''} activo${activeFilters>1?'s':''})` : '';
+
+  if (state.view === 'grid') {
+    renderGrid(sorted);
+  } else {
+    renderTable(sorted);
+  }
+}
+
+function renderGrid(players) {
+  const container = document.getElementById('players-grid');
+  document.getElementById('players-grid').style.display = 'grid';
+  document.getElementById('players-table-wrap').style.display = 'none';
+
+  if (!players.length) {
+    container.innerHTML = `
+      <div class="empty-state" style="grid-column:1/-1;">
+        <div class="empty-icon" data-icon="search" data-size="48"></div>
+        <div class="empty-title">Sin resultados</div>
+        <div class="empty-sub">Probá cambiando los filtros de búsqueda</div>
+        <button class="btn btn-secondary btn-sm" onclick="resetFilters()">Limpiar filtros</button>
+      </div>`;
+    renderIcons();
+    return;
+  }
+
+  container.innerHTML = players.map(p => playerCardHTML(p)).join('');
+  initLazyImages();
+  renderIcons();
+}
+
+function renderTable(players) {
+  document.getElementById('players-grid').style.display = 'none';
+  document.getElementById('players-table-wrap').style.display = 'block';
+
+  const tbody = document.getElementById('players-tbody');
+  if (!players.length) {
+    tbody.innerHTML = `<tr><td colspan="11" class="empty-state">Sin resultados con los filtros actuales</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = players.map((p, i) => {
+    const flag   = getCountryFlag(p.country);
+    return `
+      <tr>
+        <td style="color:var(--gold); font-family:var(--font-mono); font-weight:700;">${i+1}</td>
+        <td>
+          <div class="tbl-player">
+            <div class="tbl-avatar">
+              <img data-src="${p.photo || 'assets/images/player_action.png'}" alt="${p.first_name}"
+                class="lazy-img" loading="lazy"
+                onerror="this.parentElement.innerHTML='<span class=&quot;badge badge-neutral&quot;>${flag}</span>'">
+            </div>
+            <div>
+              <div class="tbl-name">${p.first_name} ${p.last_name}</div>
+              ${p.nickname ? `<div class="tbl-nick">"${p.nickname}"</div>` : ''}
+            </div>
+          </div>
+        </td>
+        <td><span class="badge badge-neutral" style="font-size:9px; padding:1px 4px; border-radius:3px; margin-right:4px;">${flag}</span> ${getCountryLabel(p.country)}</td>
+        <td style="color:var(--text-secondary);">${p.province || '—'}</td>
+        <td>${p.gender === 'masculino' ? 'Masc.' : 'Fem.'}</td>
+        <td><span class="badge badge-primary" style="font-size:10px;">${p.category || '—'} cat.</span></td>
+        <td style="font-family:var(--font-mono);">${p.age || '—'}</td>
+        <td style="font-family:var(--font-mono);">${p.height ? p.height+'cm' : '—'}</td>
+        <td class="tbl-pts">${(p.ranking_points||0).toLocaleString('es-AR')}</td>
+        <td>
+          <div style="display:flex; gap:5px;">
+            <button class="btn btn-ghost btn-sm" onclick="openProfile('${p.id}')">Ver</button>
+            ${(typeof AUTH !== 'undefined' && (AUTH.isAdmin() || AUTH.isOrganizer())) ? `
+              <button class="btn btn-ghost btn-sm" onclick="openEditPlayer('${p.id}')" title="Editar"><span data-icon="edit"></span></button>
+              <button class="btn btn-sm" style="background:rgba(239,68,68,.15); color:var(--accent-red); border:1px solid rgba(239,68,68,.3);"
+                onclick="openDeleteConfirm('${p.id}')" title="Eliminar"><span data-icon="trash"></span></button>
+            ` : ''}
+          </div>
+        </td>
+      </tr>`;
+  }).join('');
+  initLazyImages();
+  renderIcons();
+}
+
+function playerCardHTML(p) {
+  const flag       = getCountryFlag(p.country);
+  const rankPos    = p.gender === 'femenino' ? p.ranking_fem : p.ranking_masc;
+  const rankStr    = rankPos ? `#${rankPos}` : '—';
+  const age        = p.age || calcAge(p.birthdate) || '—';
+
+  return `
+    <div class="player-card" data-id="${p.id}">
+      <div class="player-card-img">
+        <div class="img-skeleton">
+          <img data-src="${p.photo || 'assets/images/player_action.png'}"
+            class="player-card-img-el lazy-img" alt="${p.first_name} ${p.last_name}" loading="lazy"
+            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+          <div style="display:none; width:100%; height:200px; background:var(--bg-elevated); align-items:center; justify-content:center;">
+            <span data-icon="user" data-size="48" style="color:var(--text-muted);"></span>
+          </div>
+        </div>
+      </div>
+      <div class="player-card-rank">${rankStr}</div>
+      <div class="player-card-gender"><span data-icon="user" data-size="14" style="color:var(--text-secondary);"></span></div>
+
+      <div class="player-card-body">
+        <div class="player-card-name">${p.first_name} ${p.last_name}</div>
+        ${p.nickname ? `<div class="player-card-nickname">"${p.nickname}"</div>` : ''}
+
+        <div class="player-card-tags" style="margin-top:8px;">
+          <span class="badge badge-primary" style="font-size:10px;">${p.category || '—'}</span>
+          <span class="badge badge-orange" style="font-size:10px;">${p.level || '—'}</span>
+          <span style="font-size:12px; color:var(--text-secondary);"><span class="badge badge-neutral" style="font-size:8px; padding:1px 3px; border-radius:2px; margin-right:4px;">${flag}</span>${p.province || p.country}</span>
+        </div>
+
+        <div class="player-card-stats">
+          <div class="pc-stat">
+            <span class="val">${age}</span>
+            <span class="key">Años</span>
+          </div>
+          <div class="pc-stat">
+            <span class="val">${p.height ? p.height+'cm' : '—'}</span>
+            <span class="key">Altura</span>
+          </div>
+          <div class="pc-stat">
+            <span class="val">${(p.ranking_points||0).toLocaleString('es-AR')}</span>
+            <span class="key">Puntos</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="player-card-footer">
+        <button class="btn btn-ghost btn-sm" style="flex:1;" onclick="openProfile('${p.id}')">Ver perfil</button>
+        ${(typeof AUTH !== 'undefined' && (AUTH.isAdmin() || AUTH.isOrganizer())) ? `
+          <button class="btn btn-ghost btn-sm" onclick="openEditPlayer('${p.id}')" title="Editar"><span data-icon="edit"></span></button>
+          <button class="btn btn-sm" style="background:rgba(239,68,68,.1); color:var(--accent-red); border:1px solid rgba(239,68,68,.25);"
+            onclick="openDeleteConfirm('${p.id}')" title="Eliminar"><span data-icon="trash"></span></button>
+        ` : ''}
+      </div>
+    </div>`;
+}
+
+/* ================================================
+   PERFIL JUGADOR (modal)
+   ================================================ */
+function openProfile(id) {
+  const p = getPlayerById(id);
+  if (!p) return;
+
+  const flag      = getCountryFlag(p.country);
+  const age       = p.age || calcAge(p.birthdate) || '—';
+  const rankPos   = p.gender === 'femenino' ? p.ranking_fem : p.ranking_masc;
+  const posLabel  = { drive:'Drive (derecha)', reves:'Revés (izquierda)', ambas:'Ambas posiciones' }[p.position] || p.position || '—';
+
+  document.getElementById('profile-modal-body').innerHTML = `
+    <div class="profile-hero">
+      <div class="img-skeleton">
+        <img data-src="${p.photo || 'assets/images/player_action.png'}" alt="${p.first_name}"
+          class="lazy-img" loading="lazy"
+          onerror="this.src='assets/images/player_action.png'">
+      </div>
+      <div class="profile-hero-data">
+        <div>
+          <div class="profile-name">${p.first_name} ${p.last_name}</div>
+          <div class="profile-meta">
+            <span class="badge badge-neutral" style="font-size:10px; padding:2px 5px; border-radius:3px; margin-right:6px;">${flag}</span>
+            ${p.province ? p.province + ' · ' : ''} ${getCountryLabel(p.country)}
+            ${p.club ? ' · ' + p.club : ''}
+          </div>
+        </div>
+        <div style="text-align:right;">
+          ${rankPos ? `<div style="font-family:var(--font-display); font-size:28px; color:var(--gold);">#${rankPos}</div><div style="font-size:11px; color:rgba(255,255,255,.6); text-transform:uppercase;">Ranking ${p.gender}</div>` : ''}
+        </div>
+      </div>
+    </div>
+
+    <div style="padding:20px;">
+      <div class="profile-stats-grid">
+        <div class="profile-stat">
+          <div class="val">${p.win_rate || 0}%</div>
+          <div class="key">Victorias</div>
+        </div>
+        <div class="profile-stat">
+          <div class="val">${p.tournaments_played || 0}</div>
+          <div class="key">Torneos</div>
+        </div>
+        <div class="profile-stat">
+          <div class="val">${p.titles || 0}</div>
+          <div class="key">Títulos</div>
+        </div>
+        <div class="profile-stat">
+          <div class="val">${(p.ranking_points||0).toLocaleString('es-AR')}</div>
+          <div class="key">Puntos</div>
+        </div>
+      </div>
+
+      <div class="profile-detail-grid">
+        <div class="profile-detail-item">
+          <span class="pdi-icon" data-icon="calendar"></span>
+          <div><div class="pdi-key">Edad</div><div class="pdi-val">${age} años</div></div>
+        </div>
+        <div class="profile-detail-item">
+          <span class="pdi-icon" data-icon="ruler"></span>
+          <div><div class="pdi-key">Altura</div><div class="pdi-val">${p.height ? p.height+'cm' : '—'}</div></div>
+        </div>
+        <div class="profile-detail-item">
+          <span class="pdi-icon" data-icon="weight"></span>
+          <div><div class="pdi-key">Peso</div><div class="pdi-val">${p.weight ? p.weight+'kg' : '—'}</div></div>
+        </div>
+        <div class="profile-detail-item">
+          <span class="pdi-icon" data-icon="hand"></span>
+          <div><div class="pdi-key">Mano dominante</div><div class="pdi-val">${p.dominant_hand || '—'}</div></div>
+        </div>
+        <div class="profile-detail-item">
+          <span class="pdi-icon" data-icon="target"></span>
+          <div><div class="pdi-key">Posición</div><div class="pdi-val">${posLabel}</div></div>
+        </div>
+        <div class="profile-detail-item">
+          <span class="pdi-icon" data-icon="award"></span>
+          <div><div class="pdi-key">Categoría</div><div class="pdi-val">${p.category || '—'}</div></div>
+        </div>
+        ${p.instagram ? `
+        <div class="profile-detail-item" style="grid-column:1/-1;">
+          <span class="pdi-icon" data-icon="instagram"></span>
+          <div><div class="pdi-key">Instagram</div><div class="pdi-val">${p.instagram}</div></div>
+        </div>` : ''}
+      </div>
+
+      ${p.bio ? `<div style="margin-top:14px; padding:14px; background:var(--bg-elevated); border-radius:var(--radius-md); border:1px solid var(--border-subtle); font-size:14px; color:var(--text-secondary); line-height:1.7;">"${p.bio}"</div>` : ''}
+
+      ${(typeof AUTH !== 'undefined' && (AUTH.isAdmin() || AUTH.isOrganizer())) ? `
+        <div style="display:flex; gap:10px; margin-top:16px;">
+          <button class="btn btn-secondary btn-sm" onclick="openEditPlayer('${p.id}'); closeModal('modal-profile');"><span data-icon="edit" style="margin-right:4px;"></span>Editar</button>
+          <button class="btn btn-sm" style="background:rgba(239,68,68,.15); color:var(--accent-red); border:1px solid rgba(239,68,68,.3);"
+            onclick="openDeleteConfirm('${p.id}'); closeModal('modal-profile');"><span data-icon="trash" style="margin-right:4px;"></span>Eliminar</button>
+        </div>
+      ` : ''}
+    </div>`;
+
+  initLazyImages();
+  openModal('modal-profile');
+}
+
+/* ================================================
+   ADMIN: AGREGAR / EDITAR
+   ================================================ */
+function openAddPlayer() {
+  state.editingPlayerId = null;
+  state.currentPhotoData = null;
+  document.getElementById('admin-modal-title').textContent = '➕ Nuevo Jugador';
+  document.getElementById('edit-player-id').value = '';
+
+  const form = document.getElementById('admin-player-form');
+  form.reset();
+  document.getElementById('admin-country').value = '';
+  document.getElementById('admin-province').innerHTML = '<option value="">Primero seleccioná un país</option>';
+  document.getElementById('admin-province').disabled = true;
+  document.getElementById('photo-preview-container').style.display = 'none';
+  document.querySelector('.photo-upload-area').style.display = 'block';
+
+  // Poblado de compañero
+  const partnerSel = document.getElementById('admin-partner');
+  if (partnerSel) {
+    partnerSel.innerHTML = '<option value="">Sin compañero</option>';
+    DB.players.forEach(other => {
+      partnerSel.innerHTML += `<option value="${other.id}">${other.first_name} ${other.last_name}</option>`;
+    });
+  }
+  
+  // Limpiar campos extras
+  document.getElementById('admin-points').value = 0;
+  document.getElementById('admin-partner').value = '';
+  document.getElementById('admin-active').value = 'true';
+  document.getElementById('admin-win-rate').value = 0;
+  document.getElementById('admin-tournaments-played').value = 0;
+  document.getElementById('admin-titles').value = 0;
+  document.getElementById('admin-photo-url').value = '';
+
+  openModal('modal-admin-player');
+}
+
+function openEditPlayer(id) {
+  const p = getPlayerById(id);
+  if (!p) return;
+
+  state.editingPlayerId = id;
+  state.currentPhotoData = null;
+  document.getElementById('admin-modal-title').textContent = `✏️ Editar: ${p.first_name} ${p.last_name}`;
+  document.getElementById('edit-player-id').value = id;
+
+  // Llenar el formulario
+  const form = document.getElementById('admin-player-form');
+  const fields = ['first_name','last_name','nickname','birthdate','instagram','club',
+                  'country','city','gender','dominant_hand','position','height','weight',
+                  'category','bio'];
+
+  fields.forEach(f => {
+    const el = form.querySelector(`[name="${f}"]`);
+    if (el) el.value = p[f] || '';
+  });
+
+  // Poblado de compañero
+  const partnerSel = document.getElementById('admin-partner');
+  if (partnerSel) {
+    partnerSel.innerHTML = '<option value="">Sin compañero</option>';
+    DB.players.forEach(other => {
+      if (other.id === id) return;
+      partnerSel.innerHTML += `<option value="${other.id}">${other.first_name} ${other.last_name}</option>`;
+    });
+  }
+
+  // Cargar valores extras
+  document.getElementById('admin-points').value = p.ranking_points || 0;
+  document.getElementById('admin-partner').value = p.partner_id || '';
+  document.getElementById('admin-active').value = p.active !== false ? 'true' : 'false';
+  document.getElementById('admin-win-rate').value = p.win_rate || 0;
+  document.getElementById('admin-tournaments-played').value = p.tournaments_played || 0;
+  document.getElementById('admin-titles').value = p.titles || 0;
+  document.getElementById('admin-photo-url').value = p.photo || '';
+
+  // País → Provincia
+  const countrySel = document.getElementById('admin-country');
+  countrySel.value = p.country || '';
+  if (p.country) loadAdminProvinces(p.country, p.province);
+
+  // Foto preview
+  if (p.photo) {
+    document.querySelector('.photo-upload-area').style.display = 'none';
+    document.getElementById('photo-preview-container').style.display = 'block';
+    document.getElementById('photo-preview-img').src = p.photo;
+  }
+
+  openModal('modal-admin-player');
+}
+
+function loadAdminProvinces(country, selectedProvince = '') {
+  const sel = document.getElementById('admin-province');
+  sel.innerHTML = '<option value="">Seleccionar provincia</option>';
+  sel.disabled = false;
+
+  if (REGIONS[country]) {
+    REGIONS[country].provinces.forEach(prov => {
+      const opt = document.createElement('option');
+      opt.value = prov;
+      opt.textContent = prov;
+      if (prov === selectedProvince) opt.selected = true;
+      sel.appendChild(opt);
+    });
+  }
+}
+
+// Inicializar listeners del admin country select
+document.getElementById('admin-country').addEventListener('change', function() {
+  loadAdminProvinces(this.value);
+});
+
+/* ================================================
+   SUBMIT FORMULARIO
+   ================================================ */
+function handlePlayerFormSubmit(e) {
+  e.preventDefault();
+  const form = e.target;
+
+  // Validaciones manuales
+  const required = form.querySelectorAll('[required]');
+  let valid = true;
+  required.forEach(field => {
+    field.style.borderColor = '';
+    if (!field.value.trim()) {
+      field.style.borderColor = 'var(--accent-red)';
+      field.style.boxShadow = '0 0 0 3px rgba(239,68,68,.2)';
+      valid = false;
+    }
+  });
+
+  if (!valid) {
+    showToast('⚠️ Completá todos los campos obligatorios (*)','error');
+    return;
+  }
+
+  const rawData = Object.fromEntries(new FormData(form).entries());
+
+  const data = {
+    ...rawData,
+    ranking_points: parseInt(rawData.ranking_points) || 0,
+    win_rate: parseInt(rawData.win_rate) || 0,
+    tournaments_played: parseInt(rawData.tournaments_played) || 0,
+    titles: parseInt(rawData.titles) || 0,
+    active: rawData.active === 'true',
+    partner_id: rawData.partner_id || null,
+    photo: state.currentPhotoData || rawData.photo || null
+  };
+
+  let player;
+  if (state.editingPlayerId) {
+    player = updatePlayer(state.editingPlayerId, data);
+    showToast(`✅ ${player.first_name} ${player.last_name} actualizado correctamente`, 'success');
+  } else {
+    player = addPlayer(data);
+    showToast(`✅ ${player.first_name} ${player.last_name} registrado en el directorio`, 'success');
+  }
+
+  saveDB();
+  closeModal('modal-admin-player');
+  renderPlayers();
+}
+
+/* ================================================
+   ELIMINAR JUGADOR
+   ================================================ */
+function openDeleteConfirm(id) {
+  const p = getPlayerById(id);
+  if (!p) return;
+  state.pendingDeleteId = id;
+  document.getElementById('delete-player-name').textContent = `${p.first_name} ${p.last_name}`;
+  openModal('modal-confirm-delete');
+}
+
+document.getElementById('confirm-delete-btn').addEventListener('click', () => {
+  if (!state.pendingDeleteId) return;
+  const p = getPlayerById(state.pendingDeleteId);
+  const name = p ? `${p.first_name} ${p.last_name}` : '';
+  deletePlayer(state.pendingDeleteId);
+  state.pendingDeleteId = null;
+  saveDB();
+  closeModal('modal-confirm-delete');
+  showToast(`🗑 ${name} eliminado del directorio`, 'info');
+  renderPlayers();
+});
+
+/* ================================================
+   VISTA TOGGLE
+   ================================================ */
+document.getElementById('btn-view-grid').addEventListener('click', () => {
+  state.view = 'grid';
+  document.getElementById('btn-view-grid').classList.add('active');
+  document.getElementById('btn-view-table').classList.remove('active');
+  renderPlayers();
+});
+
+document.getElementById('btn-view-table').addEventListener('click', () => {
+  state.view = 'table';
+  document.getElementById('btn-view-table').classList.add('active');
+  document.getElementById('btn-view-grid').classList.remove('active');
+  renderPlayers();
+});
+
+/* ================================================
+   PHOTO UPLOAD ADMIN
+   ================================================ */
+function initAdminPhoto() {
+  const area   = document.querySelector('#modal-admin-player .photo-upload-area');
+  const input  = document.getElementById('admin-photo-input');
+  const preview = document.getElementById('photo-preview-img');
+  const previewContainer = document.getElementById('photo-preview-container');
+
+  area.addEventListener('click', () => input.click());
+  area.addEventListener('dragover', e => { e.preventDefault(); area.classList.add('dragover'); });
+  area.addEventListener('dragleave', () => area.classList.remove('dragover'));
+  area.addEventListener('drop', e => {
+    e.preventDefault();
+    area.classList.remove('dragover');
+    if (e.dataTransfer.files[0]) processPhoto(e.dataTransfer.files[0], area, previewContainer, preview);
+  });
+  input.addEventListener('change', () => {
+    if (input.files[0]) processPhoto(input.files[0], area, previewContainer, preview);
+  });
+}
+
+function processPhoto(file, area, previewContainer, previewImg) {
+  if (!file.type.startsWith('image/')) { showToast('⚠️ Solo se permiten imágenes','error'); return; }
+  if (file.size > 5 * 1024 * 1024)    { showToast('⚠️ La imagen no puede superar 5MB','error'); return; }
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    state.currentPhotoData = e.target.result;
+    previewImg.src = e.target.result;
+    area.style.display = 'none';
+    previewContainer.style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+/* ================================================
+   INIT
+   ================================================ */
+document.getElementById('btn-add-player').addEventListener('click', openAddPlayer);
+document.getElementById('btn-reset-filters').addEventListener('click', resetFilters);
+
+document.addEventListener('DOMContentLoaded', () => {
+  initFilterOptions();
+  initChips();
+  initTextFilters();
+  initAdminPhoto();
+  updateProvinceFilter('todos');
+  renderPlayers();
+});
+</script>
+
+<!-- ======= FOOTER ======= -->
+<footer class="site-footer" role="contentinfo">
+  <div class="container">
+    <div class="site-footer-inner">
+      <div class="footer-brand">
+        <div class="footer-logo-name">PadelBell</div>
+        <div class="footer-logo-tagline">Bella Vista · Corrientes</div>
+        <p>La plataforma del pádel regional del litoral sudamericano. Jugadores, torneos, rankings y canchas.</p>
+      </div>
+      <div>
+        <div class="footer-col-title">Navegación</div>
+        <ul class="footer-links">
+          <li><a href="index.html">Inicio</a></li>
+          <li><a href="jugadores.html">Jugadores</a></li>
+          <li><a href="torneos.html">Torneos</a></li>
+          <li><a href="ranking.html">Ranking</a></li>
+          <li><a href="canchas.html">Canchas</a></li>
+          <li><a href="noticias.html">Noticias</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">Jugadores</div>
+        <ul class="footer-links">
+          <li><a href="jugadores.html">Directorio completo</a></li>
+          <li><a href="ranking.html">Ranking Masculino</a></li>
+          <li><a href="ranking.html">Ranking Femenino</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">Información</div>
+        <ul class="footer-links">
+          <li><a href="admin.html">Panel Admin</a></li>
+          <li><a href="noticias.html">Noticias</a></li>
+        </ul>
+        <div style="margin-top:20px; font-size:12px; color:var(--text-muted); font-family:var(--font-mono);">
+          <span class="footer-status-dot"></span>Sistema operativo
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 PadelBell · Bella Vista, Corrientes, Argentina</p>
+      <div class="footer-bottom-links">
+        <a href="admin.html">Administración</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

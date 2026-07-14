@@ -1,0 +1,1316 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- PWA -->
+  <link rel="manifest" href="site.webmanifest">
+  <meta name="theme-color" content="#020406">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Padel Bella Vista">
+  <title>Canchas en Bella Vista — Padel Bella Vista</title>
+  <meta name="description" content="Directorio de complejos y canchas de pádel en Bella Vista, Corrientes. Ubicaciones, especificaciones técnicas y reservas.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Cormorant:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    /* Header & navigation */
+    #main-header { position:fixed; top:0; left:0; right:0; z-index:100; background:rgba(7,11,16,0.97); backdrop-filter:blur(20px); border-bottom:1px solid var(--border-subtle); }
+    .header-inner { display:flex; align-items:center; justify-content:space-between; height:72px; gap:24px; }
+    .logo-icon { width:38px; height:38px; background:linear-gradient(135deg,var(--accent-primary),var(--accent-orange)); border-radius:var(--radius-md); display:flex; align-items:center; justify-content:center; }
+    .logo-text .logo-name { font-family:var(--font-display); font-size:22px; letter-spacing:2px; color:var(--text-primary); }
+    .logo-text .logo-tagline { font-size:9px; text-transform:uppercase; letter-spacing:2px; color:var(--accent-primary); font-weight:600; }
+    .main-nav { display:flex; gap:2px; align-items:center; }
+    .nav-link { padding:7px 12px; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.5px; color:var(--text-secondary); border-radius:var(--radius-sm); transition:all .15s; }
+    .nav-link:hover, .nav-link.active { color:var(--text-primary); background:rgba(255,255,255,.06); }
+    .nav-link.active { color:var(--accent-primary); }
+    #menu-toggler { display:none; width:38px; height:38px; align-items:center; justify-content:center; background:var(--bg-elevated); border-radius:var(--radius-sm); color:var(--text-primary); font-size:18px; border:1px solid var(--border-subtle); }
+    #mobile-menu { display:none; position:fixed; top:72px; left:0; right:0; background:rgba(7,11,16,.98); backdrop-filter:blur(20px); border-bottom:1px solid var(--border-subtle); padding:16px; z-index:99; flex-direction:column; gap:4px; }
+    #mobile-menu.open { display:flex; }
+    #mobile-menu .nav-link { padding:10px 14px; font-size:14px; border-bottom:1px solid var(--border-subtle); }
+
+    /* PAGE HERO */
+    .page-hero { padding:100px 0 40px; background:linear-gradient(180deg,var(--bg-base) 0%,var(--bg-surface) 100%); border-bottom:1px solid var(--border-subtle); }
+    .page-hero h1 { font-family:var(--font-display); font-size:clamp(40px,6vw,72px); text-transform:uppercase; letter-spacing:2px; line-height:.95; }
+    .page-hero h1 span { color:var(--accent-primary); }
+
+    /* STATS STRIP */
+    .canchas-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .canchas-stat-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .canchas-stat-card .value {
+      font-family: var(--font-display);
+      font-size: 36px;
+      color: var(--accent-primary);
+      line-height: 1;
+    }
+    .canchas-stat-card .label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    /* AVAILABILITY ROW */
+    .availability-section {
+      margin-bottom: 36px;
+    }
+    .availability-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--accent-primary);
+      margin-bottom: 12px;
+    }
+    .availability-scroll {
+      display: flex;
+      gap: 14px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border-subtle) transparent;
+    }
+    .availability-scroll::-webkit-scrollbar { height: 4px; }
+    .availability-scroll::-webkit-scrollbar-track { background: transparent; }
+    .availability-scroll::-webkit-scrollbar-thumb { background: var(--border-subtle); border-radius: 4px; }
+    .avail-card {
+      flex: 0 0 220px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: border-color var(--transition-normal);
+    }
+    .avail-card:hover { border-color: var(--accent-primary); }
+    .avail-court-name {
+      font-family: var(--font-display);
+      font-size: 18px;
+      color: var(--text-primary);
+      letter-spacing: 1px;
+    }
+    .avail-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      padding: 3px 8px;
+      border-radius: var(--radius-xs);
+      width: fit-content;
+    }
+    .avail-badge.libre {
+      background: rgba(34, 197, 94, 0.12);
+      color: #22c55e;
+      border: 1px solid rgba(34, 197, 94, 0.25);
+    }
+    .avail-badge.libre::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background: #22c55e;
+      border-radius: 50%;
+      animation: pulse-green 1.6s infinite;
+    }
+    .avail-badge.completo {
+      background: rgba(239, 68, 68, 0.12);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.25);
+    }
+    .avail-badge.completo::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background: #ef4444;
+      border-radius: 50%;
+    }
+    .avail-schedule {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+    @keyframes pulse-green {
+      0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+      70% { box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+    }
+
+    /* COURT CARDS GRID */
+    .canchas-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+    .court-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: all var(--transition-normal);
+      position: relative;
+    }
+    .court-card:hover {
+      border-color: var(--accent-primary);
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(0, 180, 216, 0.1);
+    }
+    .court-card.featured {
+      border-color: rgba(232, 132, 31, 0.3);
+    }
+    .court-card.featured::after {
+      content: 'RECOMENDADO';
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: var(--accent-orange);
+      color: var(--text-inverse);
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 800;
+      padding: 4px 8px;
+      border-radius: 4px;
+      letter-spacing: 1px;
+      z-index: 10;
+    }
+    .court-img {
+      height: 220px;
+      position: relative;
+      overflow: hidden;
+    }
+    .court-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform var(--transition-slow);
+    }
+    .court-card:hover .court-img img {
+      transform: scale(1.04);
+    }
+    .court-body {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex-grow: 1;
+    }
+    .court-name {
+      font-family: var(--font-display);
+      font-size: 32px;
+      color: var(--text-primary);
+      letter-spacing: 1px;
+      line-height: 1;
+    }
+    .court-address {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+    .court-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
+    .court-chip {
+      font-size: 11px;
+      padding: 4px 8px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xs);
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .court-info-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border-subtle);
+      margin-top: 6px;
+    }
+    .court-info-item {
+      display: flex;
+      flex-direction: column;
+    }
+    .court-info-item .lbl {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+    .court-info-item .val {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .court-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: auto;
+      padding-top: 16px;
+      border-top: 1px solid var(--border-subtle);
+    }
+    .court-price {
+      display: flex;
+      flex-direction: column;
+    }
+    .court-price .lbl {
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-muted);
+    }
+    .court-price .val {
+      font-family: var(--font-mono);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--accent-orange);
+    }
+
+    /* MOCK MAP GRAPHIC (in modal) */
+    .mock-map {
+      width: 100%;
+      height: 180px;
+      background: #090e15;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .mock-map-grid {
+      position: absolute;
+      inset: 0;
+      background-image: 
+        linear-gradient(rgba(0, 180, 216, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 180, 216, 0.04) 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+    .mock-map-court-line {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 140px;
+      height: 70px;
+      border: 1px solid rgba(0, 180, 216, 0.25);
+    }
+    .mock-map-court-net {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 1px;
+      height: 70px;
+      background: rgba(0, 180, 216, 0.4);
+    }
+    .mock-map-marker {
+      position: absolute;
+      top: 48%;
+      left: 42%;
+      width: 12px;
+      height: 12px;
+      background: var(--accent-orange);
+      border-radius: 50%;
+      border: 2px solid #fff;
+      box-shadow: 0 0 10px var(--accent-orange);
+      animation: pulse-orange 1.8s infinite;
+    }
+
+    @keyframes pulse-orange {
+      0% { box-shadow: 0 0 0 0 rgba(232, 132, 31, 0.7); }
+      70% { box-shadow: 0 0 0 12px rgba(232, 132, 31, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(232, 132, 31, 0); }
+    }
+
+    /* AMENITY PILLS */
+    .amenity-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .amenity-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 10px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      font-size: 11px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+    .amenity-pill span[data-icon] { color: var(--accent-primary); }
+
+    /* SPECS TABLE */
+    .specs-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .specs-table tr { border-bottom: 1px solid var(--border-subtle); }
+    .specs-table tr:last-child { border-bottom: none; }
+    .specs-table th {
+      text-align: left;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-muted);
+      padding: 10px 14px;
+      background: var(--bg-elevated);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .specs-table td {
+      padding: 10px 14px;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+    .specs-table td:first-child { font-weight: 600; color: var(--text-primary); }
+    .specs-table td:last-child { text-align: right; }
+
+    /* BOTTOM MAP SECTION */
+    .map-section {
+      margin-top: 48px;
+      margin-bottom: 48px;
+    }
+    .map-section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .map-section-title {
+      font-family: var(--font-display);
+      font-size: 28px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-primary);
+    }
+    .map-section-title span { color: var(--accent-primary); }
+    .bottom-map-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    .bottom-map-placeholder {
+      width: 100%;
+      height: 280px;
+      background: #070c14;
+      position: relative;
+      overflow: hidden;
+    }
+    .bmap-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0, 180, 216, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 180, 216, 0.035) 1px, transparent 1px);
+      background-size: 32px 32px;
+    }
+    /* Simulated road lines */
+    .bmap-road {
+      position: absolute;
+      background: rgba(0, 180, 216, 0.08);
+    }
+    .bmap-road.h { height: 3px; left: 0; right: 0; }
+    .bmap-road.v { width: 3px; top: 0; bottom: 0; }
+    .bmap-label {
+      position: absolute;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--text-muted);
+      background: rgba(7, 12, 20, 0.8);
+      padding: 2px 6px;
+      border-radius: 3px;
+      letter-spacing: 1px;
+      pointer-events: none;
+    }
+    /* Orange dot markers */
+    .bmap-marker {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      cursor: default;
+    }
+    .bmap-dot {
+      width: 14px;
+      height: 14px;
+      background: var(--accent-orange);
+      border-radius: 50%;
+      border: 2px solid #fff;
+      box-shadow: 0 0 12px var(--accent-orange);
+      animation: pulse-orange 2s infinite;
+    }
+    .bmap-marker-label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--accent-orange);
+      background: rgba(7,12,20,0.85);
+      padding: 2px 6px;
+      border-radius: 3px;
+      border: 1px solid rgba(232,132,31,0.3);
+      white-space: nowrap;
+      letter-spacing: .5px;
+    }
+    .bottom-map-legend {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 14px 20px;
+      border-top: 1px solid var(--border-subtle);
+      flex-wrap: wrap;
+    }
+    .bmap-legend-label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-muted);
+    }
+    .bmap-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+    .bmap-legend-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--accent-orange);
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* RESERVATION MODAL */
+    .res-form-group { margin-bottom: 14px; }
+    .res-form-group label {
+      display: block;
+      font-size: 11px;
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin-bottom: 5px;
+    }
+    .res-form-group input,
+    .res-form-group select {
+      width: 100%;
+      padding: 9px 12px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-size: 13px;
+      font-family: var(--font-body);
+      outline: none;
+      box-sizing: border-box;
+      transition: border-color var(--transition-fast);
+    }
+    .res-form-group input:focus,
+    .res-form-group select:focus { border-color: var(--accent-primary); }
+    .res-form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    @media (max-width: 900px) {
+      .canchas-grid { grid-template-columns: 1fr; }
+      .canchas-stats { grid-template-columns: 1fr; }
+      .res-form-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 768px) {
+      #menu-toggler { display: flex; }
+    }
+  </style>
+</head>
+<body>
+<div id="toast-container"></div>
+
+<!-- HEADER -->
+<header id="main-header">
+  <div class="container">
+    <div class="header-inner">
+      <a href="index.html" class="header-logo" style="gap:14px; display:flex; align-items:center;">
+        <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
+          <rect width="38" height="38" rx="10" fill="url(#pbv-grad-cn)"/>
+          <defs>
+            <linearGradient id="pbv-grad-cn" x1="0" y1="0" x2="38" y2="38" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#0F4C81"/>
+              <stop offset="60%" stop-color="#1E6B59"/>
+              <stop offset="100%" stop-color="#F28C2B" stop-opacity=".7"/>
+            </linearGradient>
+          </defs>
+          <ellipse cx="17" cy="16" rx="8" ry="10" stroke="#E9DFC8" stroke-width="1.4" fill="none"/>
+          <line x1="17" y1="10" x2="17" y2="22" stroke="#E9DFC8" stroke-width="1" opacity=".6"/>
+          <line x1="11" y1="16" x2="23" y2="16" stroke="#E9DFC8" stroke-width="1" opacity=".6"/>
+          <circle cx="20" cy="10" r="2.5" fill="#F28C2B" opacity=".9"/>
+          <line x1="17" y1="26" x2="17" y2="33" stroke="#E9DFC8" stroke-width="2" stroke-linecap="round"/>
+          <path d="M7 30 Q10 28 13 30 Q16 32 19 30 Q22 28 25 30 Q28 32 31 30" stroke="#E9DFC8" stroke-width="1.2" fill="none" opacity=".5"/>
+          <path d="M9 33 Q12 31 15 33 Q18 35 21 33 Q24 31 27 33" stroke="#E9DFC8" stroke-width="1" fill="none" opacity=".3"/>
+        </svg>
+        <div class="logo-text">
+          <div class="logo-name" style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:15px;letter-spacing:1px;line-height:1;color:#E9DFC8;">
+            PADEL <span style="color:#F28C2B;">BELLA VISTA</span>
+          </div>
+          <div class="logo-tagline" style="font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:2.5px;color:#8BA186;text-transform:uppercase;margin-top:3px;">
+            Naturaleza · Deporte · Comunidad
+          </div>
+        </div>
+      </a>
+      <nav class="main-nav">
+        <a href="index.html" class="nav-link">Inicio</a>
+        <a href="jugadores.html" class="nav-link">Jugadores</a>
+        <a href="torneos.html" class="nav-link">Torneos</a>
+        <a href="ranking.html" class="nav-link">Ranking</a>
+        <a href="canchas.html" class="nav-link active">Canchas</a>
+        <a href="noticias.html" class="nav-link">Noticias</a>
+      </nav>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button id="theme-toggle" class="theme-toggle-btn" data-icon="sun" data-size="16" title="Cambiar tema"></button>
+        <button id="menu-toggler">&#9776;</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div id="mobile-menu">
+  <a href="index.html" class="nav-link"><span data-icon="home" style="margin-right:8px; vertical-align:middle;"></span>Inicio</a>
+  <a href="jugadores.html" class="nav-link"><span data-icon="users" style="margin-right:8px; vertical-align:middle;"></span>Jugadores</a>
+  <a href="torneos.html" class="nav-link"><span data-icon="trophy" style="margin-right:8px; vertical-align:middle;"></span>Torneos</a>
+  <a href="ranking.html" class="nav-link"><span data-icon="ranking" style="margin-right:8px; vertical-align:middle;"></span>Ranking</a>
+  <a href="canchas.html" class="nav-link active"><span data-icon="court" style="margin-right:8px; vertical-align:middle;"></span>Canchas</a>
+  <a href="noticias.html" class="nav-link"><span data-icon="news" style="margin-right:8px; vertical-align:middle;"></span>Noticias</a>
+</div>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <div class="container">
+    <div style="font-family:var(--font-mono); font-size:11px; letter-spacing:3px; color:var(--accent-primary); text-transform:uppercase; margin-bottom:10px;">canchas homologadas</div>
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+      <div>
+        <h1>Canchas en <span>Bella Vista</span></h1>
+        <p style="color:var(--text-secondary); margin-top:10px; font-size:15px;">
+          Descubrí los complejos locales, sus especificaciones técnicas y reservá tu turno de juego.
+        </p>
+      </div>
+      <div>
+        <button class="btn btn-primary" id="btn-add-court" onclick="openModal('modal-add-court')">
+          <span data-icon="plus" style="margin-right:4px;"></span>Registrar Cancha
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container section-sm">
+  <!-- Stats Row -->
+  <div class="canchas-stats">
+    <div class="canchas-stat-card">
+      <span class="value" id="stat-total-complexes">0</span>
+      <span class="label">Complejos Activos</span>
+    </div>
+    <div class="canchas-stat-card">
+      <span class="value" id="stat-total-courts">0</span>
+      <span class="label">Canchas Totales</span>
+    </div>
+    <div class="canchas-stat-card">
+      <span class="value" id="stat-active-courts" style="color:var(--accent-green);">Apta LED</span>
+      <span class="label">100% de Complejos</span>
+    </div>
+  </div>
+
+  <!-- AVAILABILITY ROW -->
+  <div class="availability-section">
+    <div class="availability-label">
+      <span data-icon="clock" style="margin-right:6px; vertical-align:middle;"></span>Disponibilidad Ahora
+    </div>
+    <div class="availability-scroll" id="availability-row">
+      <!-- Rendered by JS -->
+    </div>
+  </div>
+
+  <!-- Courts Grid -->
+  <div class="canchas-grid" id="canchas-grid-container"></div>
+
+  <!-- BOTTOM MAP SECTION -->
+  <div class="map-section">
+    <div class="map-section-header">
+      <div class="map-section-title">Mapa de <span>Canchas</span></div>
+      <div style="font-family:var(--font-mono); font-size:10px; letter-spacing:1.5px; color:var(--text-muted); text-transform:uppercase;">Bella Vista, Corrientes</div>
+    </div>
+    <div class="bottom-map-card">
+      <div class="bottom-map-placeholder" id="bottom-map">
+        <div class="bmap-grid"></div>
+        <!-- Road lines -->
+        <div class="bmap-road h" style="top:33%;"></div>
+        <div class="bmap-road h" style="top:66%;"></div>
+        <div class="bmap-road v" style="left:30%;"></div>
+        <div class="bmap-road v" style="left:62%;"></div>
+        <!-- Street labels -->
+        <div class="bmap-label" style="top:30%; left:65%;">AV. SAN MARTIN</div>
+        <div class="bmap-label" style="top:63%; left:8%;">RUTA 27</div>
+        <!-- Markers -->
+        <div class="bmap-marker" style="top:22%; left:26%;">
+          <div class="bmap-dot"></div>
+          <div class="bmap-marker-label">PALMERAS PADEL</div>
+        </div>
+        <div class="bmap-marker" style="top:50%; left:57%;">
+          <div class="bmap-dot"></div>
+          <div class="bmap-marker-label">CLUB SAN JOSE</div>
+        </div>
+        <div class="bmap-marker" style="top:70%; left:38%;">
+          <div class="bmap-dot"></div>
+          <div class="bmap-marker-label">NAUTICO PADEL</div>
+        </div>
+        <!-- Coords badge -->
+        <div style="position:absolute; bottom:10px; right:12px; font-family:var(--font-mono); font-size:9px; color:var(--accent-primary); background:rgba(6,10,15,0.8); padding:3px 8px; border-radius:3px; border:1px solid var(--border-subtle);">
+          Ubicacion: -28.5162, -59.0515
+        </div>
+      </div>
+      <div class="bottom-map-legend">
+        <span class="bmap-legend-label">Referencias:</span>
+        <div class="bmap-legend-item"><div class="bmap-legend-dot"></div>Palmeras Padel</div>
+        <div class="bmap-legend-item"><div class="bmap-legend-dot"></div>Club San Jose</div>
+        <div class="bmap-legend-item"><div class="bmap-legend-dot"></div>Nautico Padel</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-bottom">
+      <p>© 2026 PadelBell · Hecho con pasión en Bella Vista, Corrientes, Argentina</p>
+      <p style="font-size:12px; color:var(--text-muted);">La plataforma del pádel del litoral</p>
+    </div>
+  </div>
+</footer>
+
+<!-- MODAL: DETALLES DE CANCHA -->
+<div class="modal-overlay" id="modal-court-detail">
+  <div class="modal" style="max-width:680px;">
+    <div class="modal-header">
+      <h2 id="court-detail-title" style="font-family:var(--font-display); font-size:32px; letter-spacing:1px;">Nombre del Complejo</h2>
+      <button class="modal-close" onclick="closeModal('modal-court-detail')">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <!-- Mock Map Graphic -->
+      <div class="mock-map">
+        <div class="mock-map-grid"></div>
+        <div class="mock-map-court-line"></div>
+        <div class="mock-map-court-net"></div>
+        <div class="mock-map-marker" id="court-map-marker"></div>
+        <div style="position:absolute; bottom:10px; left:12px; font-family:var(--font-mono); font-size:9px; color:var(--accent-primary); background:rgba(6,10,15,0.7); padding:2px 6px; border-radius:3px; border:1px solid var(--border-subtle);">
+          LOCATOR: <span id="court-detail-coords">0, 0</span>
+        </div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:18px;">
+        <!-- Location & Contact -->
+        <div>
+          <h3 style="font-size:12px; text-transform:uppercase; letter-spacing:1px; color:var(--accent-primary); font-family:var(--font-mono); margin-bottom:6px;">Ubicación &amp; Contacto</h3>
+          <p class="court-address" id="court-detail-address" style="margin-bottom:8px;">
+            <span data-icon="mapPin"></span> Dirección
+          </p>
+          <div style="display:flex; gap:16px; flex-wrap:wrap;">
+            <span style="font-size:13px; color:var(--text-secondary); display:flex; align-items:center; gap:6px;">
+              <span data-icon="phone" style="color:var(--accent-green);"></span> <span id="court-detail-phone">Teléfono</span>
+            </span>
+            <a id="court-detail-instagram-link" href="#" target="_blank" style="font-size:13px; color:var(--accent-primary); display:flex; align-items:center; gap:6px; transition:color 0.2s;">
+              <span data-icon="instagram"></span> <span id="court-detail-instagram">@instagram</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div>
+          <h3 style="font-size:12px; text-transform:uppercase; letter-spacing:1px; color:var(--accent-primary); font-family:var(--font-mono); margin-bottom:8px;">Descripción</h3>
+          <p id="court-detail-desc" style="font-size:14px; color:var(--text-secondary); line-height:1.6;">Descripción del complejo.</p>
+        </div>
+
+        <!-- Specs Table -->
+        <div>
+          <h3 style="font-size:12px; text-transform:uppercase; letter-spacing:1px; color:var(--accent-primary); font-family:var(--font-mono); margin-bottom:8px;">Especificaciones Técnicas</h3>
+          <div style="background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:var(--radius-md); overflow:hidden;">
+            <table class="specs-table">
+              <thead>
+                <tr>
+                  <th>Atributo</th>
+                  <th>Detalle</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Superficie</td>
+                  <td id="court-detail-surface">Césped sintético</td>
+                </tr>
+                <tr>
+                  <td>Iluminación</td>
+                  <td id="court-detail-lighting">LED de alta potencia</td>
+                </tr>
+                <tr>
+                  <td>Canchas</td>
+                  <td id="court-detail-count">3</td>
+                </tr>
+                <tr>
+                  <td>Horario</td>
+                  <td id="court-detail-schedule">Lun-Dom 8:00 - 23:00</td>
+                </tr>
+                <tr>
+                  <td>Precio / hora</td>
+                  <td id="court-detail-price" style="font-family:var(--font-mono); font-weight:700; color:var(--accent-orange);">$3.500</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Amenities pills -->
+        <div>
+          <h3 style="font-size:12px; text-transform:uppercase; letter-spacing:1px; color:var(--accent-primary); font-family:var(--font-mono); margin-bottom:8px;">Servicios &amp; Amenities</h3>
+          <div class="amenity-pills" id="court-detail-amenities">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:4px;">
+          <button class="btn btn-secondary" onclick="closeModal('modal-court-detail')">Cerrar</button>
+          <button class="btn btn-primary" id="court-detail-reservar-btn" onclick="">
+            <span data-icon="calendar" style="margin-right:4px;"></span>Reservar Turno
+          </button>
+          <a id="court-detail-reserve-btn" href="#" class="btn btn-secondary" target="_blank">
+            <span data-icon="phone" style="margin-right:4px;"></span>Contactar
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: RESERVAR TURNO -->
+<div class="modal-overlay" id="modal-reservar">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-header">
+      <h2 style="font-family:var(--font-display); font-size:26px; letter-spacing:1px;">Reservar Turno</h2>
+      <button class="modal-close" onclick="closeModal('modal-reservar')">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <div style="font-family:var(--font-mono); font-size:11px; color:var(--accent-primary); letter-spacing:1.5px; text-transform:uppercase; margin-bottom:14px;" id="reservar-court-name">Complejo</div>
+      <form id="form-reservar" onsubmit="submitReserva(event)">
+        <div class="res-form-group">
+          <label for="res-name">Nombre del jugador</label>
+          <input type="text" id="res-name" placeholder="ej. Juan Rodriguez" required>
+        </div>
+        <div class="res-form-grid">
+          <div class="res-form-group">
+            <label for="res-date">Fecha</label>
+            <input type="date" id="res-date" required>
+          </div>
+          <div class="res-form-group">
+            <label for="res-time">Hora</label>
+            <select id="res-time" required>
+              <option value="">Seleccionar</option>
+              <option value="08:00">08:00</option>
+              <option value="09:00">09:00</option>
+              <option value="10:00">10:00</option>
+              <option value="11:00">11:00</option>
+              <option value="12:00">12:00</option>
+              <option value="13:00">13:00</option>
+              <option value="14:00">14:00</option>
+              <option value="15:00">15:00</option>
+              <option value="16:00">16:00</option>
+              <option value="17:00">17:00</option>
+              <option value="18:00">18:00</option>
+              <option value="19:00">19:00</option>
+              <option value="20:00">20:00</option>
+              <option value="21:00">21:00</option>
+              <option value="22:00">22:00</option>
+            </select>
+          </div>
+        </div>
+        <div class="res-form-group">
+          <label for="res-duration">Duración</label>
+          <select id="res-duration" required>
+            <option value="60">60 minutos (1 hora)</option>
+            <option value="90">90 minutos (1:30 hs)</option>
+          </select>
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:20px;">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-reservar')">Cancelar</button>
+          <button type="submit" class="btn btn-primary">
+            <span data-icon="check" style="margin-right:4px;"></span>Confirmar Reserva
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: REGISTRAR CANCHA -->
+<div class="modal-overlay" id="modal-add-court">
+  <div class="modal" style="max-width:600px;">
+    <div class="modal-header">
+      <h2>Registrar Complejo / Cancha</h2>
+      <button class="modal-close" onclick="closeModal('modal-add-court')">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <form id="form-court" onsubmit="submitCourtForm(event)" class="player-form" style="border:none; padding:0; background:transparent;">
+        <div class="form-group" style="margin-bottom:14px;">
+          <label class="form-label" for="court-name">Nombre del Complejo</label>
+          <input type="text" id="court-name" name="name" class="form-input" placeholder="ej. Palmeras Pádel" required>
+        </div>
+
+        <div class="form-grid-2" style="margin-bottom:14px;">
+          <div class="form-group">
+            <label class="form-label" for="court-address-input">Dirección</label>
+            <input type="text" id="court-address-input" name="address" class="form-input" placeholder="ej. San Martín 1234" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="court-city">Ciudad / Localidad</label>
+            <input type="text" id="court-city" name="city" class="form-input" value="Bella Vista" required>
+          </div>
+        </div>
+
+        <div class="form-grid-2" style="margin-bottom:14px;">
+          <div class="form-group">
+            <label class="form-label" for="court-phone">Teléfono de contacto</label>
+            <input type="text" id="court-phone" name="phone" class="form-input" placeholder="ej. +54 3777 000000" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="court-instagram-input">Instagram</label>
+            <input type="text" id="court-instagram-input" name="instagram" class="form-input" placeholder="ej. @complejo_padel">
+          </div>
+        </div>
+
+        <div class="form-grid-2" style="margin-bottom:14px;">
+          <div class="form-group">
+            <label class="form-label" for="court-count-input">Cantidad de Canchas</label>
+            <input type="number" id="court-count-input" name="courts_count" class="form-input" min="1" max="10" value="2" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="court-price-input">Tarifa por hora ($)</label>
+            <input type="number" id="court-price-input" name="price_per_hour" class="form-input" min="500" max="20000" step="100" value="3000" required>
+          </div>
+        </div>
+
+        <div class="form-grid-2" style="margin-bottom:14px;">
+          <div class="form-group">
+            <label class="form-label" for="court-surface-input">Superficie</label>
+            <select id="court-surface-input" name="surface" class="form-select" required>
+              <option value="Césped sintético">Césped sintético</option>
+              <option value="Hormigón poroso">Hormigón poroso</option>
+              <option value="Alfombra">Alfombra premium</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="court-lighting-input">Iluminación</label>
+            <select id="court-lighting-input" name="lighting" class="form-select" required>
+              <option value="LED">Iluminación LED</option>
+              <option value="LED nocturna">LED nocturna focalizada</option>
+              <option value="Halógena">Halógena clásica</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:14px;">
+          <label class="form-label" for="court-schedule-input">Horario / Agenda</label>
+          <input type="text" id="court-schedule-input" name="schedule" class="form-input" placeholder="ej. Lun-Dom 8:00 - 23:00" required>
+        </div>
+
+        <div class="form-group" style="margin-bottom:14px;">
+          <label class="form-label">Servicios / Amenities disponibles</label>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:4px;">
+            <label class="checkbox-item"><input type="checkbox" name="amenities" value="Restó-Bar"> Restó-Bar</label>
+            <label class="checkbox-item"><input type="checkbox" name="amenities" value="Vestuarios"> Vestuarios</label>
+            <label class="checkbox-item"><input type="checkbox" name="amenities" value="Estacionamiento"> Estacionamiento</label>
+            <label class="checkbox-item"><input type="checkbox" name="amenities" value="Gimnasio"> Gimnasio</label>
+            <label class="checkbox-item"><input type="checkbox" name="amenities" value="Pileta"> Pileta recreativa</label>
+            <label class="checkbox-item"><input type="checkbox" name="amenities" value="Vista al río"> Vista al río Paraná</label>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:20px;">
+          <label class="form-label" for="court-description">Breve descripción</label>
+          <textarea id="court-description" name="description" class="form-input form-textarea" placeholder="Describí brevemente el complejo deportivo (accesos, servicios)..." style="min-height:70px;"></textarea>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:12px;">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-add-court')">Cancelar</button>
+          <button type="submit" class="btn btn-primary"><span data-icon="save" style="margin-right:4px;"></span>Registrar Complejo</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="js/icons.js"></script>
+<script src="js/data.js"></script>
+<script src="js/main.js"></script>
+<script>
+  /* ================================================
+     LÓGICA DE CANCHAS
+     ================================================ */
+
+  // Amenity icon mapping
+  const AMENITY_ICONS = {
+    'Restó-Bar': 'coffee',
+    'Vestuarios': 'users',
+    'Estacionamiento': 'car',
+    'Gimnasio': 'activity',
+    'Pileta': 'droplet',
+    'Vista al río': 'eye'
+  };
+
+  // Static availability data (hardcoded as requested)
+  const AVAILABILITY_DATA = [
+    { name: 'Palmeras Pádel', status: 'libre', count: 1, schedule: 'Lun-Dom 8:00 - 23:00' },
+    { name: 'Club San José', status: 'completo', count: 0, schedule: 'Lun-Sáb 7:00 - 22:00' },
+    { name: 'Náutico Pádel', status: 'libre', count: 2, schedule: 'Mar-Dom 9:00 - 22:00' }
+  ];
+
+  // Currently targeted court for reservation
+  let _currentCourtForReserva = null;
+
+  function renderAvailabilityRow() {
+    const row = document.getElementById('availability-row');
+    if (!row) return;
+    row.innerHTML = AVAILABILITY_DATA.map(item => `
+      <div class="avail-card">
+        <div class="avail-court-name">${item.name}</div>
+        <span class="avail-badge ${item.status}">
+          ${item.status === 'libre' ? `${item.count} cancha${item.count > 1 ? 's' : ''} libre${item.count > 1 ? 's' : ''}` : 'Completo'}
+        </span>
+        <div class="avail-schedule">${item.schedule}</div>
+      </div>
+    `).join('');
+    renderIcons();
+  }
+
+  function renderCourtsPage() {
+    const list = getAllCourts();
+    const container = document.getElementById('canchas-grid-container');
+    if (!container) return;
+
+    // Renders Stats Strip
+    document.getElementById('stat-total-complexes').textContent = list.length;
+    const totalCourtsCount = list.reduce((sum, c) => sum + (c.courts_count || 0), 0);
+    document.getElementById('stat-total-courts').textContent = totalCourtsCount;
+
+    if (!list.length) {
+      container.innerHTML = `<div style="grid-column: 1 / -1; text-align:center; padding:40px; color:var(--text-muted);">No hay canchas registradas en la base de datos</div>`;
+      renderAvailabilityRow();
+      return;
+    }
+
+    container.innerHTML = list.map((c, index) => {
+      const imgPath = c.image || 'assets/images/court_top_view.png';
+      const isFeatured = c.featured ? 'featured' : '';
+      
+      return `
+        <div class="court-card ${isFeatured}">
+          <div class="court-img">
+            <div class="img-skeleton">
+              <img data-src="${imgPath}" alt="${c.name}" class="lazy-img" loading="lazy" onerror="this.src='assets/images/court_top_view.png'">
+            </div>
+          </div>
+          <div class="court-body">
+            <h2 class="court-name">${c.name}</h2>
+            <div class="court-address">
+              <span data-icon="mapPin" data-size="14"></span> ${c.address}, ${c.city}
+            </div>
+            
+            <div class="court-chips">
+              ${c.amenities.map(a => `
+                <span class="court-chip">
+                  <span data-icon="${AMENITY_ICONS[a] || 'check'}" data-size="10"></span>${a}
+                </span>`).join('')}
+            </div>
+
+            <div class="court-info-row">
+              <div class="court-info-item">
+                <span class="lbl">Superficie</span>
+                <span class="val">${c.surface}</span>
+              </div>
+              <div class="court-info-item">
+                <span class="lbl">Canchas</span>
+                <span class="val">${c.courts_count} pista${c.courts_count > 1 ? 's' : ''}</span>
+              </div>
+            </div>
+
+            <div class="court-info-row" style="margin-top:0; border-top:none; padding-top:0;">
+              <div class="court-info-item">
+                <span class="lbl">Iluminación</span>
+                <span class="val">${c.lighting}</span>
+              </div>
+              <div class="court-info-item">
+                <span class="lbl">Horario</span>
+                <span class="val">${c.schedule.split('·')[0].trim()}</span>
+              </div>
+            </div>
+
+            <div class="court-footer">
+              <div class="court-price">
+                <span class="lbl">Precio / Hora</span>
+                <span class="val">${formatPrice(c.price_per_hour)}</span>
+              </div>
+              <div style="display:flex; gap:8px;">
+                <button class="btn btn-secondary btn-sm" onclick="openCourtDetail('${c.id}')">
+                  <span data-icon="eye" style="margin-right:4px;"></span>Detalles
+                </button>
+                ${(typeof AUTH !== 'undefined' && (AUTH.isAdmin() || AUTH.isOrganizer())) ? `
+                  <button class="btn btn-primary btn-sm" onclick="openReservarModal('${c.id}')">
+                    <span data-icon="calendar" style="margin-right:4px;"></span>Reservar Turno
+                  </button>
+                ` : `
+                  <a href="https://wa.me/${c.phone.replace(/[^0-9]/g, '')}" target="_blank" class="btn btn-primary btn-sm" style="display:inline-flex; align-items:center; text-decoration:none;">
+                    <span data-icon="phone" style="margin-right:4px;"></span>Contactar Club
+                  </a>
+                `}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    initLazyImages();
+    renderIcons();
+    renderAvailabilityRow();
+  }
+
+  function openCourtDetail(id) {
+    const courts = getAllCourts();
+    const court = courts.find(c => c.id === id);
+    if (!court) return;
+
+    document.getElementById('court-detail-title').textContent = court.name;
+    document.getElementById('court-detail-address').innerHTML = `<span data-icon="mapPin"></span> ${court.address}, ${court.city}, ${court.province || 'Corrientes'}`;
+    document.getElementById('court-detail-phone').textContent = court.phone;
+    document.getElementById('court-detail-instagram').textContent = court.instagram || '@padelbell_bv';
+    document.getElementById('court-detail-instagram-link').href = `https://instagram.com/${(court.instagram || '@padelbell_bv').replace('@', '')}`;
+    document.getElementById('court-detail-desc').textContent = court.description || 'Complejo regional habilitado para el torneo oficial PadelBell Bella Vista.';
+    document.getElementById('court-detail-count').textContent = `${court.courts_count} cancha${court.courts_count > 1 ? 's' : ''}`;
+    document.getElementById('court-detail-surface').textContent = court.surface;
+    document.getElementById('court-detail-lighting').textContent = court.lighting;
+    document.getElementById('court-detail-schedule').textContent = court.schedule;
+    document.getElementById('court-detail-price').textContent = formatPrice(court.price_per_hour);
+
+    // Amenity pills
+    const amenitiesContainer = document.getElementById('court-detail-amenities');
+    if (court.amenities && court.amenities.length) {
+      amenitiesContainer.innerHTML = court.amenities.map(a => `
+        <span class="amenity-pill">
+          <span data-icon="${AMENITY_ICONS[a] || 'check'}" data-size="12"></span>${a}
+        </span>
+      `).join('');
+    } else {
+      amenitiesContainer.innerHTML = `<span style="font-size:12px; color:var(--text-muted);">Sin amenities registradas</span>`;
+    }
+
+    // Simulated coordinates
+    const lat = court.coordinates?.lat || -28.5162;
+    const lng = court.coordinates?.lng || -59.0515;
+    document.getElementById('court-detail-coords').textContent = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+
+    // Marker position
+    const marker = document.getElementById('court-map-marker');
+    if (marker) {
+      const topPercent = Math.min(Math.max(((lat - (-28.5250)) / 0.0200) * 100, 15), 85);
+      const leftPercent = Math.min(Math.max(((lng - (-59.0600)) / 0.0200) * 100, 15), 85);
+      marker.style.top = `${100 - topPercent}%`;
+      marker.style.left = `${leftPercent}%`;
+    }
+
+    document.getElementById('court-detail-reserve-btn').href = `https://wa.me/${court.phone.replace(/[^0-9]/g, '')}?text=Hola%20${encodeURIComponent(court.name)},%20quisiera%20consultar%20disponibilidad%20de%20turnos%20desde%20PadelBell`;
+
+    // Wire reservation button
+    document.getElementById('court-detail-reservar-btn').onclick = () => {
+      closeModal('modal-court-detail');
+      openReservarModal(court.id);
+    };
+
+    openModal('modal-court-detail');
+    renderIcons();
+  }
+
+  function openReservarModal(courtId) {
+    const courts = getAllCourts();
+    const court = courts.find(c => c.id === courtId);
+    _currentCourtForReserva = court || null;
+
+    // Set today's date as default
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('res-date').value = today;
+    document.getElementById('res-date').min = today;
+    document.getElementById('res-name').value = '';
+    document.getElementById('res-time').value = '';
+    document.getElementById('res-duration').value = '60';
+
+    if (court) {
+      document.getElementById('reservar-court-name').textContent = court.name;
+    } else {
+      document.getElementById('reservar-court-name').textContent = 'Cancha';
+    }
+
+    openModal('modal-reservar');
+    renderIcons();
+  }
+
+  function submitReserva(e) {
+    e.preventDefault();
+    const name = document.getElementById('res-name').value.trim();
+    const date = document.getElementById('res-date').value;
+    const time = document.getElementById('res-time').value;
+    const duration = document.getElementById('res-duration').value;
+    const courtName = _currentCourtForReserva ? _currentCourtForReserva.name : 'la cancha';
+
+    if (!name || !date || !time) {
+      showToast('Completá todos los campos obligatorios', 'error');
+      return;
+    }
+
+    closeModal('modal-reservar');
+    setTimeout(() => {
+      showToast(`¡Turno reservado! ${name} · ${courtName} · ${date} ${time} · ${duration} min`, 'success');
+    }, 200);
+  }
+
+  function submitCourtForm(e) {
+    e.preventDefault();
+    const form = document.getElementById('form-court');
+    const formData = new FormData(form);
+
+    const activeAmenities = [];
+    document.querySelectorAll('input[name="amenities"]:checked').forEach(cb => {
+      activeAmenities.push(cb.value);
+    });
+
+    const centerLat = -28.5162;
+    const centerLng = -59.0515;
+    const randomLatOffset = (Math.random() - 0.5) * 0.01;
+    const randomLngOffset = (Math.random() - 0.5) * 0.01;
+
+    const newCourt = {
+      id: 'c' + Date.now(),
+      name: formData.get('name'),
+      address: formData.get('address'),
+      city: formData.get('city') || 'Bella Vista',
+      province: 'Corrientes',
+      phone: formData.get('phone'),
+      instagram: formData.get('instagram') || '@padelbell_bv',
+      courts_count: parseInt(formData.get('courts_count')) || 1,
+      surface: formData.get('surface'),
+      lighting: formData.get('lighting'),
+      amenities: activeAmenities,
+      schedule: formData.get('schedule') || 'Lun-Dom 8:00 - 22:00',
+      price_per_hour: parseInt(formData.get('price_per_hour')) || 3000,
+      coordinates: { lat: centerLat + randomLatOffset, lng: centerLng + randomLngOffset },
+      description: formData.get('description') || 'Nuevo complejo registrado.',
+      featured: false,
+      image: 'assets/images/court_top_view.png'
+    };
+
+    DB.courts.push(newCourt);
+    saveDB();
+
+    showToast(`Complejo "${newCourt.name}" registrado con éxito`, 'success');
+    closeModal('modal-add-court');
+    form.reset();
+
+    renderCourtsPage();
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    renderCourtsPage();
+  });
+</script>
+
+<!-- ======= FOOTER ======= -->
+<footer class="site-footer" role="contentinfo">
+  <div class="container">
+    <div class="site-footer-inner">
+      <div class="footer-brand">
+        <div class="footer-logo-name">PadelBell</div>
+        <div class="footer-logo-tagline">Bella Vista · Corrientes</div>
+        <p>La plataforma del pádel regional del litoral sudamericano. Jugadores, torneos, rankings y canchas.</p>
+      </div>
+      <div>
+        <div class="footer-col-title">Navegación</div>
+        <ul class="footer-links">
+          <li><a href="index.html">Inicio</a></li>
+          <li><a href="jugadores.html">Jugadores</a></li>
+          <li><a href="torneos.html">Torneos</a></li>
+          <li><a href="ranking.html">Ranking</a></li>
+          <li><a href="canchas.html">Canchas</a></li>
+          <li><a href="noticias.html">Noticias</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">Canchas</div>
+        <ul class="footer-links">
+          <li><a href="canchas.html">Directorio de canchas</a></li>
+          <li><a href="canchas.html">Canchas destacadas</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">Información</div>
+        <ul class="footer-links">
+          <li><a href="admin.html">Panel Admin</a></li>
+          <li><a href="noticias.html">Noticias</a></li>
+        </ul>
+        <div style="margin-top:20px; font-size:12px; color:var(--text-muted); font-family:var(--font-mono);">
+          <span class="footer-status-dot"></span>Sistema operativo
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 PadelBell · Bella Vista, Corrientes, Argentina</p>
+      <div class="footer-bottom-links">
+        <a href="admin.html">Administración</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel Organizador — PadelBell</title>
+  <meta name="description" content="Portal del organizador de torneos de PadelBell.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    /* ── Layout Organizador ── */
+    .org-layout {
+      display: flex;
+      min-height: 100vh;
+      padding-top: 72px; /* header height */
+    }
+
+    /* ── Session bar (debajo del header) ── */
+    .org-session-bar {
+      position: fixed;
+      top: 72px;
+      left: 0;
+      right: 0;
+      z-index: 90;
+      background: linear-gradient(90deg, #001a1f 0%, #000d11 100%);
+      border-bottom: 1px solid rgba(0,180,216,.25);
+      height: 38px;
+      display: flex;
+      align-items: center;
+      font-family: var(--font-mono);
+      font-size: 12px;
+    }
+    .org-session-bar .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+    }
+    .org-session-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .org-session-dot {
+      width: 6px; height: 6px;
+      background: var(--accent-green, #4ade80);
+      border-radius: 50%;
+      animation: blink 2s ease-in-out infinite;
+    }
+    .org-session-label { color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-size: 10px; }
+    .org-session-name  { color: var(--text-primary); font-weight: 600; }
+    .org-session-sep   { color: var(--text-muted); }
+    .org-session-tournament { color: var(--accent-primary); }
+    .org-session-right { display: flex; align-items: center; gap: 12px; }
+    .org-session-logout {
+      background: rgba(220,38,38,.15);
+      border: 1px solid rgba(220,38,38,.3);
+      color: #f87171;
+      padding: 3px 10px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-family: var(--font-mono);
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .org-session-logout:hover { background: rgba(220,38,38,.3); color: white; }
+
+    /* ── Sidebar ── */
+    .org-sidebar {
+      width: 220px;
+      flex-shrink: 0;
+      background: var(--bg-elevated, #0a0f14);
+      border-right: 1px solid var(--border-subtle);
+      position: fixed;
+      top: 110px; /* header + session bar */
+      bottom: 0;
+      left: 0;
+      overflow-y: auto;
+      z-index: 80;
+    }
+    .org-sidebar-nav { padding: 16px 12px; display: flex; flex-direction: column; gap: 4px; }
+    .org-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 500;
+      transition: all .2s;
+      border: 1px solid transparent;
+    }
+    .org-nav-item:hover { background: rgba(255,255,255,.04); color: var(--text-primary); }
+    .org-nav-item.active {
+      background: rgba(0,180,216,.08);
+      color: var(--accent-primary);
+      border-color: rgba(0,180,216,.2);
+    }
+    .org-nav-icon { width: 18px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+    /* ── Main content ── */
+    .org-main {
+      flex: 1;
+      margin-left: 220px;
+      padding: 24px;
+      padding-top: calc(110px + 24px); /* header + session bar + gap */
+      min-height: 100vh;
+    }
+
+    /* ── Panels ── */
+    .org-panel { display: none; }
+    .org-panel.active { display: block; }
+
+    /* ── Panel header ── */
+    .panel-hdr {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .panel-hdr h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 28px;
+      letter-spacing: 1px;
+    }
+    .panel-hdr h2 span { color: var(--accent-primary); }
+
+    /* ── Stats row ── */
+    .stats-row-sm {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .stat-sm {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 14px 16px;
+    }
+    .stat-sm__num {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 32px;
+      color: var(--accent-primary);
+      line-height: 1;
+    }
+    .stat-sm__lbl { font-size: 11px; color: var(--text-muted); margin-top: 4px; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 1px; }
+
+    /* ── Tournament info card ── */
+    .tournament-info-card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+    .tournament-info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .tinfo-item { }
+    .tinfo-label { font-size: 10px; color: var(--text-muted); font-family: var(--font-mono); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
+    .tinfo-value { font-size: 14px; color: var(--text-primary); font-weight: 500; }
+
+    /* ── Tabla jugadores ── */
+    .org-table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border-subtle); }
+    .org-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .org-table thead tr { background: rgba(255,255,255,.03); border-bottom: 1px solid var(--border-subtle); }
+    .org-table th { padding: 12px 14px; text-align: left; color: var(--text-muted); font-size: 11px; font-family: var(--font-mono); letter-spacing: 1px; text-transform: uppercase; font-weight: 500; }
+    .org-table td { padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,.04); vertical-align: middle; }
+    .org-table tbody tr:last-child td { border-bottom: none; }
+    .org-table tbody tr:hover { background: rgba(255,255,255,.02); }
+
+    /* ── Partidos ── */
+    .match-card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+      transition: border-color .2s;
+    }
+    .match-card:hover { border-color: rgba(0,180,216,.2); }
+    .match-phase { font-size: 10px; color: var(--text-muted); font-family: var(--font-mono); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
+    .match-teams { font-size: 14px; font-weight: 600; }
+    .match-teams .vs { color: var(--text-muted); font-weight: 400; margin: 0 8px; font-size: 12px; }
+    .match-score { font-family: var(--font-mono); color: var(--accent-primary); font-size: 13px; }
+    .match-winner { color: var(--accent-orange); font-weight: 700; }
+    .match-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+
+    /* ── Status badges ── */
+    .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-family: var(--font-mono); font-weight: 600; letter-spacing: .5px; }
+    .badge--live    { background: rgba(232,132,31,.15); color: var(--accent-orange); border: 1px solid rgba(232,132,31,.3); }
+    .badge--done    { background: rgba(74,222,128,.1);  color: #4ade80;              border: 1px solid rgba(74,222,128,.2); }
+    .badge--pending { background: rgba(255,255,255,.06); color: var(--text-muted);  border: 1px solid var(--border-subtle); }
+
+    /* ── Bracket visual ── */
+    .bracket-wrap { overflow-x: auto; padding-bottom: 12px; }
+    .bracket { display: flex; gap: 0; min-width: 700px; }
+    .bracket-round { flex: 1; display: flex; flex-direction: column; justify-content: space-around; }
+    .bracket-round-title { text-align: center; font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); letter-spacing: 1px; text-transform: uppercase; padding: 8px 0 16px; border-bottom: 1px solid var(--border-subtle); margin-bottom: 12px; }
+    .bracket-slots { display: flex; flex-direction: column; gap: 12px; padding: 8px 0; }
+    .bracket-slot {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      overflow: hidden;
+      position: relative;
+    }
+    .bracket-pair { display: flex; flex-direction: column; }
+    .bracket-team {
+      padding: 8px 12px;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255,255,255,.04);
+    }
+    .bracket-team:last-child { border-bottom: none; }
+    .bracket-team.winner { background: rgba(232,132,31,.08); color: var(--accent-orange); font-weight: 600; }
+    .bracket-team.tbd { color: var(--text-muted); font-style: italic; }
+    .bracket-score { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); }
+
+    /* ── Config tab ── */
+    .config-section { background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: 16px; padding: 24px; margin-bottom: 20px; }
+    .config-section h3 { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 1px; margin-bottom: 16px; color: var(--text-secondary); }
+
+    /* ── Empty state ── */
+    .empty-org { text-align: center; padding: 48px 24px; }
+    .empty-org-icon { color: var(--text-muted); margin-bottom: 12px; }
+    .empty-org-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 1px; color: var(--text-muted); }
+    .empty-org-msg { font-size: 13px; color: var(--text-muted); margin-top: 6px; }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 1000;
+      background: rgba(0,0,0,.75); backdrop-filter: blur(6px);
+      display: flex; align-items: center; justify-content: center; padding: 20px;
+      opacity: 0; pointer-events: none; transition: opacity .2s;
+    }
+    .modal-overlay.active { opacity: 1; pointer-events: all; }
+    .modal { background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: 20px; width: 100%; max-width: 540px; max-height: 90vh; overflow-y: auto; }
+    .modal-hdr { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid var(--border-subtle); }
+    .modal-hdr h3 { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 1px; }
+    .modal-close { background: none; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer; padding: 4px 8px; border-radius: 6px; transition: all .2s; }
+    .modal-close:hover { background: rgba(255,255,255,.06); color: var(--text-primary); }
+    .modal-body { padding: 24px; }
+
+    /* ── Forms ── */
+    .fg { margin-bottom: 14px; }
+    .fg label { display: block; font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+    .fg input, .fg select, .fg textarea {
+      width: 100%; padding: 10px 14px;
+      background: rgba(0,0,0,.3); border: 1px solid var(--border-default);
+      border-radius: 8px; color: var(--text-primary); font-family: var(--font-body); font-size: 14px;
+      outline: none; transition: border-color .2s;
+    }
+    .fg input:focus, .fg select:focus, .fg textarea:focus { border-color: var(--accent-primary); }
+    .fg textarea { resize: vertical; min-height: 80px; }
+    .fg-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    /* ── Buttons ── */
+    .btn-org-primary {
+      background: var(--accent-primary); color: #020406;
+      border: none; border-radius: 8px; padding: 10px 20px;
+      font-weight: 700; font-size: 14px; cursor: pointer; transition: all .2s;
+    }
+    .btn-org-primary:hover { filter: brightness(1.1); }
+    .btn-org-secondary {
+      background: rgba(255,255,255,.06); color: var(--text-primary);
+      border: 1px solid var(--border-default); border-radius: 8px; padding: 10px 20px;
+      font-weight: 600; font-size: 14px; cursor: pointer; transition: all .2s;
+    }
+    .btn-org-secondary:hover { background: rgba(255,255,255,.1); }
+    .btn-org-danger {
+      background: rgba(220,38,38,.15); color: #f87171;
+      border: 1px solid rgba(220,38,38,.3); border-radius: 8px; padding: 10px 20px;
+      font-weight: 600; font-size: 14px; cursor: pointer; transition: all .2s;
+    }
+    .btn-org-danger:hover { background: rgba(220,38,38,.3); color: white; }
+    .btn-org-sm { padding: 6px 12px; font-size: 12px; }
+
+    /* ── Resultado modal — sets ── */
+    .sets-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .set-item {
+      background: rgba(0,0,0,.3); border: 1px solid var(--border-default); border-radius: 8px;
+      padding: 8px 12px; display: flex; align-items: center; gap: 8px;
+    }
+    .set-inp { width: 42px; text-align: center; background: transparent; border: none; border-bottom: 1px solid var(--border-default); color: var(--text-primary); font-family: var(--font-mono); font-size: 18px; outline: none; padding: 2px 0; }
+    .set-sep { color: var(--text-muted); font-size: 16px; font-family: var(--font-mono); }
+    .btn-add-set { background: rgba(0,180,216,.1); border: 1px dashed rgba(0,180,216,.3); border-radius: 8px; padding: 8px 16px; color: var(--accent-primary); font-size: 12px; cursor: pointer; transition: all .2s; font-family: var(--font-mono); }
+    .btn-add-set:hover { background: rgba(0,180,216,.2); }
+
+    /* ── Toast ── */
+    #org-toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+    .org-toast { background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 12px 18px; font-size: 13px; max-width: 320px; animation: slideInRight .3s ease; display: flex; align-items: center; gap: 10px; }
+    .org-toast.success { border-left: 3px solid #4ade80; }
+    .org-toast.error   { border-left: 3px solid #f87171; }
+    @keyframes slideInRight { from { transform: translateX(40px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+    /* ── Mobile sidebar ── */
+    @media (max-width: 768px) {
+      .org-sidebar { width: 100%; top: auto; bottom: 0; height: 58px; flex-direction: row; border-top: 1px solid var(--border-subtle); border-right: none; }
+      .org-sidebar-nav { flex-direction: row; padding: 8px; gap: 2px; width: 100%; justify-content: space-around; }
+      .org-nav-item { flex-direction: column; gap: 3px; padding: 6px 10px; font-size: 10px; letter-spacing: 0; }
+      .org-main { margin-left: 0; padding-bottom: 80px; padding-top: calc(110px + 16px); padding-left: 16px; padding-right: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header id="main-header">
+  <div class="container">
+    <div class="header-inner">
+      <a href="index.html" class="logo" style="display:flex;align-items:center;gap:12px;">
+        <div class="logo-icon"><span data-icon="court" data-size="20"></span></div>
+        <div class="logo-text">
+          <div class="logo-name">PadelBell</div>
+          <div class="logo-tagline">Bella Vista · Corrientes</div>
+        </div>
+      </a>
+      <nav class="main-nav" id="main-nav">
+        <a href="index.html" class="nav-link">Inicio</a>
+        <a href="torneos.html" class="nav-link">Torneos</a>
+        <a href="ranking.html" class="nav-link">Ranking</a>
+        <a href="canchas.html" class="nav-link">Canchas</a>
+        <a href="noticias.html" class="nav-link">Noticias</a>
+      </nav>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button id="theme-toggle" class="theme-toggle-btn" data-icon="moon" title="Cambiar tema"></button>
+        <button id="menu-toggler" aria-label="Menu">☰</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- SESSION BAR -->
+<div class="org-session-bar" id="org-session-bar">
+  <div class="container">
+    <div class="org-session-left">
+      <span class="org-session-dot"></span>
+      <span data-icon="trophy" data-size="12"></span>
+      <span class="org-session-label">Organizador:</span>
+      <span class="org-session-name" id="session-org-name">Cargando...</span>
+      <span class="org-session-sep">·</span>
+      <span class="org-session-tournament" id="session-tournament-name">Sin torneo</span>
+    </div>
+    <div class="org-session-right">
+      <button class="org-session-logout" onclick="logout()">Cerrar sesión</button>
+    </div>
+  </div>
+</div>
+
+<div class="org-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="org-sidebar">
+    <nav class="org-sidebar-nav">
+      <div class="org-nav-item active" onclick="switchTab('torneo')" id="nav-torneo">
+        <span class="org-nav-icon" data-icon="trophy" data-size="16"></span>
+        <span>Mi Torneo</span>
+      </div>
+      <div class="org-nav-item" onclick="switchTab('jugadores')" id="nav-jugadores">
+        <span class="org-nav-icon" data-icon="users" data-size="16"></span>
+        <span>Jugadores</span>
+      </div>
+      <div class="org-nav-item" onclick="switchTab('partidos')" id="nav-partidos">
+        <span class="org-nav-icon" data-icon="court" data-size="16"></span>
+        <span>Partidos</span>
+      </div>
+      <div class="org-nav-item" onclick="switchTab('bracket')" id="nav-bracket">
+        <span class="org-nav-icon" data-icon="chart" data-size="16"></span>
+        <span>Bracket</span>
+      </div>
+      <div class="org-nav-item" onclick="switchTab('pagos')" id="nav-pagos">
+        <span class="org-nav-icon" data-icon="dollar" data-size="16"></span>
+        <span>Pagos</span>
+      </div>
+      <div class="org-nav-item" onclick="switchTab('config')" id="nav-config">
+        <span class="org-nav-icon" data-icon="settings" data-size="16"></span>
+        <span>Config</span>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="org-main">
+
+    <!-- ── TAB: MI TORNEO ── -->
+    <div class="org-panel active" id="panel-torneo">
+      <div class="panel-hdr">
+        <h2>Mi <span>Torneo</span></h2>
+        <button class="btn-org-primary" onclick="openEditTournamentModal()">
+          <span data-icon="edit" data-size="14"></span> Editar Torneo
+        </button>
+      </div>
+
+      <div class="stats-row-sm" id="torneo-stats">
+        <div class="stat-sm"><div class="stat-sm__num" id="stat-players">0</div><div class="stat-sm__lbl">Jugadores</div></div>
+        <div class="stat-sm"><div class="stat-sm__num" id="stat-matches-done">0</div><div class="stat-sm__lbl">Partidos jugados</div></div>
+        <div class="stat-sm"><div class="stat-sm__num" id="stat-matches-pending">0</div><div class="stat-sm__lbl">Pendientes</div></div>
+      </div>
+
+      <div class="tournament-info-card" id="tournament-info-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+          <div>
+            <div style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;" id="torneo-status-badge-wrap"></div>
+            <h3 id="torneo-name" style="font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:1px;">Cargando...</h3>
+          </div>
+        </div>
+        <div class="tournament-info-grid" id="torneo-info-grid">
+          <!-- rendered by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TAB: JUGADORES ── -->
+    <div class="org-panel" id="panel-jugadores">
+      <div class="panel-hdr">
+        <h2>Jugadores <span>del Torneo</span></h2>
+        <button class="btn-org-primary" onclick="openPlayerModal()">
+          <span data-icon="plus" data-size="14"></span> Agregar Jugador
+        </button>
+      </div>
+      <div class="org-table-wrap">
+        <table class="org-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Jugador</th>
+              <th>Categoría</th>
+              <th>Género</th>
+              <th>Club</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="jugadores-tbody">
+            <tr><td colspan="6"><div class="empty-org"><div class="empty-org-title">Sin jugadores</div><div class="empty-org-msg">Agregá el primer jugador al torneo.</div></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── TAB: PARTIDOS ── -->
+    <div class="org-panel" id="panel-partidos">
+      <div class="panel-hdr">
+        <h2>Partidos <span>del Torneo</span></h2>
+        <button class="btn-org-primary" onclick="openAddMatchModal()">
+          <span data-icon="plus" data-size="14"></span> Agregar Partido
+        </button>
+      </div>
+      <div id="partidos-list">
+        <!-- rendered by JS -->
+      </div>
+    </div>
+
+    <!-- ── TAB: BRACKET ── -->
+    <div class="org-panel" id="panel-bracket">
+      <div class="panel-hdr">
+        <h2>Bracket <span>del Torneo</span></h2>
+        <button class="btn-org-secondary" onclick="generateBracket()">
+          <span data-icon="edit" data-size="14"></span> Generar Bracket
+        </button>
+      </div>
+      <div class="bracket-wrap">
+        <div class="bracket" id="bracket-container">
+          <!-- rendered by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TAB: PAGOS ── -->
+    <div class="org-panel" id="panel-pagos">
+      <div class="panel-hdr">
+        <h2>Control de <span>Pagos</span></h2>
+        <div style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);">
+          ARANCEL POR JUGADOR: <strong id="pagos-fee" style="color:var(--accent-orange); font-size:14px;">$0</strong>
+        </div>
+      </div>
+      <div class="stats-row-sm" style="margin-bottom:16px;">
+        <div class="stat-sm"><div class="stat-sm__num" id="stat-pay-paid">0</div><div class="stat-sm__lbl">Pagados</div></div>
+        <div class="stat-sm"><div class="stat-sm__num" id="stat-pay-pending">0</div><div class="stat-sm__lbl">Pendientes</div></div>
+        <div class="stat-sm"><div class="stat-sm__num" id="stat-pay-total">$0</div><div class="stat-sm__lbl">Total Recaudado</div></div>
+      </div>
+      <div class="org-table-wrap">
+        <table class="org-table">
+          <thead>
+            <tr>
+              <th>Jugador</th>
+              <th>Club</th>
+              <th>Monto</th>
+              <th>Estado</th>
+              <th>Fecha Pago</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="pagos-tbody">
+            <!-- rendered by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── TAB: CONFIGURACIÓN ── -->
+    <div class="org-panel" id="panel-config">
+      <div class="panel-hdr">
+        <h2>Configuración <span>del Acceso</span></h2>
+      </div>
+
+      <div class="config-section">
+        <h3>Información del Organizador</h3>
+        <div id="org-info-display"><!-- rendered by JS --></div>
+      </div>
+
+      <div class="config-section">
+        <h3>Cambiar PIN de Acceso</h3>
+        <div class="fg-row" style="max-width:360px;">
+          <div class="fg">
+            <label>Nuevo PIN (4 dígitos)</label>
+            <input type="password" id="new-pin-input" maxlength="4" placeholder="····"
+              style="font-family:var(--font-mono);letter-spacing:12px;text-align:center;font-size:22px;"
+              oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+          </div>
+          <div class="fg">
+            <label>Confirmar PIN</label>
+            <input type="password" id="confirm-pin-input" maxlength="4" placeholder="····"
+              style="font-family:var(--font-mono);letter-spacing:12px;text-align:center;font-size:22px;"
+              oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+          </div>
+        </div>
+        <button class="btn-org-primary" style="margin-top:8px;" onclick="changePin()">Guardar nuevo PIN</button>
+      </div>
+
+      <div class="config-section">
+        <h3>Sesión</h3>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">Cerrá la sesión cuando termines de gestionar el torneo.</p>
+        <button class="btn-org-danger" onclick="logout()">
+          <span data-icon="logout" data-size="14"></span> Cerrar Sesión
+        </button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- MODAL: EDITAR TORNEO -->
+<div class="modal-overlay" id="modal-edit-tournament">
+  <div class="modal">
+    <div class="modal-hdr">
+      <h3>Editar Torneo</h3>
+      <button class="modal-close" onclick="closeModalOrg('modal-edit-tournament')">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <form id="form-edit-tournament" onsubmit="submitEditTournament(event)">
+        <input type="hidden" id="edit-t-id">
+        <div class="fg-row">
+          <div class="fg"><label>Nombre</label><input type="text" id="edit-t-name" required></div>
+          <div class="fg"><label>Sede</label><input type="text" id="edit-t-venue"></div>
+        </div>
+        <div class="fg-row">
+          <div class="fg"><label>Fecha inicio</label><input type="date" id="edit-t-start"></div>
+          <div class="fg"><label>Fecha fin</label><input type="date" id="edit-t-end"></div>
+        </div>
+        <div class="fg-row">
+          <div class="fg">
+            <label>Estado</label>
+            <select id="edit-t-status">
+              <option value="upcoming">Próximo</option>
+              <option value="in_progress">En curso</option>
+              <option value="finished">Finalizado</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label>Categoría</label>
+            <select id="edit-t-category">
+              <option>1ra</option><option>2da</option><option>3ra</option><option>4ta</option>
+              <option>5ta</option><option>6ta</option><option>7ma</option><option>8va</option><option>Principiante</option>
+            </select>
+          </div>
+        </div>
+        <div class="fg-row">
+          <div class="fg"><label>Premio ($)</label><input type="number" id="edit-t-prize" min="0"></div>
+          <div class="fg"><label>Costo Inscripción ($)</label><input type="number" id="edit-t-fee" min="0" value="5000"></div>
+        </div>
+        <div class="fg"><label>Descripción</label><textarea id="edit-t-description" rows="3"></textarea></div>
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;">
+          <button type="button" class="btn-org-secondary" onclick="closeModalOrg('modal-edit-tournament')">Cancelar</button>
+          <button type="submit" class="btn-org-primary">Guardar Cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: JUGADOR -->
+<div class="modal-overlay" id="modal-player">
+  <div class="modal">
+    <div class="modal-hdr">
+      <h3 id="player-modal-title">Agregar Jugador</h3>
+      <button class="modal-close" onclick="closeModalOrg('modal-player')">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <form id="form-player" onsubmit="submitPlayerOrg(event)">
+        <input type="hidden" id="player-edit-id">
+        <div class="fg-row">
+          <div class="fg"><label>Nombre</label><input type="text" id="p-firstname" required></div>
+          <div class="fg"><label>Apellido</label><input type="text" id="p-lastname" required></div>
+        </div>
+        <div class="fg-row">
+          <div class="fg"><label>Apodo</label><input type="text" id="p-nickname" placeholder="Opcional"></div>
+          <div class="fg">
+            <label>Género</label>
+            <select id="p-gender">
+              <option value="masculino">Masculino</option>
+              <option value="femenino">Femenino</option>
+            </select>
+          </div>
+        </div>
+        <div class="fg-row">
+          <div class="fg">
+            <label>Categoría</label>
+            <select id="p-category">
+              <option>1ra</option><option>2da</option><option>3ra</option><option selected>4ta</option>
+              <option>5ta</option><option>6ta</option><option>7ma</option><option>8va</option><option>Principiante</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label>Posición</label>
+            <select id="p-position">
+              <option value="drive">Drive (derecha)</option>
+              <option value="reves">Revés (izquierda)</option>
+              <option value="ambas">Ambas</option>
+            </select>
+          </div>
+        </div>
+        <div class="fg-row">
+          <div class="fg"><label>Club</label><input type="text" id="p-club" placeholder="ej. Palmeras Pádel"></div>
+          <div class="fg">
+            <label>Mano dominante</label>
+            <select id="p-hand">
+              <option value="derecha">Derecha</option>
+              <option value="izquierda">Izquierda</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;">
+          <button type="button" class="btn-org-secondary" onclick="closeModalOrg('modal-player')">Cancelar</button>
+          <button type="submit" class="btn-org-primary">Guardar Jugador</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: AGREGAR/EDITAR PARTIDO -->
+<div class="modal-overlay" id="modal-add-match">
+  <div class="modal">
+    <div class="modal-hdr">
+      <h3 id="match-modal-title">Agregar Partido</h3>
+      <button class="modal-close" onclick="closeModalOrg('modal-add-match')">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <form id="form-match" onsubmit="submitMatchOrg(event)">
+        <input type="hidden" id="match-edit-id">
+        <div class="fg-row">
+          <div class="fg">
+            <label>Fase</label>
+            <select id="m-phase">
+              <option>Grupos</option>
+              <option>Cuartos de Final</option>
+              <option>Semifinales</option>
+              <option>Final</option>
+            </select>
+          </div>
+          <div class="fg"><label>Fecha programada</label><input type="date" id="m-date"></div>
+        </div>
+        <div class="fg-row">
+          <div class="fg"><label>Pareja A</label><input type="text" id="m-paira" placeholder="ej. Ramírez / Medina" required></div>
+          <div class="fg"><label>Pareja B</label><input type="text" id="m-pairb" placeholder="ej. González / Fernández" required></div>
+        </div>
+        <div class="fg">
+          <label>Cancha / Sede</label>
+          <select id="m-court">
+            <!-- We will populate this dynamically in JS from DB.courts -->
+          </select>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;">
+          <button type="button" class="btn-org-secondary" onclick="closeModalOrg('modal-add-match')">Cancelar</button>
+          <button type="submit" class="btn-org-primary">Guardar Partido</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: RESULTADO -->
+<div class="modal-overlay" id="modal-result">
+  <div class="modal" style="max-width:460px;">
+    <div class="modal-hdr">
+      <h3>Cargar Resultado</h3>
+      <button class="modal-close" onclick="closeModalOrg('modal-result')">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <div id="result-match-info" style="margin-bottom:20px;padding:12px;background:rgba(0,0,0,.3);border-radius:10px;font-size:13px;"></div>
+      <input type="hidden" id="result-match-id">
+
+      <div class="fg">
+        <label>Sets (agregá hasta 3)</label>
+        <div class="sets-row" id="sets-container">
+          <div class="set-item">
+            <input type="number" class="set-inp set-a" min="0" max="7" value="6" placeholder="A">
+            <span class="set-sep">-</span>
+            <input type="number" class="set-inp set-b" min="0" max="7" value="3" placeholder="B">
+          </div>
+          <div class="set-item">
+            <input type="number" class="set-inp set-a" min="0" max="7" value="6" placeholder="A">
+            <span class="set-sep">-</span>
+            <input type="number" class="set-inp set-b" min="0" max="7" value="4" placeholder="B">
+          </div>
+        </div>
+        <button type="button" class="btn-add-set" style="margin-top:8px;" onclick="addSetInput()">+ Agregar set</button>
+      </div>
+
+      <div class="fg">
+        <label>Ganador</label>
+        <select id="result-winner">
+          <option value="a">Pareja A</option>
+          <option value="b">Pareja B</option>
+        </select>
+      </div>
+
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;">
+        <button class="btn-org-secondary" onclick="closeModalOrg('modal-result')">Cancelar</button>
+        <button class="btn-org-primary" onclick="saveResult()">Guardar Resultado</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="org-toast-container"></div>
+
+<script src="js/icons.js"></script>
+<script src="js/data.js"></script>
+<script src="js/scorer.js"></script>
+<script src="js/main.js"></script>
+<script>
+/* =====================
+   ESTADO GLOBAL
+   ===================== */
+let currentOrg = null;
+let currentTournament = null;
+let localMatches = [];
+
+/* =====================
+   INIT
+   ===================== */
+document.addEventListener('DOMContentLoaded', function() {
+  if (!AUTH.isOrganizer()) {
+    location.href = 'login.html';
+    return;
+  }
+  currentOrg        = AUTH.getCurrentOrganizer();
+  currentTournament = AUTH.getOrgTournament();
+  initPage();
+});
+
+function initPage() {
+  // Session bar
+  document.getElementById('session-org-name').textContent      = currentOrg  ? currentOrg.name   : 'Organizador';
+  document.getElementById('session-tournament-name').textContent = currentTournament ? currentTournament.name : 'Sin torneo asignado';
+
+  // Cargar matches del torneo del localStorage o usar muestra
+  const savedMatches = localStorage.getItem('padelbell_matches_' + (currentTournament?.id || ''));
+  if (savedMatches) {
+    localMatches = JSON.parse(savedMatches);
+  } else {
+    localMatches = currentTournament ? [
+      { id: 'lm1', phase: 'Cuartos de Final', pairA: 'Ramírez / Medina',      pairB: 'Ojeda / Da Silva',         status: 'finished',  sets: [{a:6,b:4},{a:3,b:6},{a:7,b:5}], winner: 'a', court: 'Palmeras Pádel', date: '2026-07-18' },
+      { id: 'lm2', phase: 'Cuartos de Final', pairA: 'González / Fernández',  pairB: 'López / Castro',           status: 'finished',  sets: [{a:6,b:2},{a:6,b:3}],            winner: 'a', court: 'Complejo San José Pádel', date: '2026-07-18' },
+      { id: 'lm3', phase: 'Semifinales',      pairA: 'Ramírez / Medina',      pairB: 'González / Fernández',     status: 'scheduled', sets: [],                               winner: null, court: 'Palmeras Pádel', date: '2026-07-19' },
+      { id: 'lm4', phase: 'Semifinales',      pairA: 'Da Silva / Rojas',      pairB: 'Vargas / Pereyra',         status: 'scheduled', sets: [],                               winner: null, court: 'Club Náutico Costanera', date: '2026-07-19' },
+      { id: 'lm5', phase: 'Final',            pairA: null,                    pairB: null,                       status: 'scheduled', sets: [],                               winner: null, court: 'Palmeras Pádel', date: '2026-07-20' },
+    ] : [];
+  }
+
+  populateCourtsSelect();
+  renderAll();
+  renderIcons();
+}
+
+function renderAll() {
+  renderTournamentInfo();
+  renderJugadores();
+  renderPartidos();
+  renderBracketView();
+  renderPayments();
+  renderOrgConfig();
+  updateStats();
+}
+
+/* =====================
+   TAB SWITCHING
+   ===================== */
+function switchTab(tab) {
+  document.querySelectorAll('.org-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.org-nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('panel-' + tab).classList.add('active');
+  document.getElementById('nav-' + tab).classList.add('active');
+}
+
+/* =====================
+   MI TORNEO
+   ===================== */
+function renderTournamentInfo() {
+  const t = currentTournament;
+  if (!t) {
+    document.getElementById('torneo-name').textContent = 'Sin torneo asignado';
+    document.getElementById('torneo-info-grid').innerHTML = `<div class="empty-org"><div class="empty-org-title">No tenés un torneo asignado</div><div class="empty-org-msg">Pedile a Mariano Romero que te asigne uno.</div></div>`;
+    return;
+  }
+
+  document.getElementById('torneo-name').textContent = t.name;
+
+  const statusMap = {
+    upcoming:    { label: 'Próximo',   cls: 'badge--pending' },
+    in_progress: { label: 'En curso',  cls: 'badge--live'    },
+    finished:    { label: 'Finalizado',cls: 'badge--done'    }
+  };
+  const st = statusMap[t.status] || statusMap.upcoming;
+  document.getElementById('torneo-status-badge-wrap').innerHTML = `<span class="badge ${st.cls}">${st.label}</span>`;
+
+  document.getElementById('torneo-info-grid').innerHTML = `
+    <div class="tinfo-item"><div class="tinfo-label">Sede Principal</div><div class="tinfo-value">${t.venue || t.city || '—'}</div></div>
+    <div class="tinfo-item"><div class="tinfo-label">Fechas</div><div class="tinfo-value">${t.start_date || '—'} al ${t.end_date || '—'}</div></div>
+    <div class="tinfo-item"><div class="tinfo-label">Categoría</div><div class="tinfo-value">${t.category || '—'}</div></div>
+    <div class="tinfo-item"><div class="tinfo-label">Género</div><div class="tinfo-value">${capitalize(t.gender || '—')}</div></div>
+    <div class="tinfo-item"><div class="tinfo-label">Premio Ofrecido</div><div class="tinfo-value">${t.prize ? '$' + Number(t.prize).toLocaleString('es-AR') : '—'}</div></div>
+    <div class="tinfo-item"><div class="tinfo-label">Costo Inscripción</div><div class="tinfo-value">$${(t.fee || 5000).toLocaleString('es-AR')} por jugador</div></div>
+    <div class="tinfo-item"><div class="tinfo-label">Modo puntuación</div><div class="tinfo-value">${t.scoring_mode === 'punto_de_oro' ? 'Punto de Oro' : 'Ventaja'}</div></div>
+    ${t.description ? `<div class="tinfo-item" style="grid-column:1/-1;"><div class="tinfo-label">Descripción</div><div class="tinfo-value" style="line-height:1.5;">${t.description}</div></div>` : ''}
+  `;
+}
+
+function updateStats() {
+  const players = DB.players.filter(p => p.active);
+  const done    = localMatches.filter(m => m.status === 'finished').length;
+  const pending = localMatches.filter(m => m.status === 'scheduled').length;
+  document.getElementById('stat-players').textContent       = players.length;
+  document.getElementById('stat-matches-done').textContent  = done;
+  document.getElementById('stat-matches-pending').textContent = pending;
+}
+
+function openEditTournamentModal() {
+  const t = currentTournament;
+  if (!t) { showOrgToast('No tenés un torneo asignado', 'error'); return; }
+  document.getElementById('edit-t-id').value          = t.id;
+  document.getElementById('edit-t-name').value        = t.name;
+  document.getElementById('edit-t-venue').value       = t.venue || t.city || '';
+  document.getElementById('edit-t-start').value       = t.start_date || '';
+  document.getElementById('edit-t-end').value         = t.end_date   || '';
+  document.getElementById('edit-t-status').value      = t.status     || 'upcoming';
+  document.getElementById('edit-t-category').value    = t.category   || '1ra';
+  document.getElementById('edit-t-prize').value       = t.prize      || 0;
+  document.getElementById('edit-t-fee').value         = t.fee        || 5000;
+  document.getElementById('edit-t-description').value = t.description || '';
+  openModalOrg('modal-edit-tournament');
+}
+
+function submitEditTournament(e) {
+  e.preventDefault();
+  const id = document.getElementById('edit-t-id').value;
+  const data = {
+    name:        document.getElementById('edit-t-name').value,
+    venue:       document.getElementById('edit-t-venue').value,
+    start_date:  document.getElementById('edit-t-start').value,
+    end_date:    document.getElementById('edit-t-end').value,
+    status:      document.getElementById('edit-t-status').value,
+    category:    document.getElementById('edit-t-category').value,
+    prize:       parseInt(document.getElementById('edit-t-prize').value) || 0,
+    fee:         parseInt(document.getElementById('edit-t-fee').value) || 5000,
+    description: document.getElementById('edit-t-description').value,
+  };
+
+  const idx = DB.tournaments.findIndex(t => t.id === id);
+  if (idx !== -1) {
+    DB.tournaments[idx] = { ...DB.tournaments[idx], ...data };
+    saveDB();
+    currentTournament = DB.tournaments[idx];
+    document.getElementById('session-tournament-name').textContent = currentTournament.name;
+  }
+
+  closeModalOrg('modal-edit-tournament');
+  renderAll();
+  showOrgToast('Torneo actualizado correctamente', 'success');
+}
+
+/* =====================
+   JUGADORES
+   ===================== */
+function renderJugadores() {
+  const tbody = document.getElementById('jugadores-tbody');
+  const players = DB.players.filter(p => p.active);
+  if (!players.length) {
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-org"><div class="empty-org-title">Sin jugadores</div><div class="empty-org-msg">Agregá el primer jugador.</div></div></td></tr>`;
+    renderIcons(); return;
+  }
+  tbody.innerHTML = players.map((p, i) => `
+    <tr>
+      <td style="color:var(--text-muted);font-family:var(--font-mono);">${i+1}</td>
+      <td>
+        <strong>${p.first_name} ${p.last_name}</strong>
+        ${p.nickname ? `<span style="color:var(--text-muted);font-size:11px;"> (${p.nickname})</span>` : ''}
+      </td>
+      <td><span class="badge badge--pending">${p.category || '—'}</span></td>
+      <td style="color:var(--text-muted);">${capitalize(p.gender || '—')}</td>
+      <td style="color:var(--text-muted);">${p.club || '—'}</td>
+      <td>
+        <div style="display:inline-flex;gap:6px;">
+          <button class="btn-org-secondary btn-org-sm" onclick="editPlayer('${p.id}')">
+            <span data-icon="edit" data-size="13"></span>
+          </button>
+          <button class="btn-org-danger btn-org-sm" onclick="deletePlayerOrg('${p.id}')">
+            <span data-icon="trash" data-size="13"></span>
+          </button>
+        </div>
+      </td>
+    </tr>`).join('');
+  renderIcons();
+}
+
+function openPlayerModal(id = null) {
+  document.getElementById('form-player').reset();
+  document.getElementById('player-edit-id').value = '';
+  document.getElementById('player-modal-title').textContent = id ? 'Editar Jugador' : 'Agregar Jugador';
+  if (id) {
+    const p = getPlayerById(id);
+    if (p) {
+      document.getElementById('player-edit-id').value = p.id;
+      document.getElementById('p-firstname').value  = p.first_name;
+      document.getElementById('p-lastname').value   = p.last_name;
+      document.getElementById('p-nickname').value   = p.nickname || '';
+      document.getElementById('p-gender').value     = p.gender;
+      document.getElementById('p-category').value   = p.category || '4ta';
+      document.getElementById('p-position').value   = p.position || 'drive';
+      document.getElementById('p-club').value       = p.club || '';
+      document.getElementById('p-hand').value       = p.dominant_hand || 'derecha';
+    }
+  }
+  openModalOrg('modal-player');
+}
+
+function editPlayer(id) { openPlayerModal(id); }
+
+function submitPlayerOrg(e) {
+  e.preventDefault();
+  const id = document.getElementById('player-edit-id').value;
+  const data = {
+    first_name:    document.getElementById('p-firstname').value,
+    last_name:     document.getElementById('p-lastname').value,
+    nickname:      document.getElementById('p-nickname').value,
+    gender:        document.getElementById('p-gender').value,
+    category:      document.getElementById('p-category').value,
+    level:         document.getElementById('p-category').value,
+    position:      document.getElementById('p-position').value,
+    club:          document.getElementById('p-club').value,
+    dominant_hand: document.getElementById('p-hand').value,
+    active: true,
+    country: 'argentina', province: 'Corrientes', city: 'Bella Vista',
+    ranking_points: 0, ranking_change: 0, win_rate: 0, tournaments_played: 0, titles: 0,
+    photo: 'assets/images/player_action.png'
+  };
+
+  if (id) {
+    updatePlayer(id, data);
+    showOrgToast('Jugador actualizado', 'success');
+  } else {
+    addPlayer(data);
+    showOrgToast(`${data.first_name} ${data.last_name} agregado al torneo`, 'success');
+  }
+  closeModalOrg('modal-player');
+  renderJugadores();
+  renderPayments();
+  updateStats();
+}
+
+function deletePlayerOrg(id) {
+  const p = getPlayerById(id);
+  if (!p) return;
+  if (confirm(`Eliminar a ${p.first_name} ${p.last_name}?`)) {
+    deletePlayer(id);
+    showOrgToast('Jugador eliminado', 'success');
+    renderJugadores();
+    renderPayments();
+    updateStats();
+  }
+}
+
+/* =====================
+   PARTIDOS
+   ===================== */
+function saveMatches() {
+  localStorage.setItem('padelbell_matches_' + (currentTournament?.id || ''), JSON.stringify(localMatches));
+}
+
+function renderPartidos() {
+  const container = document.getElementById('partidos-list');
+  if (!localMatches.length) {
+    container.innerHTML = `<div class="empty-org"><div class="empty-org-icon" data-icon="court" data-size="28"></div><div class="empty-org-title">Sin partidos</div><div class="empty-org-msg">Agregá el primer partido con el botón de arriba.</div></div>`;
+    renderIcons(); return;
+  }
+
+  container.innerHTML = localMatches.map(m => {
+    const score = m.sets && m.sets.length ? m.sets.map(s => `${s.a}-${s.b}`).join(' / ') : '';
+    const winnerName = m.winner === 'a' ? m.pairA : m.winner === 'b' ? m.pairB : '';
+    let statusBadge = '';
+    let actions = '';
+
+    if (m.status === 'finished') {
+      statusBadge = `<span class="badge badge--done">Finalizado</span>`;
+      actions = `
+        <button class="btn-org-secondary btn-org-sm" style="display:inline-flex;align-items:center;gap:4px;" onclick="openResultModal('${m.id}')" title="Cargar/Editar Score"><span data-icon="edit" data-size="12"></span> Score</button>
+        <button class="btn-org-secondary btn-org-sm" style="display:inline-flex;align-items:center;gap:4px;" onclick="openAddMatchModal('${m.id}')" title="Editar Datos del Partido"><span data-icon="settings" data-size="12"></span> Editar</button>
+      `;
+    } else {
+      statusBadge = m.status === 'in_progress'
+        ? `<span class="badge badge--live">En curso</span>`
+        : `<span class="badge badge--pending">Programado</span>`;
+      actions = `
+        <button class="btn-org-primary btn-org-sm" onclick="openResultModal('${m.id}')">Cargar Resultado</button>
+        <button class="btn-org-secondary btn-org-sm" onclick="openAddMatchModal('${m.id}')" title="Editar Datos del Partido"><span data-icon="edit" data-size="12"></span></button>
+      `;
+    }
+
+    return `<div class="match-card">
+      <div style="flex:1;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="match-phase">${m.phase}</span>
+          ${m.date ? `<span style="font-size:10.5px;color:var(--text-muted);font-family:var(--font-mono);">${m.date}</span>` : ''}
+        </div>
+        <div class="match-teams" style="margin-top:4px;">
+          ${m.pairA || '<em style="color:var(--text-muted)">Por definir</em>'}
+          <span class="vs">vs</span>
+          ${m.pairB || '<em style="color:var(--text-muted)">Por definir</em>'}
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;margin-top:6px;flex-wrap:wrap;">
+          ${score ? `<span class="match-score">${score} ${winnerName ? `<span class="match-winner">· Ganador: ${winnerName}</span>` : ''}</span>` : ''}
+          <span style="font-size:11px;color:var(--text-muted);display:inline-flex;align-items:center;gap:4px;">
+            <span data-icon="court" data-size="12" style="color:var(--accent-primary);"></span> ${m.court || 'Sede sin definir'}
+          </span>
+        </div>
+      </div>
+      <div class="match-actions">
+        ${statusBadge}
+        ${actions}
+        <button class="btn-org-danger btn-org-sm" onclick="deleteMatchOrg('${m.id}')" title="Eliminar"><span data-icon="trash" data-size="13"></span></button>
+      </div>
+    </div>`;
+  }).join('');
+  renderIcons();
+}
+
+function openAddMatchModal(id = null) {
+  document.getElementById('form-match').reset();
+  const titleEl = document.getElementById('match-modal-title');
+  const editIdEl = document.getElementById('match-edit-id');
+
+  if (id) {
+    const m = localMatches.find(x => x.id === id);
+    if (m) {
+      titleEl.textContent = 'Editar Partido';
+      editIdEl.value = m.id;
+      document.getElementById('m-phase').value = m.phase || 'Grupos';
+      document.getElementById('m-date').value = m.date || '';
+      document.getElementById('m-paira').value = m.pairA || '';
+      document.getElementById('m-pairb').value = m.pairB || '';
+      document.getElementById('m-court').value = m.court || '';
+    }
+  } else {
+    titleEl.textContent = 'Agregar Partido';
+    editIdEl.value = '';
+  }
+  openModalOrg('modal-add-match');
+}
+
+function submitMatchOrg(e) {
+  e.preventDefault();
+  const id = document.getElementById('match-edit-id').value;
+
+  const data = {
+    phase:  document.getElementById('m-phase').value,
+    pairA:  document.getElementById('m-paira').value,
+    pairB:  document.getElementById('m-pairb').value,
+    date:   document.getElementById('m-date').value,
+    court:  document.getElementById('m-court').value
+  };
+
+  if (id) {
+    const idx = localMatches.findIndex(m => m.id === id);
+    if (idx !== -1) {
+      localMatches[idx] = { ...localMatches[idx], ...data };
+      showOrgToast('Partido actualizado correctamente', 'success');
+    }
+  } else {
+    const newMatch = {
+      id:     'm' + Date.now(),
+      ...data,
+      status: 'scheduled',
+      sets:   [],
+      winner: null
+    };
+    localMatches.push(newMatch);
+    showOrgToast('Partido agregado correctamente', 'success');
+  }
+
+  saveMatches();
+  closeModalOrg('modal-add-match');
+  renderPartidos();
+  renderBracketView();
+  updateStats();
+}
+
+function deleteMatchOrg(id) {
+  if (!confirm('Eliminar este partido?')) return;
+  localMatches = localMatches.filter(m => m.id !== id);
+  saveMatches();
+  renderPartidos();
+  renderBracketView();
+  updateStats();
+  showOrgToast('Partido eliminado', 'success');
+}
+
+/* ── Resultado modal ── */
+function openResultModal(matchId) {
+  const m = localMatches.find(x => x.id === matchId);
+  if (!m) return;
+  document.getElementById('result-match-id').value = matchId;
+  document.getElementById('result-match-info').innerHTML = `<strong>${m.pairA || '?'}</strong> <span style="color:var(--text-muted)">vs</span> <strong>${m.pairB || '?'}</strong><div style="font-size:11px;color:var(--text-muted);margin-top:4px;">${m.phase}</div>`;
+  document.getElementById('result-winner').value = m.winner || 'a';
+
+  // Pre-cargar sets existentes
+  const cont = document.getElementById('sets-container');
+  cont.innerHTML = '';
+  const setsToShow = m.sets && m.sets.length ? m.sets : [{a:6,b:3},{a:6,b:4}];
+  setsToShow.forEach(s => {
+    cont.innerHTML += `<div class="set-item">
+      <input type="number" class="set-inp set-a" min="0" max="7" value="${s.a}">
+      <span class="set-sep">-</span>
+      <input type="number" class="set-inp set-b" min="0" max="7" value="${s.b}">
+    </div>`;
+  });
+
+  openModalOrg('modal-result');
+}
+
+function addSetInput() {
+  const cont = document.getElementById('sets-container');
+  if (cont.children.length >= 3) { showOrgToast('Máximo 3 sets', 'error'); return; }
+  cont.innerHTML += `<div class="set-item">
+    <input type="number" class="set-inp set-a" min="0" max="7" value="6">
+    <span class="set-sep">-</span>
+    <input type="number" class="set-inp set-b" min="0" max="7" value="4">
+  </div>`;
+}
+
+function saveResult() {
+  const matchId = document.getElementById('result-match-id').value;
+  const winner  = document.getElementById('result-winner').value;
+  const setA = document.querySelectorAll('#sets-container .set-a');
+  const setB = document.querySelectorAll('#sets-container .set-b');
+  const sets = [];
+  setA.forEach((inp, i) => sets.push({ a: parseInt(inp.value)||0, b: parseInt(setB[i].value)||0 }));
+
+  const idx = localMatches.findIndex(m => m.id === matchId);
+  if (idx !== -1) {
+    localMatches[idx].sets   = sets;
+    localMatches[idx].winner = winner;
+    localMatches[idx].status = 'finished';
+  }
+  saveMatches();
+  closeModalOrg('modal-result');
+  renderPartidos();
+  renderBracketView();
+  updateStats();
+  showOrgToast('Resultado guardado', 'success');
+}
+
+/* =====================
+   BRACKET
+   ===================== */
+function generateBracket() {
+  const pairs = DB.players
+    .filter(p => p.active)
+    .sort(() => Math.random() - .5)
+    .reduce((acc, p, i, arr) => {
+      if (i % 2 === 0 && arr[i+1]) acc.push(`${p.first_name} / ${arr[i+1].first_name}`);
+      return acc;
+    }, []);
+
+  localMatches = [];
+  for (let i = 0; i < Math.min(pairs.length, 4); i += 2) {
+    localMatches.push({ id:'b'+(i/2+1), phase:'Cuartos de Final', pairA: pairs[i]||'Por definir', pairB: pairs[i+1]||'Por definir', status:'scheduled', sets:[], winner:null, court: currentTournament?.venue || 'Sede sin definir' });
+  }
+  localMatches.push(
+    { id:'bs1', phase:'Semifinales', pairA:null, pairB:null, status:'scheduled', sets:[], winner:null, court: currentTournament?.venue || 'Sede sin definir' },
+    { id:'bs2', phase:'Semifinales', pairA:null, pairB:null, status:'scheduled', sets:[], winner:null, court: currentTournament?.venue || 'Sede sin definir' },
+    { id:'bf',  phase:'Final',       pairA:null, pairB:null, status:'scheduled', sets:[], winner:null, court: currentTournament?.venue || 'Sede sin definir' }
+  );
+  saveMatches();
+  renderPartidos();
+  renderBracketView();
+  updateStats();
+  showOrgToast('Bracket generado con los jugadores inscriptos', 'success');
+}
+
+function renderBracketView() {
+  const container = document.getElementById('bracket-container');
+  const rounds = [
+    { title: 'Cuartos de Final', matches: localMatches.filter(m => m.phase === 'Cuartos de Final') },
+    { title: 'Semifinales',      matches: localMatches.filter(m => m.phase === 'Semifinales') },
+    { title: 'Final',            matches: localMatches.filter(m => m.phase === 'Final') },
+  ];
+
+  if (!rounds.some(r => r.matches.length)) {
+    container.innerHTML = `<div class="empty-org" style="width:100%;"><div class="empty-org-title">Sin bracket</div><div class="empty-org-msg">Usá "Generar Bracket" o agregá partidos manualmente.</div></div>`;
+    return;
+  }
+
+  container.innerHTML = rounds.map(round => {
+    if (!round.matches.length) return '';
+    const slots = round.matches.map(m => {
+      const scoreA = m.sets && m.sets.length ? m.sets.map(s=>s.a).join('/') : '';
+      const scoreB = m.sets && m.sets.length ? m.sets.map(s=>s.b).join('/') : '';
+      return `<div class="bracket-slot">
+        <div class="bracket-pair">
+          <div class="bracket-team ${m.winner==='a'?'winner':''}">
+            <span>${m.pairA || '— Por definir —'}</span>
+            ${scoreA ? `<span class="bracket-score">${scoreA}</span>` : ''}
+          </div>
+          <div class="bracket-team ${m.winner==='b'?'winner':''} ${!m.pairB?'tbd':''}">
+            <span>${m.pairB || '— Por definir —'}</span>
+            ${scoreB ? `<span class="bracket-score">${scoreB}</span>` : ''}
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+    return `<div class="bracket-round">
+      <div class="bracket-round-title">${round.title}</div>
+      <div class="bracket-slots">${slots}</div>
+    </div>`;
+  }).join('');
+}
+
+/* =====================
+   PAGOS
+   ===================== */
+function renderPayments() {
+  const t = currentTournament;
+  if (!t) return;
+
+  const players = DB.players.filter(p => p.active);
+  const fee = t.fee || 5000;
+  document.getElementById('pagos-fee').textContent = '$' + fee.toLocaleString('es-AR');
+
+  const savedPayments = localStorage.getItem('padelbell_payments_' + t.id);
+  const payments = savedPayments ? JSON.parse(savedPayments) : {};
+
+  let paidCount = 0;
+  let pendingCount = 0;
+
+  const tbody = document.getElementById('pagos-tbody');
+  if (!players.length) {
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-org"><div class="empty-org-title">Sin jugadores</div><div class="empty-org-msg">Registrá jugadores en el torneo para gestionar sus pagos.</div></div></td></tr>`;
+    renderIcons();
+    return;
+  }
+
+  tbody.innerHTML = players.map(p => {
+    const payInfo = payments[p.id] || { paid: false, date: '' };
+    if (payInfo.paid) {
+      paidCount++;
+    } else {
+      pendingCount++;
+    }
+
+    const statusBadge = payInfo.paid
+      ? `<span class="badge badge--done">Pagado</span>`
+      : `<span class="badge badge--pending">Pendiente</span>`;
+
+    const payDate = payInfo.paid ? (payInfo.date || new Date().toISOString().split('T')[0]) : '—';
+
+    const btnText = payInfo.paid ? 'Pendiente' : 'Pagado';
+    const btnClass = payInfo.paid ? 'btn-org-secondary' : 'btn-org-primary';
+
+    return `<tr>
+      <td><strong>${p.first_name} ${p.last_name}</strong></td>
+      <td style="color:var(--text-muted);">${p.club || '—'}</td>
+      <td style="font-family:var(--font-mono); font-weight:600;">$${fee.toLocaleString('es-AR')}</td>
+      <td>${statusBadge}</td>
+      <td style="color:var(--text-muted); font-family:var(--font-mono);">${payDate}</td>
+      <td>
+        <button class="${btnClass} btn-org-sm" onclick="togglePayment('${p.id}')">
+          ${btnText}
+        </button>
+      </td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('stat-pay-paid').textContent = paidCount;
+  document.getElementById('stat-pay-pending').textContent = pendingCount;
+  document.getElementById('stat-pay-total').textContent = '$' + (paidCount * fee).toLocaleString('es-AR');
+
+  renderIcons();
+}
+
+function togglePayment(playerId) {
+  const t = currentTournament;
+  if (!t) return;
+  const savedPayments = localStorage.getItem('padelbell_payments_' + t.id);
+  const payments = savedPayments ? JSON.parse(savedPayments) : {};
+
+  if (payments[playerId] && payments[playerId].paid) {
+    payments[playerId] = { paid: false, date: '' };
+    showOrgToast('Pago cancelado', 'success');
+  } else {
+    payments[playerId] = { paid: true, date: new Date().toISOString().split('T')[0] };
+    showOrgToast('Pago registrado', 'success');
+  }
+
+  localStorage.setItem('padelbell_payments_' + t.id, JSON.stringify(payments));
+  renderPayments();
+}
+
+/* =====================
+   COURTS DROPDOWN
+   ===================== */
+function populateCourtsSelect() {
+  const select = document.getElementById('m-court');
+  if (!select) return;
+  select.innerHTML = '';
+  DB.courts.forEach(c => {
+    select.innerHTML += `<option value="${c.name}">${c.name} (${c.city})</option>`;
+  });
+  select.innerHTML += `<option value="Otra Sede">Otra Sede (Corrientes)</option>`;
+}
+
+/* =====================
+   CONFIG
+   ===================== */
+function renderOrgConfig() {
+  const el = document.getElementById('org-info-display');
+  if (!currentOrg) { el.innerHTML = '<p style="color:var(--text-muted);">—</p>'; return; }
+  el.innerHTML = `
+    <div class="tournament-info-grid">
+      <div class="tinfo-item"><div class="tinfo-label">Organización</div><div class="tinfo-value">${currentOrg.name}</div></div>
+      <div class="tinfo-item"><div class="tinfo-label">Contacto</div><div class="tinfo-value">${currentOrg.contact || '—'}</div></div>
+      <div class="tinfo-item"><div class="tinfo-label">Teléfono</div><div class="tinfo-value">${currentOrg.phone || '—'}</div></div>
+      <div class="tinfo-item"><div class="tinfo-label">PIN actual</div><div class="tinfo-value" style="font-family:var(--font-mono);font-size:22px;letter-spacing:8px;color:var(--accent-primary);">${currentOrg.pin}</div></div>
+    </div>`;
+}
+
+function changePin() {
+  const newPin  = document.getElementById('new-pin-input').value;
+  const confPin = document.getElementById('confirm-pin-input').value;
+  if (newPin.length !== 4)             { showOrgToast('El PIN debe tener 4 dígitos',       'error'); return; }
+  if (newPin !== confPin)              { showOrgToast('Los PINs no coinciden',              'error'); return; }
+  if (!/^\d{4}$/.test(newPin))        { showOrgToast('Solo se permiten números',            'error'); return; }
+
+  updateOrganizer(currentOrg.id, { pin: newPin });
+  currentOrg.pin = newPin;
+  localStorage.setItem('padelbell_role', 'organizador');
+  renderOrgConfig();
+  document.getElementById('new-pin-input').value    = '';
+  document.getElementById('confirm-pin-input').value = '';
+  showOrgToast('PIN actualizado correctamente', 'success');
+}
+
+/* =====================
+   HELPERS
+   ===================== */
+function openModalOrg(id)  { const el = document.getElementById(id); if(el) el.classList.add('active'); }
+function closeModalOrg(id) { const el = document.getElementById(id); if(el) el.classList.remove('active'); }
+document.addEventListener('click', e => { if(e.target.classList.contains('modal-overlay')) e.target.classList.remove('active'); });
+
+function logout() { AUTH.logout(); location.href = 'login.html'; }
+
+function capitalize(str) { return str ? str.charAt(0).toUpperCase() + str.slice(1) : ''; }
+
+function showOrgToast(msg, type = 'success') {
+  const container = document.getElementById('org-toast-container');
+  const icons     = { success: '✓', error: '✕' };
+  const t = document.createElement('div');
+  t.className = `org-toast ${type}`;
+  t.innerHTML = `<span>${icons[type]}</span> <span>${msg}</span>`;
+  container.appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity .3s'; setTimeout(() => t.remove(), 300); }, 3500);
+}
+</script>
+</body>
+</html>

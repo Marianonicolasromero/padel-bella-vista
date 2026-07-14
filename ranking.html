@@ -1,0 +1,1366 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- PWA -->
+  <link rel="manifest" href="site.webmanifest">
+  <meta name="theme-color" content="#020406">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Padel Bella Vista">
+  <title>Ranking Regional · Padel Bella Vista</title>
+  <meta name="description" content="Ranking regional del Circuito del Litoral Argentino. Clasificación de jugadores por categoría, país y provincia. Temporada 2026." />
+  <meta name="robots" content="index, follow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Cormorant:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    /* ============================================================
+       RANKING PAGE — LOCAL STYLES
+       ============================================================ */
+
+    /* --- Hero --------------------------------------------------- */
+    .ranking-hero {
+      position: relative;
+      min-height: 420px;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      padding: 96px 0 72px;
+      background:
+        linear-gradient(180deg, #020406 0%, #060A10 60%, #020406 100%);
+    }
+
+    /* Grid overlay */
+    .ranking-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,180,216,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,180,216,0.05) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+    }
+
+    /* Glowing accent lines */
+    .ranking-hero::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(0,180,216,0.6) 30%,
+        rgba(232,132,31,0.8) 50%,
+        rgba(0,180,216,0.6) 70%,
+        transparent 100%);
+      box-shadow: 0 0 24px rgba(0,180,216,0.4);
+    }
+
+    .hero-glow-left {
+      position: absolute;
+      top: -80px;
+      left: -120px;
+      width: 480px;
+      height: 480px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,180,216,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-glow-right {
+      position: absolute;
+      bottom: -100px;
+      right: -80px;
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(232,132,31,0.1) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+    }
+
+    .hero-eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent-primary);
+    }
+
+    .hero-eyebrow-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent-primary);
+      box-shadow: 0 0 8px var(--accent-primary);
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.7); }
+    }
+
+    .hero-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(64px, 10vw, 120px);
+      line-height: 0.92;
+      letter-spacing: 0.02em;
+      color: var(--text-primary);
+      margin: 0 0 12px;
+      text-shadow: 0 0 60px rgba(0,180,216,0.15);
+    }
+
+    .hero-title .accent-orange {
+      color: var(--accent-orange);
+      text-shadow: 0 0 40px rgba(232,132,31,0.3);
+    }
+
+    .hero-subtitle {
+      font-size: 15px;
+      color: var(--text-secondary);
+      letter-spacing: 0.04em;
+      margin-bottom: 48px;
+      font-weight: 400;
+    }
+
+    /* Stat pills */
+    .hero-stats {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .stat-pill {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 24px;
+      border-radius: var(--radius-xl);
+      background: rgba(14,23,36,0.7);
+      border: 1px solid rgba(0,180,216,0.18);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04);
+      transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    .stat-pill:hover {
+      transform: translateY(-2px);
+      border-color: rgba(0,180,216,0.4);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 16px rgba(0,180,216,0.12);
+    }
+
+    .stat-pill-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-md);
+      background: rgba(0,180,216,0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-primary);
+      flex-shrink: 0;
+    }
+
+    .stat-pill-body {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat-pill-number {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 32px;
+      line-height: 1;
+      color: var(--accent-primary);
+      letter-spacing: 0.02em;
+    }
+
+    .stat-pill-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-weight: 500;
+      margin-top: 2px;
+    }
+
+    /* --- Sticky Filter Bar ---------------------------------------- */
+    .filter-bar {
+      position: sticky;
+      top: 72px;
+      z-index: 90;
+      background: rgba(6,10,16,0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 14px 0;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+    }
+
+    .filter-bar-inner {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .search-wrapper {
+      position: relative;
+      flex: 1 1 220px;
+      min-width: 180px;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      pointer-events: none;
+    }
+
+    .filter-search-input {
+      width: 100%;
+      height: 40px;
+      padding: 0 12px 0 38px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      outline: none;
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    .filter-search-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .filter-search-input:focus {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(0,180,216,0.15);
+    }
+
+    .filter-select {
+      height: 40px;
+      padding: 0 12px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      outline: none;
+      cursor: pointer;
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+      min-width: 140px;
+    }
+
+    .filter-select:focus {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(0,180,216,0.15);
+    }
+
+    .filter-select:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .filter-select option {
+      background: var(--bg-card);
+      color: var(--text-primary);
+    }
+
+    .gender-tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--bg-elevated);
+      border-radius: var(--radius-lg);
+      padding: 3px;
+      border: 1px solid var(--border-subtle);
+      flex-shrink: 0;
+    }
+
+    .gender-tab {
+      height: 34px;
+      padding: 0 18px;
+      border-radius: var(--radius-md);
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      white-space: nowrap;
+    }
+
+    .gender-tab.active {
+      background: var(--accent-primary);
+      color: #020406;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(0,180,216,0.4);
+    }
+
+    .gender-tab:not(.active):hover {
+      background: rgba(0,180,216,0.1);
+      color: var(--text-primary);
+    }
+
+    /* --- Podium Section ------------------------------------------- */
+    .podium-section-wrap {
+      padding: 56px 0 32px;
+      background: linear-gradient(180deg, var(--bg-base) 0%, var(--bg-surface) 100%);
+    }
+
+    .podium-section-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 36px;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 18px;
+      letter-spacing: 0.08em;
+      color: var(--text-secondary);
+    }
+
+    .podium-section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border-subtle);
+    }
+
+    .podium-container {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .podium-card {
+      border-radius: var(--radius-xl);
+      background: var(--bg-card);
+      padding: 28px 24px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+      cursor: default;
+    }
+
+    .podium-card:hover {
+      transform: translateY(-4px);
+    }
+
+    .podium-gold {
+      width: 240px;
+      box-shadow: 0 12px 48px rgba(212,160,23,0.25), 0 4px 16px rgba(0,0,0,0.6);
+    }
+
+    .podium-gold:hover {
+      box-shadow: 0 20px 60px rgba(212,160,23,0.35), 0 8px 24px rgba(0,0,0,0.7);
+    }
+
+    .podium-silver {
+      width: 210px;
+      margin-bottom: 24px;
+      box-shadow: 0 8px 32px rgba(138,155,174,0.2), 0 4px 16px rgba(0,0,0,0.5);
+    }
+
+    .podium-silver:hover {
+      box-shadow: 0 16px 48px rgba(138,155,174,0.3), 0 8px 24px rgba(0,0,0,0.6);
+    }
+
+    .podium-bronze {
+      width: 210px;
+      margin-bottom: 12px;
+      box-shadow: 0 8px 32px rgba(160,82,45,0.2), 0 4px 16px rgba(0,0,0,0.5);
+    }
+
+    .podium-bronze:hover {
+      box-shadow: 0 16px 48px rgba(160,82,45,0.3), 0 8px 24px rgba(0,0,0,0.6);
+    }
+
+    .podium-pos-num {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 72px;
+      line-height: 1;
+      letter-spacing: -0.02em;
+      opacity: 0.9;
+    }
+
+    .podium-gold .podium-pos-num { font-size: 88px; }
+
+    .podium-avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 26px;
+      color: #fff;
+      letter-spacing: 0.05em;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+      flex-shrink: 0;
+    }
+
+    .podium-gold .podium-avatar {
+      width: 84px;
+      height: 84px;
+      font-size: 32px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5), 0 0 0 3px rgba(212,160,23,0.3);
+    }
+
+    .podium-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+      text-align: center;
+      line-height: 1.2;
+    }
+
+    .podium-gold .podium-name {
+      font-size: 17px;
+    }
+
+    .podium-club {
+      font-size: 12px;
+      color: var(--text-secondary);
+      text-align: center;
+    }
+
+    .podium-province {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 0.06em;
+    }
+
+    .podium-points {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 28px;
+      letter-spacing: 0.04em;
+      margin-top: 4px;
+    }
+
+    .podium-gold .podium-points {
+      font-size: 36px;
+    }
+
+    .podium-pts-lbl {
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      opacity: 0.7;
+      letter-spacing: 0.04em;
+    }
+
+    /* Crown for gold */
+    .podium-crown {
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #D4A017;
+      display: flex;
+      align-items: center;
+    }
+
+    /* Podium base bars */
+    .podium-base {
+      width: 100%;
+      height: 8px;
+      border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+      margin-top: 8px;
+    }
+
+    /* --- Table Section -------------------------------------------- */
+    .ranking-table-section {
+      padding: 0 0 80px;
+      background: var(--bg-surface);
+    }
+
+    .section-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 32px 0 20px;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .section-title-sm {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 20px;
+      letter-spacing: 0.1em;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .results-count {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 4px 10px;
+    }
+
+    /* Table wrapper */
+    .ranking-table-wrap {
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      border: 1px solid var(--border-subtle);
+      box-shadow: 0 4px 32px rgba(0,0,0,0.4);
+    }
+
+    .ranking-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      background: var(--bg-card);
+    }
+
+    /* Sticky thead */
+    .ranking-table thead {
+      position: sticky;
+      top: 141px;
+      z-index: 10;
+    }
+
+    .ranking-table thead tr {
+      background: var(--bg-elevated);
+      border-bottom: 1px solid var(--border-default);
+    }
+
+    .ranking-table th {
+      padding: 14px 16px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    .sortable-th {
+      cursor: pointer;
+      transition: color var(--transition-fast);
+    }
+
+    .sortable-th:hover {
+      color: var(--accent-primary);
+    }
+
+    .sortable-th.sort-active {
+      color: var(--accent-primary);
+    }
+
+    .th-inner {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .sort-icon {
+      color: var(--text-muted);
+      opacity: 0.5;
+      display: flex;
+      align-items: center;
+    }
+
+    .sortable-th.sort-active .sort-icon {
+      opacity: 1;
+      color: var(--accent-primary);
+    }
+
+    /* Table body */
+    .ranking-table tbody tr {
+      border-bottom: 1px solid rgba(62,90,114,0.15);
+      transition: background var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    .ranking-table tbody tr:last-child {
+      border-bottom: none;
+    }
+
+    .ranking-table tbody tr.ranking-row-full {
+      cursor: pointer;
+    }
+
+    .ranking-table tbody tr.ranking-row-full:hover {
+      background: rgba(0,180,216,0.06);
+      box-shadow: inset 0 0 0 1px rgba(0,180,216,0.08);
+    }
+
+    .ranking-table td {
+      padding: 12px 16px;
+      vertical-align: middle;
+      color: var(--text-primary);
+    }
+
+    /* Column widths */
+    .col-pos { width: 56px; text-align: center; }
+    .col-player { min-width: 180px; }
+    .col-country { width: 80px; }
+    .col-province { min-width: 120px; color: var(--text-secondary); font-size: 13px; }
+    .col-category { width: 90px; }
+    .col-points { width: 100px; text-align: right; }
+    .col-var { width: 80px; text-align: center; }
+    .col-matches { width: 80px; text-align: center; color: var(--text-secondary); font-size: 13px; }
+
+    .rank-num {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 20px;
+      letter-spacing: 0.04em;
+      color: var(--text-secondary);
+    }
+
+    /* Player cell */
+    .player-cell {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .player-avatar-sm {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 15px;
+      color: #fff;
+      letter-spacing: 0.05em;
+      flex-shrink: 0;
+    }
+
+    .player-info { display: flex; flex-direction: column; gap: 2px; }
+    .player-fullname { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+    .player-club-sm { font-size: 12px; color: var(--text-muted); }
+
+    /* Badges */
+    .country-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: var(--radius-sm);
+      background: rgba(122,155,184,0.12);
+      border: 1px solid rgba(122,155,184,0.2);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      letter-spacing: 0.08em;
+    }
+
+    .cat-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: var(--radius-sm);
+      background: rgba(0,180,216,0.1);
+      border: 1px solid rgba(0,180,216,0.2);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent-primary);
+      letter-spacing: 0.04em;
+    }
+
+    /* Points */
+    .points-val {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 20px;
+      color: var(--text-primary);
+      letter-spacing: 0.04em;
+    }
+
+    /* Variation pill */
+    .var-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 3px 8px;
+      border-radius: var(--radius-sm);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .var-up {
+      background: rgba(22,163,74,0.12);
+      border: 1px solid rgba(22,163,74,0.25);
+      color: #4ADE80;
+    }
+
+    .var-down {
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.2);
+      color: #F87171;
+    }
+
+    /* Empty state */
+    .table-empty {
+      padding: 64px 24px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    /* --- Toast ---------------------------------------------------- */
+    #toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+
+    /* --- Responsive ----------------------------------------------- */
+    @media (max-width: 900px) {
+      .podium-container { gap: 10px; }
+      .podium-gold { width: 200px; }
+      .podium-silver, .podium-bronze { width: 170px; }
+      .podium-pos-num { font-size: 56px; }
+      .podium-gold .podium-pos-num { font-size: 68px; }
+    }
+
+    @media (max-width: 700px) {
+      .filter-bar-inner { gap: 8px; }
+      .filter-select { min-width: 110px; font-size: 13px; }
+      .col-province, .col-matches, .col-category { display: none; }
+      .podium-gold { width: 160px; }
+      .podium-silver, .podium-bronze { width: 136px; }
+      .hero-stats { gap: 10px; }
+      .stat-pill { padding: 12px 16px; }
+    }
+
+    @media (max-width: 480px) {
+      .podium-container { gap: 6px; }
+      .podium-card { padding: 16px 12px 16px; }
+      .podium-gold { width: 140px; }
+      .podium-silver, .podium-bronze { width: 116px; }
+      .podium-name { font-size: 12px; }
+      .podium-avatar { width: 52px; height: 52px; font-size: 20px; }
+      .podium-gold .podium-avatar { width: 62px; height: 62px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ============================================================
+     HEADER
+     ============================================================ -->
+<header id="main-header">
+  <div class="container">
+    <div class="header-inner">
+      <a href="index.html" class="header-logo" style="gap:14px;">
+        <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
+          <rect width="38" height="38" rx="10" fill="url(#pbv-grad-rk)"/>
+          <defs>
+            <linearGradient id="pbv-grad-rk" x1="0" y1="0" x2="38" y2="38" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#0F4C81"/>
+              <stop offset="60%" stop-color="#1E6B59"/>
+              <stop offset="100%" stop-color="#F28C2B" stop-opacity=".7"/>
+            </linearGradient>
+          </defs>
+          <ellipse cx="17" cy="16" rx="8" ry="10" stroke="#E9DFC8" stroke-width="1.4" fill="none"/>
+          <line x1="17" y1="10" x2="17" y2="22" stroke="#E9DFC8" stroke-width="1" opacity=".6"/>
+          <line x1="11" y1="16" x2="23" y2="16" stroke="#E9DFC8" stroke-width="1" opacity=".6"/>
+          <circle cx="20" cy="10" r="2.5" fill="#F28C2B" opacity=".9"/>
+          <line x1="17" y1="26" x2="17" y2="33" stroke="#E9DFC8" stroke-width="2" stroke-linecap="round"/>
+          <path d="M7 30 Q10 28 13 30 Q16 32 19 30 Q22 28 25 30 Q28 32 31 30" stroke="#E9DFC8" stroke-width="1.2" fill="none" opacity=".5"/>
+          <path d="M9 33 Q12 31 15 33 Q18 35 21 33 Q24 31 27 33" stroke="#E9DFC8" stroke-width="1" fill="none" opacity=".3"/>
+        </svg>
+        <div class="logo-text">
+          <div class="logo-name" style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:15px;letter-spacing:1px;line-height:1;color:#E9DFC8;">
+            PADEL <span style="color:#F28C2B;">BELLA VISTA</span>
+          </div>
+          <div class="logo-tagline" style="font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:2.5px;color:#8BA186;text-transform:uppercase;margin-top:3px;">
+            Naturaleza · Deporte · Comunidad
+          </div>
+        </div>
+      </a>
+      <nav class="main-nav" id="main-nav">
+        <a href="index.html" class="nav-link">Inicio</a>
+        <a href="jugadores.html" class="nav-link">Jugadores</a>
+        <a href="torneos.html" class="nav-link">Torneos</a>
+        <a href="ranking.html" class="nav-link active">Ranking</a>
+        <a href="canchas.html" class="nav-link">Canchas</a>
+        <a href="noticias.html" class="nav-link">Noticias</a>
+      </nav>
+      <div class="header-actions">
+        <button id="theme-toggle" class="theme-toggle-btn" data-icon="sun" title="Cambiar tema"></button>
+        <button id="menu-toggler" aria-label="Menu" aria-expanded="false">
+          <span data-icon="menu"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+<nav id="mobile-menu">
+  <a href="index.html" class="nav-link">Inicio</a>
+  <a href="jugadores.html" class="nav-link">Jugadores</a>
+  <a href="torneos.html" class="nav-link">Torneos</a>
+  <a href="ranking.html" class="nav-link active">Ranking</a>
+  <a href="canchas.html" class="nav-link">Canchas</a>
+  <a href="noticias.html" class="nav-link">Noticias</a>
+</nav>
+
+<!-- ============================================================
+     HERO
+     ============================================================ -->
+<section class="ranking-hero" aria-label="Encabezado ranking">
+  <div class="hero-glow-left"></div>
+  <div class="hero-glow-right"></div>
+  <div class="container">
+    <div class="hero-content">
+      <p class="hero-eyebrow">
+        <span class="hero-eyebrow-dot"></span>
+        Temporada 2026 · Actualizado en vivo
+      </p>
+      <h1 class="hero-title">
+        RANKING<br><span class="accent-orange">REGIONAL</span>
+      </h1>
+      <p class="hero-subtitle">Circuito del Litoral Argentino &middot; Temporada 2026</p>
+
+      <!-- Stat pills -->
+      <div class="hero-stats">
+        <div class="stat-pill">
+          <div class="stat-pill-icon">
+            <span data-icon="users" data-size="18"></span>
+          </div>
+          <div class="stat-pill-body">
+            <span class="stat-pill-number" data-counter="24">0</span>
+            <span class="stat-pill-label">Jugadores</span>
+          </div>
+        </div>
+        <div class="stat-pill">
+          <div class="stat-pill-icon">
+            <span data-icon="globe" data-size="18"></span>
+          </div>
+          <div class="stat-pill-body">
+            <span class="stat-pill-number" data-counter="4">0</span>
+            <span class="stat-pill-label">Países</span>
+          </div>
+        </div>
+        <div class="stat-pill">
+          <div class="stat-pill-icon">
+            <span data-icon="trophy" data-size="18"></span>
+          </div>
+          <div class="stat-pill-body">
+            <span class="stat-pill-number" data-counter="12">0</span>
+            <span class="stat-pill-label">Torneos</span>
+          </div>
+        </div>
+        <div class="stat-pill">
+          <div class="stat-pill-icon">
+            <span data-icon="zap" data-size="18"></span>
+          </div>
+          <div class="stat-pill-body">
+            <span class="stat-pill-number" data-counter="87">0</span>
+            <span class="stat-pill-label">Partidos</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     STICKY FILTER BAR
+     ============================================================ -->
+<div class="filter-bar" role="search" aria-label="Filtros de ranking">
+  <div class="container">
+    <div class="filter-bar-inner">
+
+      <!-- Search -->
+      <div class="search-wrapper">
+        <span class="search-icon">
+          <span data-icon="search" data-size="15"></span>
+        </span>
+        <input
+          type="search"
+          id="filter-search"
+          class="filter-search-input"
+          placeholder="Buscar jugador, club..."
+          autocomplete="off"
+          aria-label="Buscar jugador"
+        />
+      </div>
+
+      <!-- Country -->
+      <select id="filter-country" class="filter-select" aria-label="Filtrar por país">
+        <option value="todos">Todos los países</option>
+        <option value="argentina">Argentina</option>
+        <option value="uruguay">Uruguay</option>
+        <option value="brasil">Brasil</option>
+        <option value="paraguay">Paraguay</option>
+      </select>
+
+      <!-- Province -->
+      <select id="filter-province" class="filter-select" disabled aria-label="Filtrar por provincia">
+        <option value="todos">Todas las provincias</option>
+      </select>
+
+      <!-- Category -->
+      <select id="filter-category" class="filter-select" aria-label="Filtrar por categoría">
+        <option value="todos">Todas las categorías</option>
+        <option value="1ra">1ra</option>
+        <option value="2da">2da</option>
+        <option value="3ra">3ra</option>
+        <option value="4ta">4ta</option>
+        <option value="5ta">5ta</option>
+        <option value="6ta">6ta</option>
+        <option value="7ma">7ma</option>
+        <option value="8va">8va</option>
+        <option value="principiante">Principiante</option>
+      </select>
+
+      <!-- Gender tabs -->
+      <div class="gender-tabs" role="group" aria-label="Género">
+        <button class="gender-tab active" data-gender="masculino" id="tab-masculino">Masculino</button>
+        <button class="gender-tab" data-gender="femenino" id="tab-femenino">Femenino</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     PODIUM SECTION
+     ============================================================ -->
+<section class="podium-section-wrap" aria-label="Top 3 ranking">
+  <div class="container">
+    <h2 class="podium-section-label">
+      <span data-icon="award" data-size="16"></span>
+      Top 3
+    </h2>
+    <div id="podium-section" aria-live="polite"></div>
+  </div>
+</section>
+
+<!-- ============================================================
+     RANKING TABLE
+     ============================================================ -->
+<section class="ranking-table-section" aria-label="Tabla de ranking completa">
+  <div class="container">
+
+    <div class="section-header-row">
+      <h2 class="section-title-sm">
+        <span data-icon="ranking" data-size="16"></span>
+        Clasificación completa
+      </h2>
+      <span class="results-count" id="results-count" aria-live="polite">— jugadores</span>
+    </div>
+
+    <div class="ranking-table-wrap">
+      <table class="ranking-table" id="ranking-table" aria-label="Tabla de ranking">
+        <thead>
+          <tr>
+            <th class="col-pos sortable-th sort-active" id="th-pos" aria-sort="ascending">
+              <div class="th-inner">
+                #
+                <span class="sort-icon"><span data-icon="arrowUp" data-size="11"></span></span>
+              </div>
+            </th>
+            <th class="col-player sortable-th" id="th-player">
+              <div class="th-inner">
+                Jugador
+                <span class="sort-icon"><span data-icon="arrowUp" data-size="11"></span></span>
+              </div>
+            </th>
+            <th class="col-country" id="th-country">País</th>
+            <th class="col-province sortable-th" id="th-province">
+              <div class="th-inner">
+                Provincia
+                <span class="sort-icon"><span data-icon="arrowUp" data-size="11"></span></span>
+              </div>
+            </th>
+            <th class="col-category sortable-th" id="th-cat">
+              <div class="th-inner">
+                Categoría
+                <span class="sort-icon"><span data-icon="arrowUp" data-size="11"></span></span>
+              </div>
+            </th>
+            <th class="col-points sortable-th sort-active" id="th-points" style="text-align:right;">
+              <div class="th-inner" style="justify-content:flex-end;">
+                Puntos
+                <span class="sort-icon"><span data-icon="arrowDown" data-size="11"></span></span>
+              </div>
+            </th>
+            <th class="col-var" id="th-var" style="text-align:center;">Var.</th>
+            <th class="col-matches sortable-th" id="th-matches" style="text-align:center;">
+              <div class="th-inner" style="justify-content:center;">
+                Partidos
+                <span class="sort-icon"><span data-icon="arrowUp" data-size="11"></span></span>
+              </div>
+            </th>
+          </tr>
+        </thead>
+        <tbody id="ranking-tbody" aria-live="polite">
+          <!-- Rows injected by JS -->
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</section>
+
+<!-- Toast container -->
+<div id="toast-container" aria-live="assertive" aria-atomic="true"></div>
+
+<!-- ============================================================
+     SCRIPTS
+     ============================================================ -->
+<script src="js/icons.js"></script>
+<script src="js/data.js"></script>
+<script src="js/main.js"></script>
+<script>
+/* ============================================================
+   RANKING PAGE — INLINE SCRIPT
+   ============================================================ */
+
+// Page-specific state
+let currentGender = 'masculino';
+let currentSort = { col: 'points', dir: 'desc' };
+let currentFilters = { search: '', country: 'todos', province: 'todos', category: 'todos' };
+
+// Compute ranking: sort DB.players by ranking_points desc, filtered by gender+filters
+function getComputedRanking() {
+  let list = DB.players.filter(function(p) { return p.active; });
+  if (currentGender !== 'todos') {
+    list = list.filter(function(p) { return p.gender === currentGender; });
+  }
+  if (currentFilters.search) {
+    var q = currentFilters.search.toLowerCase();
+    list = list.filter(function(p) {
+      return ((p.first_name || '') + ' ' + (p.last_name || '') + ' ' + (p.club || '') + ' ' + (p.nickname || '')).toLowerCase().indexOf(q) !== -1;
+    });
+  }
+  if (currentFilters.country !== 'todos') {
+    list = list.filter(function(p) { return p.country === currentFilters.country; });
+  }
+  if (currentFilters.province !== 'todos') {
+    list = list.filter(function(p) { return p.province === currentFilters.province; });
+  }
+  if (currentFilters.category !== 'todos') {
+    list = list.filter(function(p) { return p.category === currentFilters.category; });
+  }
+  // Sort by ranking_points desc
+  list.sort(function(a, b) { return b.ranking_points - a.ranking_points; });
+  return list;
+}
+
+// Initials from name
+function getInitials(p) {
+  return ((p.first_name || ' ')[0] + (p.last_name || ' ')[0]).toUpperCase();
+}
+
+// Country badge text
+function getCountryBadge(country) {
+  var m = { argentina: 'ARG', uruguay: 'URU', brasil: 'BRA', paraguay: 'PAR' };
+  return m[country] || (country || '').toUpperCase().slice(0, 3);
+}
+
+// Avatar gradient color based on index using Padel Bella Vista palette
+function avatarGrad(i) {
+  var grads = [
+    'linear-gradient(135deg,#0F4C81,#1E6B59)', // Azul profundo a verde botánico
+    'linear-gradient(135deg,#F28C2B,#CC7220)', // Naranja cítrico a naranja oscuro
+    'linear-gradient(135deg,#1E6B59,#8BA186)', // Verde botánico a verde salvia
+    'linear-gradient(135deg,#0F4C81,#8BA186)'  // Azul profundo a verde salvia
+  ];
+  return grads[i % grads.length];
+}
+
+
+function renderPodium(top3) {
+  var el = document.getElementById('podium-section');
+  if (!el) return;
+  if (!top3 || top3.length < 1) { el.innerHTML = ''; return; }
+
+  var borders = { gold: '#D4A017', silver: '#8A9BAE', bronze: '#A0522D' };
+  // Order: Silver (index 1), Gold (index 0), Bronze (index 2)
+  var positions = [top3[1] || null, top3[0] || null, top3[2] || null];
+  var metalOrder = ['silver', 'gold', 'bronze'];
+
+  var cards = positions.map(function(p, i) {
+    if (!p) return '';
+    var metal = metalOrder[i];
+    var posNum = metal === 'gold' ? 1 : metal === 'silver' ? 2 : 3;
+    var border = borders[metal];
+    var initials = getInitials(p);
+    var crownHtml = metal === 'gold'
+      ? '<div class="podium-crown"><span data-icon="star" data-size="22"></span></div>'
+      : '';
+    return (
+      '<div class="podium-card podium-' + metal + '" style="border:3px solid ' + border + ';" tabindex="0" role="listitem" aria-label="Posicion ' + posNum + ': ' + p.first_name + ' ' + p.last_name + '">' +
+        crownHtml +
+        '<div class="podium-pos-num" style="color:' + border + ';">' + posNum + '</div>' +
+        '<div class="podium-avatar" style="background:' + avatarGrad(posNum - 1) + ';">' + initials + '</div>' +
+        '<div class="podium-name">' + p.first_name + ' ' + p.last_name + '</div>' +
+        '<div class="podium-club">' + (p.club || '') + '</div>' +
+        '<div class="podium-province">' + (p.province || '') + ' &middot; ' + getCountryBadge(p.country) + '</div>' +
+        '<div class="podium-points" style="color:' + border + ';">' + (p.ranking_points || 0).toLocaleString('es-AR') + ' <span class="podium-pts-lbl">pts</span></div>' +
+      '</div>'
+    );
+  }).join('');
+
+  el.innerHTML = '<div class="podium-container" role="list">' + cards + '</div>';
+  renderIcons();
+}
+
+function renderTable(list) {
+  var tbody = document.getElementById('ranking-tbody');
+  if (!tbody) return;
+
+  // Update results count
+  var countEl = document.getElementById('results-count');
+  if (countEl) countEl.textContent = list.length + ' jugador' + (list.length !== 1 ? 'es' : '');
+
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="8" class="table-empty">No se encontraron jugadores para los filtros seleccionados</td></tr>';
+    return;
+  }
+
+  var medalBorders = { 0: '#D4A017', 1: '#8A9BAE', 2: '#A0522D' };
+
+  tbody.innerHTML = list.map(function(p, i) {
+    var borderStyle = medalBorders[i]
+      ? 'border-left:3px solid ' + medalBorders[i] + ';'
+      : 'border-left:3px solid transparent;';
+
+    var varVal, varClass, varIcon;
+    if (i === 0) {
+      varVal = 3; varClass = 'var-up'; varIcon = 'arrowUp';
+    } else if (i % 2 !== 0) {
+      varVal = 1; varClass = 'var-up'; varIcon = 'arrowUp';
+    } else {
+      varVal = 1; varClass = 'var-down'; varIcon = 'arrowDown';
+    }
+
+    var badge = getCountryBadge(p.country);
+    var initials = getInitials(p);
+    var rankColor = medalBorders[i] ? 'color:' + medalBorders[i] + ';' : '';
+
+    return (
+      '<tr class="ranking-row-full" style="' + borderStyle + '" onclick="window.location=\'jugadores.html\'" tabindex="0" role="row" aria-label="Posicion ' + (i + 1) + ': ' + p.first_name + ' ' + p.last_name + '">' +
+        '<td class="col-pos"><span class="rank-num" style="' + rankColor + '">' + (i + 1) + '</span></td>' +
+        '<td class="col-player">' +
+          '<div class="player-cell">' +
+            '<div class="player-avatar-sm" style="background:' + avatarGrad(i) + ';">' + initials + '</div>' +
+            '<div class="player-info">' +
+              '<div class="player-fullname">' + p.first_name + ' ' + p.last_name + '</div>' +
+              '<div class="player-club-sm">' + (p.club || '&mdash;') + '</div>' +
+            '</div>' +
+          '</div>' +
+        '</td>' +
+        '<td class="col-country"><span class="country-badge">' + badge + '</span></td>' +
+        '<td class="col-province">' + (p.province || '&mdash;') + '</td>' +
+        '<td class="col-category"><span class="cat-badge">' + (p.category || '&mdash;') + '</span></td>' +
+        '<td class="col-points" style="text-align:right;"><span class="points-val">' + (p.ranking_points || 0).toLocaleString('es-AR') + '</span></td>' +
+        '<td class="col-var">' +
+          '<span class="var-pill ' + varClass + '">' +
+            '<span data-icon="' + varIcon + '" data-size="11"></span>' +
+            varVal +
+          '</span>' +
+        '</td>' +
+        '<td class="col-matches">' + (p.tournaments_played || 0) + '</td>' +
+      '</tr>'
+    );
+  }).join('');
+
+  renderIcons();
+  initLazyImages();
+}
+
+function refresh() {
+  var list = getComputedRanking();
+  renderPodium(list.slice(0, 3));
+  renderTable(list);
+}
+
+// Province loader for filter bar
+function loadFilterProvinces(country) {
+  var sel = document.getElementById('filter-province');
+  if (!sel) return;
+  sel.innerHTML = '<option value="todos">Todas las provincias</option>';
+  if (country && country !== 'todos' && REGIONS[country]) {
+    REGIONS[country].provinces.forEach(function(prov) {
+      var opt = document.createElement('option');
+      opt.value = prov;
+      opt.textContent = prov;
+      sel.appendChild(opt);
+    });
+    sel.disabled = false;
+  } else {
+    sel.disabled = true;
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  // Initial render
+  refresh();
+
+  // Init counters
+  if (typeof initCounters === 'function') initCounters();
+
+  // Gender tabs
+  document.querySelectorAll('.gender-tab').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.gender-tab').forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      currentGender = btn.dataset.gender;
+      refresh();
+    });
+    // Keyboard support
+    btn.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); btn.click(); }
+    });
+  });
+
+  // Search
+  var searchInput = document.getElementById('filter-search');
+  if (searchInput) {
+    searchInput.addEventListener('input', function() {
+      currentFilters.search = searchInput.value;
+      refresh();
+    });
+  }
+
+  // Country
+  var countrySelect = document.getElementById('filter-country');
+  if (countrySelect) {
+    countrySelect.addEventListener('change', function() {
+      currentFilters.country = countrySelect.value;
+      currentFilters.province = 'todos';
+      loadFilterProvinces(countrySelect.value);
+      var provinceSelect = document.getElementById('filter-province');
+      if (provinceSelect) provinceSelect.value = 'todos';
+      refresh();
+    });
+  }
+  loadFilterProvinces('todos');
+
+  // Province
+  var provinceSelect = document.getElementById('filter-province');
+  if (provinceSelect) {
+    provinceSelect.addEventListener('change', function() {
+      currentFilters.province = provinceSelect.value;
+      refresh();
+    });
+  }
+
+  // Category
+  var catSelect = document.getElementById('filter-category');
+  if (catSelect) {
+    catSelect.addEventListener('change', function() {
+      currentFilters.category = catSelect.value;
+      refresh();
+    });
+  }
+
+  // Column sort — visual feedback only
+  document.querySelectorAll('.sortable-th').forEach(function(th) {
+    th.addEventListener('click', function() {
+      document.querySelectorAll('.sortable-th').forEach(function(h) { h.classList.remove('sort-active'); });
+      th.classList.add('sort-active');
+    });
+  });
+
+  // Keyboard navigation on table rows
+  document.getElementById('ranking-tbody').addEventListener('keydown', function(e) {
+    if (e.target.tagName === 'TR' && (e.key === 'Enter' || e.key === ' ')) {
+      e.preventDefault();
+      window.location = 'jugadores.html';
+    }
+  });
+});
+</script>
+
+<!-- ======= FOOTER ======= -->
+<footer class="site-footer" role="contentinfo">
+  <div class="container">
+    <div class="site-footer-inner">
+      <div class="footer-brand">
+        <div class="footer-logo-name">PadelBell</div>
+        <div class="footer-logo-tagline">Bella Vista · Corrientes</div>
+        <p>La plataforma del pádel regional del litoral sudamericano. Jugadores, torneos, rankings y canchas.</p>
+      </div>
+      <div>
+        <div class="footer-col-title">Navegación</div>
+        <ul class="footer-links">
+          <li><a href="index.html">Inicio</a></li>
+          <li><a href="jugadores.html">Jugadores</a></li>
+          <li><a href="torneos.html">Torneos</a></li>
+          <li><a href="ranking.html">Ranking</a></li>
+          <li><a href="canchas.html">Canchas</a></li>
+          <li><a href="noticias.html">Noticias</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">Ranking</div>
+        <ul class="footer-links">
+          <li><a href="ranking.html">Ranking Masculino</a></li>
+          <li><a href="ranking.html">Ranking Femenino</a></li>
+          <li><a href="jugadores.html">Directorio de Jugadores</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">Información</div>
+        <ul class="footer-links">
+          <li><a href="admin.html">Panel Admin</a></li>
+          <li><a href="noticias.html">Noticias</a></li>
+        </ul>
+        <div style="margin-top:20px; font-size:12px; color:var(--text-muted); font-family:var(--font-mono);">
+          <span class="footer-status-dot"></span>Sistema operativo
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 PadelBell · Bella Vista, Corrientes, Argentina</p>
+      <div class="footer-bottom-links">
+        <a href="admin.html">Administración</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

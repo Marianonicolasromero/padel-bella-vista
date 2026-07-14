@@ -1,0 +1,3221 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- PWA -->
+  <link rel="manifest" href="site.webmanifest">
+  <meta name="theme-color" content="#020406">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="PadelBell">
+  <title>Panel de Administración — PadelBell</title>
+  <meta name="description" content="Panel de control administrativo de PadelBell. Gestión de jugadores, torneos, canchas y noticias de Bella Vista.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    /* SIDEBAR DASHBOARD LAYOUT */
+    .admin-container {
+      display: flex;
+      min-height: 100vh;
+      background: var(--bg-base);
+    }
+    .admin-sidebar {
+      width: 260px;
+      background: var(--bg-surface);
+      border-right: 1px solid var(--border-subtle);
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      display: flex;
+      flex-direction: column;
+      z-index: 90;
+      padding: 24px 16px;
+    }
+    .admin-sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 32px;
+      padding: 0 8px;
+    }
+    .admin-sidebar-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .admin-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-secondary);
+      border-radius: var(--radius-sm);
+      transition: all var(--transition-fast);
+      cursor: pointer;
+      justify-content: space-between;
+    }
+    .admin-nav-item-inner {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .admin-nav-item:hover,
+    .admin-nav-item.active {
+      color: var(--text-primary);
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .admin-nav-item.active {
+      color: var(--accent-primary);
+      background: rgba(0, 180, 216, 0.08);
+      border-left: 3px solid var(--accent-primary);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      padding-left: 11px;
+    }
+
+    /* Sidebar count badges */
+    .nav-count-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 20px;
+      height: 20px;
+      padding: 0 5px;
+      background: rgba(0, 180, 216, 0.15);
+      border: 1px solid rgba(0, 180, 216, 0.25);
+      border-radius: 10px;
+      font-size: 10px;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--accent-primary);
+      flex-shrink: 0;
+    }
+    
+    .admin-sidebar-footer {
+      margin-top: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .admin-main-panel {
+      flex-grow: 1;
+      margin-left: 260px;
+      padding: 40px;
+      width: calc(100% - 260px);
+    }
+
+    /* TOP STATS DASHBOARD ROW */
+    .admin-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-bottom: 36px;
+    }
+    .admin-stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: border-color var(--transition-normal);
+    }
+    .admin-stat-card:hover {
+      border-color: var(--border-default);
+    }
+    .admin-stat-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .admin-stat-num {
+      font-family: var(--font-display);
+      font-size: 36px;
+      color: var(--text-primary);
+      line-height: 1;
+      letter-spacing: 1px;
+    }
+    .admin-stat-label {
+      font-size: 10px;
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-muted);
+    }
+    .admin-stat-icon {
+      width: 48px;
+      height: 48px;
+      background: rgba(0, 180, 216, 0.06);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-primary);
+    }
+    
+    /* PANEL HEADER CONTROLS */
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .panel-title {
+      font-family: var(--font-display);
+      font-size: 36px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      line-height: 1;
+    }
+    .panel-title span {
+      color: var(--accent-primary);
+    }
+    .panel-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    /* TAB PANEL DEFAULT DISPLAY */
+    .admin-tab-panel {
+      display: none;
+    }
+    .admin-tab-panel.active {
+      display: block;
+      animation: fadeIn var(--transition-normal);
+    }
+
+    /* SEARCH WRAPPER */
+    .admin-search-wrapper {
+      position: relative;
+      min-width: 240px;
+    }
+    .admin-search-wrapper input {
+      width: 100%;
+      padding: 9px 12px 9px 34px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-size: 12px;
+      outline: none;
+    }
+    .admin-search-wrapper input:focus {
+      border-color: var(--accent-primary);
+    }
+    .admin-search-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    /* EMPTY STATE */
+    .empty-state-panel {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 56px 24px;
+      gap: 14px;
+      color: var(--text-muted);
+    }
+    .empty-state-panel .empty-icon {
+      width: 56px;
+      height: 56px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+    }
+    .empty-state-panel .empty-title {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-secondary);
+    }
+    .empty-state-panel .empty-msg {
+      font-size: 13px;
+      color: var(--text-muted);
+      text-align: center;
+      max-width: 300px;
+    }
+
+    /* STATUS BADGES */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 8px;
+      border-radius: var(--radius-xs);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .5px;
+    }
+    .status-badge.upcoming {
+      background: rgba(0,180,216,0.1);
+      color: var(--accent-primary);
+      border: 1px solid rgba(0,180,216,0.25);
+    }
+    .status-badge.in_progress {
+      background: rgba(232,132,31,0.1);
+      color: var(--accent-orange);
+      border: 1px solid rgba(232,132,31,0.25);
+    }
+    .status-badge.in_progress::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background: var(--accent-orange);
+      border-radius: 50%;
+      animation: blink-orange 1s infinite;
+    }
+    .status-badge.finished {
+      background: rgba(34,197,94,0.1);
+      color: #22c55e;
+      border: 1px solid rgba(34,197,94,0.25);
+    }
+    .status-badge.live {
+      background: rgba(232,132,31,0.1);
+      color: var(--accent-orange);
+      border: 1px solid rgba(232,132,31,0.25);
+    }
+    .status-badge.live::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background: var(--accent-orange);
+      border-radius: 50%;
+      animation: blink-orange 1s infinite;
+    }
+    @keyframes blink-orange {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.2; }
+    }
+
+    /* Tournament status select inline */
+    .status-select {
+      padding: 3px 6px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-xs);
+      color: var(--text-primary);
+      font-size: 11px;
+      font-family: var(--font-mono);
+      cursor: pointer;
+      outline: none;
+    }
+    .status-select:focus { border-color: var(--accent-primary); }
+
+    /* CONFIG SECTION */
+    .config-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+    }
+    .config-card-title {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--accent-primary);
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .config-action-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      padding: 12px 16px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      text-align: left;
+      margin-bottom: 8px;
+    }
+    .config-action-btn:hover {
+      border-color: var(--accent-primary);
+      color: var(--text-primary);
+      background: rgba(0,180,216,0.04);
+    }
+    .config-action-btn.danger:hover {
+      border-color: #ef4444;
+      color: #ef4444;
+      background: rgba(239,68,68,0.04);
+    }
+    .config-action-btn span[data-icon] { color: var(--accent-primary); flex-shrink: 0; }
+    .config-action-btn.danger span[data-icon] { color: #ef4444; }
+    .app-info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      font-size: 12px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .app-info-row:last-child { border-bottom: none; }
+    .app-info-row .key { color: var(--text-muted); }
+    .app-info-row .val { font-family: var(--font-mono); font-weight: 600; color: var(--text-primary); }
+
+    /* RESPONSIVE */
+    @media (max-width: 1024px) {
+      .admin-stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 900px) {
+      .admin-container { flex-direction: column; }
+      .admin-sidebar { width: 100%; height: auto; position: relative; border-right: none; border-bottom: 1px solid var(--border-subtle); padding: 16px; }
+      .admin-sidebar-logo { margin-bottom: 16px; }
+      .admin-sidebar-nav { flex-direction: row; flex-wrap: wrap; gap: 4px; }
+      .admin-nav-item { padding: 8px 12px; font-size: 11px; }
+      .admin-nav-item.active { border-left: none; border-bottom: 2px solid var(--accent-primary); border-radius: var(--radius-sm); padding-left: 12px; }
+      .admin-main-panel { margin-left: 0; width: 100%; padding: 24px 16px; }
+      .admin-stats-grid { grid-template-columns: 1fr 1fr; }
+      .nav-count-badge { display: none; }
+    }
+    /* CONSOLE MODAL STYLES */
+    .console-tab-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      padding: 12px 20px;
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      border-left: 3px solid transparent;
+      outline: none;
+    }
+    .console-tab-btn:hover {
+      background: rgba(255, 255, 255, 0.02);
+      color: var(--text-primary);
+    }
+    .console-tab-btn.active {
+      background: rgba(0, 180, 216, 0.05);
+      color: var(--accent-primary);
+      border-left-color: var(--accent-primary);
+    }
+    .console-tab-btn span[data-icon] {
+      color: inherit;
+    }
+    .score-edit-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+    .score-set-inputs {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .score-set-input {
+      width: 32px;
+      height: 28px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-xs);
+      color: var(--text-primary);
+      text-align: center;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 13px;
+      outline: none;
+    }
+    .score-set-input:focus {
+      border-color: var(--accent-primary);
+    }
+    .score-set-sep {
+      color: var(--text-muted);
+      font-size: 11px;
+    }
+  </style>
+</head>
+<body>
+<div id="toast-container"></div>
+
+<div class="admin-container">
+  <!-- SIDEBAR (LEFT) -->
+  <aside class="admin-sidebar">
+    <div class="admin-sidebar-logo" style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom: 32px; padding: 0 8px;">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <div class="logo-icon" data-icon="court" data-size="20"></div>
+        <div class="logo-text">
+          <span class="logo-name" style="font-size:20px; letter-spacing:1px;">PadelBell</span>
+          <span class="logo-tagline" style="font-size:8px;">Control Administrativo</span>
+        </div>
+      </div>
+      <button id="theme-toggle" class="theme-toggle-btn" data-icon="sun" data-size="14" title="Cambiar tema" style="width:32px; height:32px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center;"></button>
+    </div>
+    
+    <nav class="admin-sidebar-nav">
+      <div class="admin-nav-item active" onclick="switchTab('jugadores')" id="nav-jugadores">
+        <div class="admin-nav-item-inner"><span data-icon="users"></span> Jugadores</div>
+        <span class="nav-count-badge" id="badge-jugadores">0</span>
+      </div>
+      <div class="admin-nav-item" onclick="switchTab('torneos')" id="nav-torneos">
+        <div class="admin-nav-item-inner"><span data-icon="trophy"></span> Torneos</div>
+        <span class="nav-count-badge" id="badge-torneos">0</span>
+      </div>
+      <div class="admin-nav-item" onclick="switchTab('canchas')" id="nav-canchas">
+        <div class="admin-nav-item-inner"><span data-icon="court"></span> Canchas</div>
+      </div>
+      <div class="admin-nav-item" onclick="switchTab('noticias')" id="nav-noticias">
+        <div class="admin-nav-item-inner"><span data-icon="news"></span> Noticias</div>
+      </div>
+      <div class="admin-nav-item" onclick="switchTab('organizadores')" id="nav-organizadores">
+        <div class="admin-nav-item-inner"><span data-icon="users"></span> Organizadores</div>
+      </div>
+      <div class="admin-nav-item" onclick="switchTab('configuracion')" id="nav-configuracion">
+        <div class="admin-nav-item-inner"><span data-icon="settings"></span> Configuración</div>
+      </div>
+    </nav>
+
+    <div class="admin-sidebar-footer">
+      <div class="divider" style="margin-bottom:8px;"></div>
+      <a href="index.html" class="btn btn-secondary btn-sm" style="width:100%; justify-content:center;">
+        <span data-icon="undo"></span> Volver al Sitio
+      </a>
+    </div>
+  </aside>
+
+  <!-- MAIN AREA (RIGHT) -->
+  <main class="admin-main-panel">
+    <!-- STATS DASHBOARD ROW -->
+    <section class="admin-stats-grid">
+      <div class="admin-stat-card">
+        <div class="admin-stat-info">
+          <span class="admin-stat-num" id="stat-players-count">0</span>
+          <span class="admin-stat-label">Jugadores</span>
+        </div>
+        <div class="admin-stat-icon"><span data-icon="users" data-size="20"></span></div>
+      </div>
+      <div class="admin-stat-card">
+        <div class="admin-stat-info">
+          <span class="admin-stat-num" id="stat-tournaments-count">0</span>
+          <span class="admin-stat-label">Torneos</span>
+        </div>
+        <div class="admin-stat-icon"><span data-icon="trophy" data-size="20"></span></div>
+      </div>
+      <div class="admin-stat-card">
+        <div class="admin-stat-info">
+          <span class="admin-stat-num" id="stat-courts-count">0</span>
+          <span class="admin-stat-label">Complejos</span>
+        </div>
+        <div class="admin-stat-icon"><span data-icon="court" data-size="20"></span></div>
+      </div>
+      <div class="admin-stat-card">
+        <div class="admin-stat-info">
+          <span class="admin-stat-num" id="stat-news-count">0</span>
+          <span class="admin-stat-label">Noticias</span>
+        </div>
+        <div class="admin-stat-icon"><span data-icon="news" data-size="20"></span></div>
+      </div>
+    </section>
+
+    <!-- =====================
+         TAB: JUGADORES
+         ===================== -->
+    <section class="admin-tab-panel active" id="panel-jugadores">
+      <div class="panel-header">
+        <h2 class="panel-title">Gestión de <span>Jugadores</span></h2>
+        <div class="panel-controls">
+          <div class="admin-search-wrapper">
+            <span class="admin-search-icon" data-icon="search" data-size="12"></span>
+            <input type="text" id="search-players" placeholder="Buscar por nombre o club...">
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openPlayerModal()">
+            <span data-icon="plus"></span> Nuevo Jugador
+          </button>
+        </div>
+      </div>
+      
+      <div style="background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); overflow-x:auto;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width:60px;">ID</th>
+              <th>Jugador</th>
+              <th>Género</th>
+              <th>Nivel / Categoría</th>
+              <th>País / Prov.</th>
+              <th>Club</th>
+              <th style="text-align:right;">Puntos</th>
+              <th style="width:130px; text-align:center;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="admin-players-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- =====================
+         TAB: TORNEOS
+         ===================== -->
+    <section class="admin-tab-panel" id="panel-torneos">
+      <div class="panel-header">
+        <h2 class="panel-title">Gestión de <span>Torneos</span></h2>
+        <div class="panel-controls">
+          <div class="admin-search-wrapper">
+            <span class="admin-search-icon" data-icon="search" data-size="12"></span>
+            <input type="text" id="search-tournaments" placeholder="Buscar torneo...">
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openTournamentModal()">
+            <span data-icon="plus"></span> Nuevo Torneo
+          </button>
+        </div>
+      </div>
+      
+      <div style="background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); overflow-x:auto;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width:60px;">ID</th>
+              <th>Torneo</th>
+              <th>Sede / Ciudad</th>
+              <th>Fechas</th>
+              <th>Género / Cat.</th>
+              <th>Estado</th>
+              <th style="text-align:right;">Premios</th>
+              <th style="width:130px; text-align:center;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="admin-tournaments-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- =====================
+         TAB: CANCHAS
+         ===================== -->
+    <section class="admin-tab-panel" id="panel-canchas">
+      <div class="panel-header">
+        <h2 class="panel-title">Gestión de <span>Canchas</span></h2>
+        <div class="panel-controls">
+          <button class="btn btn-primary btn-sm" onclick="openCourtModal()">
+            <span data-icon="plus"></span> Nueva Cancha
+          </button>
+        </div>
+      </div>
+      
+      <div style="background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); overflow-x:auto;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width:60px;">ID</th>
+              <th>Complejo</th>
+              <th>Dirección</th>
+              <th>Canchas</th>
+              <th>Superficie / Luz</th>
+              <th>Tarifa / Hora</th>
+              <th>Destacado</th>
+              <th style="width:130px; text-align:center;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="admin-courts-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- =====================
+         TAB: NOTICIAS
+         ===================== -->
+    <section class="admin-tab-panel" id="panel-noticias">
+      <div class="panel-header">
+        <h2 class="panel-title">Gestión de <span>Noticias</span></h2>
+        <div class="panel-controls">
+          <div class="admin-search-wrapper">
+            <span class="admin-search-icon" data-icon="search" data-size="12"></span>
+            <input type="text" id="search-news" placeholder="Buscar noticia...">
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openNewsModal()">
+            <span data-icon="plus"></span> Nueva Noticia
+          </button>
+        </div>
+      </div>
+      
+      <div style="background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); overflow-x:auto;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width:60px;">ID</th>
+              <th>Título</th>
+              <th>Categoría</th>
+              <th>Fecha</th>
+              <th>Autor</th>
+              <th>Destacada</th>
+              <th style="width:130px; text-align:center;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="admin-news-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- =====================
+         TAB: ORGANIZADORES
+         ===================== -->
+    <section class="admin-tab-panel" id="panel-organizadores">
+      <div class="panel-header">
+        <h2 class="panel-title">Organizadores <span>del Circuito</span></h2>
+        <div class="panel-header-actions">
+          <button class="btn btn-primary btn-sm" onclick="openOrgModal()">
+            <span data-icon="plus"></span> Nuevo Organizador
+          </button>
+        </div>
+      </div>
+
+      <div class="stats-row" style="margin-bottom:24px; display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
+        <div class="stat-card" style="margin-bottom:0;">
+          <div class="stat-card__icon"><span data-icon="users" data-size="20"></span></div>
+          <div class="stat-card__body">
+            <div class="stat-card__num" id="stat-org-total">0</div>
+            <div class="stat-card__lbl">Organizadores activos</div>
+          </div>
+        </div>
+        <div class="stat-card" style="margin-bottom:0;">
+          <div class="stat-card__icon orange"><span data-icon="trophy" data-size="20"></span></div>
+          <div class="stat-card__body">
+            <div class="stat-card__num" id="stat-org-with-tournament">0</div>
+            <div class="stat-card__lbl">Con torneo asignado</div>
+          </div>
+        </div>
+        <div class="stat-card" style="margin-bottom:0;">
+          <div class="stat-card__icon" style="color:var(--accent-orange);"><span data-icon="shield" data-size="20"></span></div>
+          <div class="stat-card__body" style="width:100%; display:flex; flex-direction:column; justify-content:center;">
+            <div style="display:flex; justify-content:space-between; align-items:baseline; width:100%;">
+              <div class="stat-card__num" id="stat-org-limit" style="font-size:24px;">0 / 50</div>
+              <span style="font-size:9px; color:var(--text-muted); font-family:var(--font-mono); letter-spacing:0.5px;">CAPACIDAD</span>
+            </div>
+            <div style="width:100%; height:5px; background:rgba(255,255,255,0.06); border-radius:10px; margin-top:8px; overflow:hidden;">
+              <div id="stat-org-progress" style="width:0%; height:100%; background:linear-gradient(90deg, var(--accent-primary), var(--accent-orange)); transition:width .4s ease;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Organizador</th>
+              <th>Contacto</th>
+              <th>PIN</th>
+              <th>Torneo Asignado</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="admin-orgs-tbody">
+            <tr><td colspan="6"><div class="empty-state-panel"><div class="empty-title">Cargando...</div></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- =====================
+         TAB: CONFIGURACIÓN
+         ===================== -->
+    <section class="admin-tab-panel" id="panel-configuracion">
+      <div class="panel-header">
+        <h2 class="panel-title">Configuración del <span>Sitio</span></h2>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1.5fr 1fr; gap:24px; align-items:start;">
+        <!-- General settings form -->
+        <div class="config-card">
+          <div class="config-card-title">
+            <span data-icon="settings"></span>Ajustes Generales
+          </div>
+          <form id="form-settings" onsubmit="saveSettings(event)" style="display:flex; flex-direction:column; gap:16px;">
+            <div class="form-group">
+              <label class="form-label" for="cfg-sitename">Nombre de la Plataforma</label>
+              <input type="text" id="cfg-sitename" class="form-input" value="PadelBell" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="cfg-city">Ciudad de Referencia</label>
+              <input type="text" id="cfg-city" class="form-input" value="Bella Vista" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="cfg-province">Provincia / Región</label>
+              <input type="text" id="cfg-province" class="form-input" value="Corrientes" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="cfg-email">Email de la Organización</label>
+              <input type="email" id="cfg-email" class="form-input" value="organizacion@padelbell.com">
+            </div>
+            <button type="submit" class="btn btn-primary" style="margin-top:8px; align-self:flex-start;">
+              <span data-icon="save"></span> Guardar Ajustes
+            </button>
+          </form>
+        </div>
+
+        <!-- Right column: DB tools + App info -->
+        <div style="display:flex; flex-direction:column; gap:20px;">
+          <!-- Database Tools -->
+          <div class="config-card">
+            <div class="config-card-title" style="color:var(--accent-orange); border-bottom-color:rgba(232,132,31,0.2);">
+              <span data-icon="settings" style="color:var(--accent-orange);"></span>Mantenimiento de Datos
+            </div>
+            <p style="font-size:12px; color:var(--text-secondary); line-height:1.6; margin-bottom:16px;">
+              Respaldá y restaurá la base de datos completa de PadelBell (localStorage) mediante archivos JSON.
+            </p>
+
+            <button class="config-action-btn" onclick="exportDatabase()">
+              <span data-icon="upload" data-size="14"></span>
+              <div>
+                <div style="font-weight:600; font-size:13px;">Exportar Base de Datos</div>
+                <div style="font-size:11px; color:var(--text-muted); margin-top:1px;">Descarga padelbell_db como .json</div>
+              </div>
+            </button>
+
+            <button class="config-action-btn" onclick="document.getElementById('import-file-input').click()">
+              <span data-icon="plus" data-size="14"></span>
+              <div>
+                <div style="font-weight:600; font-size:13px;">Importar Base de Datos</div>
+                <div style="font-size:11px; color:var(--text-muted); margin-top:1px;">Fusiona un archivo .json al sistema</div>
+              </div>
+            </button>
+            <input type="file" id="import-file-input" accept=".json" style="display:none;" onchange="importDatabase(event)">
+
+            <div class="divider" style="margin: 10px 0;"></div>
+
+            <button class="config-action-btn danger" onclick="resetDatabase()">
+              <span data-icon="alert" data-size="14"></span>
+              <div>
+                <div style="font-weight:600; font-size:13px;">Restablecer Valores de Fábrica</div>
+                <div style="font-size:11px; color:var(--text-muted); margin-top:1px;">Limpia localStorage y recarga</div>
+              </div>
+            </button>
+
+            <div style="margin-top:14px; padding:10px 14px; background:var(--bg-elevated); border-radius:var(--radius-sm); border:1px solid var(--border-subtle);">
+              <div style="font-size:11px; color:var(--text-muted); margin-bottom:4px; font-family:var(--font-mono); text-transform:uppercase; letter-spacing:1px;">Último backup</div>
+              <div style="font-family:var(--font-mono); font-size:12px; color:var(--text-primary);" id="cfg-last-backup">Nunca</div>
+            </div>
+          </div>
+
+          <!-- App Info -->
+          <div class="config-card">
+            <div class="config-card-title">
+              <span data-icon="globe"></span>Información del Sistema
+            </div>
+            <div class="app-info-row">
+              <span class="key">Versión</span>
+              <span class="val">PadelBell v2.0</span>
+            </div>
+            <div class="app-info-row">
+              <span class="key">Localidad</span>
+              <span class="val">Bella Vista, Corrientes</span>
+            </div>
+            <div class="app-info-row">
+              <span class="key">Año</span>
+              <span class="val">2026</span>
+            </div>
+            <div class="app-info-row">
+              <span class="key">Motor DB</span>
+              <span class="val">LocalStore Sync</span>
+            </div>
+            <div class="app-info-row">
+              <span class="key">Jugadores en DB</span>
+              <span class="val" id="cfg-info-players">—</span>
+            </div>
+            <div class="app-info-row">
+              <span class="key">Torneos en DB</span>
+              <span class="val" id="cfg-info-tournaments">—</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- ================================================
+     MODALES EDIT/CREATE
+     ================================================ -->
+
+<!-- MODAL: JUGADOR -->
+<div class="modal-overlay" id="modal-player">
+  <div class="modal" style="max-width:650px;">
+    <div class="modal-header">
+      <h2 id="player-modal-title">Agregar Jugador</h2>
+      <button class="modal-close" onclick="closeModal('modal-player')">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <form id="form-player" onsubmit="submitPlayerForm(event)" class="player-form" style="border:none; padding:0; background:transparent;">
+        <input type="hidden" name="id" id="edit-player-id">
+
+        <div class="form-grid-2" style="margin-bottom:12px;">
+          <div class="form-group">
+            <label class="form-label" for="p-firstname">Nombre</label>
+            <input type="text" id="p-firstname" name="first_name" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="p-lastname">Apellido</label>
+            <input type="text" id="p-lastname" name="last_name" class="form-input" required>
+          </div>
+        </div>
+
+        <div class="form-grid-2" style="margin-bottom:12px;">
+          <div class="form-group">
+            <label class="form-label" for="p-nickname">Apodo / Nickname</label>
+            <input type="text" id="p-nickname" name="nickname" class="form-input" placeholder="ej. El Rayo">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="p-gender">Género</label>
+            <select id="p-gender" name="gender" class="form-select" required>
+              <option value="masculino">Masculino</option>
+              <option value="femenino">Femenino</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-grid-2" style="margin-bottom:12px;">
+          <div class="form-group">
+            <label class="form-label" for="p-birthdate">Fecha de Nacimiento</label>
+            <input type="date" id="p-birthdate" name="birthdate" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="p-club">Club de residencia</label>
+            <input type="text" id="p-club" name="club" class="form-input" placeholder="ej. Palmeras Pádel">
+          </div>
+        </div>
+
+        <div class="form-grid-2" style="margin-bottom:12px;">
+          <div class="form-group">
+            <label class="form-label" for="p-height">Altura (cm)</label>
+            <input type="number" id="p-height" name="height" class="form-input" min="100" max="230" value="180" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="p-weight">Peso (kg)</label>
+            <input type="number" id="p-weight" name="weight" class="form-input" min="30" max="150" value="75" required>
+          </div>
+        </div>
+
+        <div class="form-grid-2" style="margin-bottom:12px;">
+          <div class="form-group">
+            <label class="form-label" for="p-hand">Mano Hábil</label>
+            <select id="p-hand" name="dominant_hand" class="form-select" required>
+              <option value="derecha">Derecha</option>
+              <option value="izquierda">Izquierda</option>
+              <option value="ambidiestro">Ambidiestro</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="p-position">Posición en Cancha</label>
+            <select id="p-position" name="position" class="form-select" required>
+              <option value="reves">Revés (izquierda)</option>
+              <option value="drive">Drive (derecha)</option>
+              <option value="ambas">Ambas posiciones</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:12px;">
+          <label class="form-label" for="p-category">Categoría *</label>
+          <select id="p-category" name="category" class="form-select" required></select>
+        </div>
+
+        <div class="form-grid-2" style="margin-bottom:12px;">
+          <div class="form-group">
+            <label class="form-label" for="p-country">País</label>
+            <select id="p-country" name="country" class="form-select" data-country-select="admin-player" required>
+              <option value="">Seleccionar país</option>
+              <option value="argentina">Argentina</option>
+              <option value="uruguay">Uruguay</option>
+              <option value="brasil">Brasil</option>
+              <option value="paraguay">Paraguay</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="p-province">Provincia / Dpto.</label>
+            <select id="p-province" name="province" class="form-select" data-province-select="admin-player" required disabled>
+              <option value="">Seleccionar provincia</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-grid-2" style="margin-bottom:12px;">
+          <div class="form-group">
+            <label class="form-label" for="p-points">Puntos de Ranking</label>
+            <input type="number" id="p-points" name="ranking_points" class="form-input" min="0" value="0" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="p-instagram">Instagram</label>
+            <input type="text" id="p-instagram" name="instagram" class="form-input" placeholder="ej. @mati_padel">
+          </div>
+        </div>
+
+        <div class="form-grid-2" style="margin-bottom:12px;">
+          <div class="form-group">
+            <label class="form-label" for="p-city">Ciudad / Localidad</label>
+            <input type="text" id="p-city" name="city" class="form-input" placeholder="ej. Bella Vista">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="p-active">Estado del Jugador</label>
+            <select id="p-active" name="active" class="form-select">
+              <option value="true">Activo</option>
+              <option value="false">Inactivo</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-grid-2" style="margin-bottom:12px;">
+          <div class="form-group">
+            <label class="form-label" for="p-partner">Compañero Habitual</label>
+            <select id="p-partner" name="partner_id" class="form-select">
+              <option value="">Sin compañero asignado</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="p-photo">URL de Foto de Perfil</label>
+            <input type="text" id="p-photo" name="photo" class="form-input" placeholder="ej. assets/images/player_action.png">
+          </div>
+        </div>
+
+        <div class="form-grid-3" style="margin-bottom:12px; display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
+          <div class="form-group">
+            <label class="form-label" for="p-winrate">% de Victorias</label>
+            <input type="number" id="p-winrate" name="win_rate" class="form-input" min="0" max="100" value="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="p-tournaments-played">Torneos Disputados</label>
+            <input type="number" id="p-tournaments-played" name="tournaments_played" class="form-input" min="0" value="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="p-titles">Títulos Ganados</label>
+            <input type="number" id="p-titles" name="titles" class="form-input" min="0" value="0">
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:20px;">
+          <label class="form-label" for="p-bio">Breve Biografía</label>
+          <textarea id="p-bio" name="bio" class="form-input form-textarea" placeholder="Describí los logros, historia y perfil del jugador..."></textarea>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:12px;">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-player')">Cancelar</button>
+          <button type="submit" class="btn btn-primary"><span data-icon="save" style="margin-right:4px;"></span>Guardar Jugador</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: ORGANIZADOR -->
+<div class="modal-overlay" id="modal-org">
+  <div class="modal" style="max-width:520px;">
+    <div class="modal-header">
+      <h2 id="org-modal-title">Nuevo Organizador</h2>
+      <button class="modal-close" onclick="closeModal('modal-org')">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <form id="form-org" onsubmit="submitOrgForm(event)">
+        <input type="hidden" id="edit-org-id" name="id" value="">
+
+        <div class="form-grid-2" style="margin-bottom:12px;">
+          <div class="form-group">
+            <label class="form-label" for="org-name">Nombre del Club / Org.</label>
+            <input type="text" id="org-name" name="name" class="form-input" placeholder="ej. Club Palmeras Pádel" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="org-contact">Nombre del Contacto</label>
+            <input type="text" id="org-contact" name="contact" class="form-input" placeholder="ej. Juan García">
+          </div>
+        </div>
+
+        <div class="form-grid-2" style="margin-bottom:12px;">
+          <div class="form-group">
+            <label class="form-label" for="org-phone">Teléfono</label>
+            <input type="text" id="org-phone" name="phone" class="form-input" placeholder="+54 9 3782 ...">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="org-pin">Contraseña / PIN de Acceso</label>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <input type="text" id="org-pin" name="pin" class="form-input" maxlength="20" placeholder="ej. mimir149" style="font-family:var(--font-mono);letter-spacing:2px;text-align:center;">
+              <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('org-pin').value = generateOrgPin()" title="Generar PIN aleatorio">
+                <span data-icon="edit" data-size="14"></span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:12px;">
+          <label class="form-label" for="org-tournament">Torneo Asignado</label>
+          <select id="org-tournament" name="tournament_id" class="form-select">
+            <option value="">-- Sin torneo asignado --</option>
+          </select>
+          <span class="form-hint">El organizador solo podrá gestionar el torneo seleccionado.</span>
+        </div>
+
+        <div class="form-group" style="margin-bottom:16px;">
+          <label class="form-label" for="org-active">Estado</label>
+          <select id="org-active" name="active" class="form-select">
+            <option value="true">Activo</option>
+            <option value="false">Desactivado</option>
+          </select>
+        </div>
+
+        <div style="display:flex;gap:12px;justify-content:flex-end;margin-top:20px;">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-org')">Cancelar</button>
+          <button type="submit" class="btn btn-primary"><span data-icon="save"></span> Guardar Organizador</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: TORNEO -->
+<div class="modal-overlay" id="modal-tournament">
+  <div class="modal" style="max-width:620px;">
+    <div class="modal-header">
+      <h2 id="tournament-modal-title">Registrar Torneo</h2>
+      <button class="modal-close" onclick="closeModal('modal-tournament')">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <form id="form-tournament" onsubmit="submitTournamentForm(event)" class="player-form" style="border:none; padding:0; background:transparent;">
+        <input type="hidden" name="id" id="edit-tournament-id">
+
+        <div class="form-group" style="margin-bottom:12px;">
+          <label class="form-label" for="t-name">Nombre Completo del Torneo</label>
+          <input type="text" id="t-name" name="name" class="form-input" required>
+        </div>
+
+        <div class="form-grid-2" style="margin-bottom:12px;">
+          <div class="form-group">
+            <label class="form-label" for="t-shortname">Nombre Corto</label>
+            <input type="text" id="t-shortname" name="short_name" class="form-input" placeholder="ej. Copa Litoral" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="t-country">País</label>
+            <select id="t-country" name="country" class="form-select" required>
+              <option value="argentina">Argentina</option>
+              <option value="uruguay">Uruguay</option>
+              <option value="brasil">Brasil</option>
+              <option value="paraguay">Paraguay</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-grid-2" style="margin-bottom:12px;">
+          <div class="form-group">
+            <label class="form-label" for="t-venue">Sede / Complejo</label>
+            <input type="text" id="t-venue" name="venue" class="form-input" placeholder="ej. Palmeras Pádel" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="t-city">Ciudad / Localidad</label>
+            <input type="text" id="t-city" name="city" class="form-input" value="Bella Vista" required>
+          </div>
+        </div>
+
+        <div class="form-grid-2" style="margin-bottom:12px;">
+          <div class="form-group">
+            <label class="form-label" for="t-province">Provincia</label>
+            <input type="text" id="t-province" name="province" class="form-input" value="Corrientes">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="t-category">Ámbito / Categoría</label>
+            <select id="t-category" name="category" class="form-select" required>
+              <option value="Regional">Regional</option>
+              <option value="Provincial">Provincial</option>
+              <option value="Nacional">Nacional</option>
+              <option value="Internacional">Internacional</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-grid-2" style="margin-bottom:12px;">
+          <div class="form-group">
+            <label class="form-label" for="t-gender">Género</label>
+            <select id="t-gender" name="gender" class="form-select" required>
+              <option value="masculino">Masculino</option>
+              <option value="femenino">Femenino</option>
+              <option value="mixto">Mixto</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="t-scoring">Modo Puntuación</label>
+            <select id="t-scoring" name="scoring_mode" class="form-select">
+              <option value="ventaja">Ventaja clásica</option>
+              <option value="punto_de_oro">Punto de oro (sin ventaja)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-grid-2" style="margin-bottom:12px;">
+          <div class="form-group">
+            <label class="form-label" for="t-start">Fecha Inicio</label>
+            <input type="date" id="t-start" name="start_date" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="t-end">Fecha Cierre</label>
+            <input type="date" id="t-end" name="end_date" class="form-input" required>
+          </div>
+        </div>
+
+        <div class="form-grid-2" style="margin-bottom:12px;">
+          <div class="form-group">
+            <label class="form-label" for="t-format">Formato de Torneo</label>
+            <select id="t-format" name="format" class="form-select" required>
+              <option value="grupos_y_eliminacion">Fase de Grupos y Eliminación Directa</option>
+              <option value="eliminacion_directa">Eliminación Directa</option>
+              <option value="todos_contra_todos">Todos contra Todos (Liga)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="t-organizer">Organizador / Federación</label>
+            <input type="text" id="t-organizer" name="organizer" class="form-input" placeholder="ej. Federación Correntina de Pádel">
+          </div>
+        </div>
+
+        <div class="form-grid-3" style="margin-bottom:12px; display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
+          <div class="form-group">
+            <label class="form-label" for="t-setstowin">Sets para ganar</label>
+            <input type="number" id="t-setstowin" name="sets_to_win" class="form-input" min="1" max="3" value="2" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="t-gamesperset">Games por set</label>
+            <input type="number" id="t-gamesperset" name="games_per_set" class="form-input" min="2" max="10" value="6" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="t-prize">Bolsa de Premios ($)</label>
+            <input type="number" id="t-prize" name="prize" class="form-input" min="0" value="100000" required>
+          </div>
+        </div>
+
+        <div class="form-grid-2" style="margin-bottom:12px;">
+          <div class="form-group">
+            <label class="form-label" for="t-image">URL Imagen de Portada</label>
+            <input type="text" id="t-image" name="image" class="form-input" placeholder="ej. assets/images/hero_padel_bg.png">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="t-status">Estado del torneo</label>
+            <select id="t-status" name="status" class="form-select" required>
+              <option value="upcoming">Próximo / Inscripciones</option>
+              <option value="live">En Vivo / Disputándose</option>
+              <option value="finished">Finalizado</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:20px;">
+          <label class="form-label" for="t-description">Información / Descripción</label>
+          <textarea id="t-description" name="description" class="form-input form-textarea" placeholder="Cronogramas, premios por puestos, detalles de inscripción..."></textarea>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:12px;">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-tournament')">Cancelar</button>
+          <button type="submit" class="btn btn-primary"><span data-icon="save" style="margin-right:4px;"></span>Guardar Torneo</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: CONSOLA DE GESTIÓN DE TORNEO -->
+<div class="modal-overlay" id="modal-tournament-console">
+  <div class="modal" style="max-width:960px; width:95%; height:85vh; display:flex; flex-direction:column; padding:0; background:var(--bg-card); overflow:hidden;">
+    <div class="modal-header" style="padding:18px 24px; border-bottom:1px solid var(--border-subtle); flex-shrink:0;">
+      <div>
+        <h2 id="console-tournament-name" style="font-family:var(--font-display); font-size:24px; letter-spacing:1px; color:var(--text-primary); margin:0;">Gestionar Torneo</h2>
+        <div style="display:flex; gap:8px; align-items:center; margin-top:4px;">
+          <span class="badge" id="console-tournament-status" style="font-size:9px;">—</span>
+          <span style="font-size:11px; color:var(--text-muted); font-family:var(--font-mono);" id="console-tournament-meta"></span>
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeModal('modal-tournament-console')">&#x2715;</button>
+    </div>
+    
+    <div style="display:flex; flex:1; min-height:0; overflow:hidden;">
+      <!-- Sidebar de la consola -->
+      <div style="width:200px; background:var(--bg-base); border-right:1px solid var(--border-subtle); display:flex; flex-direction:column; padding:16px 0; flex-shrink:0;">
+        <button class="console-tab-btn active" id="console-nav-inicio" onclick="switchConsoleTab('inicio')">
+          <span data-icon="settings"></span> Inicio y Parejas
+        </button>
+        <button class="console-tab-btn" id="console-nav-grupos" onclick="switchConsoleTab('grupos')">
+          <span data-icon="grid"></span> Fase de Grupos
+        </button>
+        <button class="console-tab-btn" id="console-nav-llaves" onclick="switchConsoleTab('llaves')">
+          <span data-icon="trophy"></span> Fase de Llaves
+        </button>
+      </div>
+      
+      <!-- Panel de contenido -->
+      <div style="flex:1; padding:24px; overflow-y:auto; min-width:0; background:var(--bg-surface);" id="console-content-panel">
+        <!-- Renderizado dinámico vía JS -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: CANCHA -->
+<div class="modal-overlay" id="modal-court">
+  <div class="modal" style="max-width:600px;">
+    <div class="modal-header">
+      <h2 id="court-modal-title">Registrar Complejo / Cancha</h2>
+      <button class="modal-close" onclick="closeModal('modal-court')">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <form id="form-court" onsubmit="submitCourtForm(event)" class="player-form" style="border:none; padding:0; background:transparent;">
+        <input type="hidden" name="id" id="edit-court-id">
+
+        <div class="form-group" style="margin-bottom:12px;">
+          <label class="form-label" for="c-name">Nombre del Complejo</label>
+          <input type="text" id="c-name" name="name" class="form-input" placeholder="ej. Palmeras Pádel" required>
+        </div>
+
+        <div class="form-grid-3" style="margin-bottom:12px; display:grid; grid-template-columns:1.5fr 1fr 1fr; gap:12px;">
+          <div class="form-group">
+            <label class="form-label" for="c-address">Dirección</label>
+            <input type="text" id="c-address" name="address" class="form-input" placeholder="ej. San Martín entre Salta y Corrientes" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="c-city">Ciudad</label>
+            <input type="text" id="c-city" name="city" class="form-input" value="Bella Vista" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="c-province">Provincia</label>
+            <input type="text" id="c-province" name="province" class="form-input" value="Corrientes" required>
+          </div>
+        </div>
+
+        <div class="form-grid-2" style="margin-bottom:12px;">
+          <div class="form-group">
+            <label class="form-label" for="c-phone">Teléfono de contacto</label>
+            <input type="text" id="c-phone" name="phone" class="form-input" placeholder="ej. +54 3777 000000" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="c-instagram">Instagram</label>
+            <input type="text" id="c-instagram" name="instagram" class="form-input" placeholder="ej. @complejo_padel">
+          </div>
+        </div>
+
+        <div class="form-grid-2" style="margin-bottom:12px;">
+          <div class="form-group">
+            <label class="form-label" for="c-courts-count">Cantidad de Canchas</label>
+            <input type="number" id="c-courts-count" name="courts_count" class="form-input" min="1" max="10" value="2" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="c-price">Tarifa por hora ($)</label>
+            <input type="number" id="c-price" name="price_per_hour" class="form-input" min="500" max="20000" step="100" value="3000" required>
+          </div>
+        </div>
+
+        <div class="form-grid-2" style="margin-bottom:12px;">
+          <div class="form-group">
+            <label class="form-label" for="c-surface">Superficie</label>
+            <select id="c-surface" name="surface" class="form-select" required>
+              <option value="Césped sintético">Césped sintético</option>
+              <option value="Hormigón poroso">Hormigón poroso</option>
+              <option value="Alfombra">Alfombra premium</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="c-lighting">Iluminación</label>
+            <select id="c-lighting" name="lighting" class="form-select" required>
+              <option value="LED">Iluminación LED</option>
+              <option value="LED nocturna">LED nocturna focalizada</option>
+              <option value="Halógena">Halógena clásica</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-grid-3" style="margin-bottom:12px; display:grid; grid-template-columns:1fr 1fr 1.2fr; gap:12px;">
+          <div class="form-group">
+            <label class="form-label" for="c-lat">Latitud</label>
+            <input type="number" id="c-lat" name="lat" class="form-input" step="0.0001" placeholder="ej. -28.5162">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="c-lng">Longitud</label>
+            <input type="number" id="c-lng" name="lng" class="form-input" step="0.0001" placeholder="ej. -59.0515">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="c-featured">Destacada</label>
+            <select id="c-featured" name="featured" class="form-select">
+              <option value="false">Normal</option>
+              <option value="true">Destacada (con insignia)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-grid-2" style="margin-bottom:12px;">
+          <div class="form-group">
+            <label class="form-label" for="c-schedule">Horario / Agenda</label>
+            <input type="text" id="c-schedule" name="schedule" class="form-input" placeholder="ej. Lun-Dom 8:00 - 23:00" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="c-image">URL de Foto de Portada</label>
+            <input type="text" id="c-image" name="image" class="form-input" placeholder="ej. assets/images/court_top_view.png">
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:12px;">
+          <label class="form-label">Amenities / Servicios</label>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;" id="c-amenities-group">
+            <label class="checkbox-item"><input type="checkbox" value="Restó-Bar"> Restó-Bar</label>
+            <label class="checkbox-item"><input type="checkbox" value="Vestuarios"> Vestuarios</label>
+            <label class="checkbox-item"><input type="checkbox" value="Estacionamiento"> Estacionamiento</label>
+            <label class="checkbox-item"><input type="checkbox" value="Gimnasio"> Gimnasio</label>
+            <label class="checkbox-item"><input type="checkbox" value="Pileta"> Pileta</label>
+            <label class="checkbox-item"><input type="checkbox" value="Vista al río"> Vista al río</label>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:20px;">
+          <label class="form-label" for="c-description">Breve descripción</label>
+          <textarea id="c-description" name="description" class="form-input form-textarea" placeholder="Accesos, estacionamiento, etc."></textarea>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:12px;">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-court')">Cancelar</button>
+          <button type="submit" class="btn btn-primary"><span data-icon="save" style="margin-right:4px;"></span>Guardar Complejo</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: NOTICIA -->
+<div class="modal-overlay" id="modal-news">
+  <div class="modal" style="max-width:600px;">
+    <div class="modal-header">
+      <h2 id="news-modal-title">Redactar Noticia</h2>
+      <button class="modal-close" onclick="closeModal('modal-news')">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <form id="form-news" onsubmit="submitNewsForm(event)" class="player-form" style="border:none; padding:0; background:transparent;">
+        <input type="hidden" name="id" id="edit-news-id">
+
+        <div class="form-group" style="margin-bottom:12px;">
+          <label class="form-label" for="n-title">Título de la Noticia</label>
+          <input type="text" id="n-title" name="title" class="form-input" placeholder="Título..." required>
+        </div>
+
+        <div class="form-grid-2" style="margin-bottom:12px;">
+          <div class="form-group">
+            <label class="form-label" for="n-category">Categoría</label>
+            <select id="n-category" name="category" class="form-select" required>
+              <option value="Torneos">Torneos</option>
+              <option value="Jugadores">Jugadores</option>
+              <option value="Canchas">Canchas</option>
+              <option value="Comunidad">Comunidad</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="n-date">Fecha</label>
+            <input type="date" id="n-date" name="date" class="form-input" required>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:12px;">
+          <label class="form-label" for="n-excerpt">Bajada / Resumen</label>
+          <input type="text" id="n-excerpt" name="excerpt" class="form-input" placeholder="Copete..." required>
+        </div>
+
+        <div class="form-group" style="margin-bottom:12px;">
+          <label class="form-label" for="n-content">Cuerpo de la Noticia</label>
+          <textarea id="n-content" name="content" class="form-input form-textarea" placeholder="Escribí aquí..." style="min-height:140px;" required></textarea>
+        </div>
+
+        <div class="form-grid-2" style="margin-bottom:12px;">
+          <div class="form-group">
+            <label class="form-label" for="n-author">Autor</label>
+            <input type="text" id="n-author" name="author" class="form-input" placeholder="ej. Redacción PadelBell">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="n-featured">Destacada</label>
+            <select id="n-featured" name="featured" class="form-select">
+              <option value="false">Normal</option>
+              <option value="true">Destacada (portada grande)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:12px;">
+          <label class="form-label" for="n-image">URL Imagen de Portada</label>
+          <input type="text" id="n-image" name="image" class="form-input" placeholder="ej. assets/images/hero_padel_bg.png">
+        </div>
+
+        <div class="form-group" style="margin-bottom:20px;">
+          <label class="form-label" for="n-tags">Etiquetas (separadas por coma)</label>
+          <input type="text" id="n-tags" name="tags" class="form-input" placeholder="ej. corrientes, padel, final">
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:12px;">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-news')">Cancelar</button>
+          <button type="submit" class="btn btn-primary"><span data-icon="save" style="margin-right:4px;"></span>Guardar Noticia</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: DETALLES DE PARTIDO -->
+<div class="modal-overlay" id="modal-match-details">
+  <div class="modal" style="max-width:500px;">
+    <div class="modal-header">
+      <h2>Editar Detalles del Partido</h2>
+      <button class="modal-close" onclick="closeModal('modal-match-details')">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <form id="form-match-details" onsubmit="submitMatchDetailsForm(event)" class="player-form" style="border:none; padding:0; background:transparent;">
+        <input type="hidden" id="edit-match-id">
+        
+        <div class="form-group" style="margin-bottom:12px;">
+          <label class="form-label" for="em-pair-a">Pareja A</label>
+          <input type="text" id="em-pair-a" class="form-input" required>
+        </div>
+        
+        <div class="form-group" style="margin-bottom:12px;">
+          <label class="form-label" for="em-pair-b">Pareja B</label>
+          <input type="text" id="em-pair-b" class="form-input" required>
+        </div>
+
+        <div class="form-grid-2" style="margin-bottom:12px;">
+          <div class="form-group">
+            <label class="form-label" for="em-status">Estado</label>
+            <select id="em-status" class="form-select" required>
+              <option value="scheduled">Programado</option>
+              <option value="in_progress">En curso</option>
+              <option value="finished">Finalizado</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="em-winner">Ganador</label>
+            <select id="em-winner" class="form-select">
+              <option value="">Ninguno / En juego</option>
+              <option value="a">Pareja A</option>
+              <option value="b">Pareja B</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-grid-2" style="margin-bottom:12px;">
+          <div class="form-group">
+            <label class="form-label" for="em-court">Cancha</label>
+            <input type="text" id="em-court" class="form-input" placeholder="ej. Cancha 1">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="em-scoring">Modo Puntuación</label>
+            <select id="em-scoring" class="form-select">
+              <option value="ventaja">Ventaja clásica</option>
+              <option value="punto_de_oro">Punto de oro</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:20px;">
+          <label class="form-label" for="em-date">Fecha / Hora programada</label>
+          <input type="text" id="em-date" class="form-input" placeholder="ej. Sábado 18:30hs">
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:12px;">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-match-details')">Cancelar</button>
+          <button type="submit" class="btn btn-primary"><span data-icon="save" style="margin-right:4px;"></span>Guardar Detalles</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<script src="js/icons.js"></script>
+<script src="js/data.js"></script>
+<script src="js/main.js"></script>
+<script>
+  /* ================================================
+     ADMIN DASHBOARD CONTROLLER
+     ================================================ */
+  let activeTab = 'jugadores';
+
+  // State local filters
+  const filters = {
+    players: '',
+    tournaments: '',
+    news: ''
+  };
+
+  function initAdmin() {
+    // Populate Player form dropdown options
+    const catSelect = document.getElementById('p-category');
+    if (catSelect) {
+      catSelect.innerHTML = '<option value="">Seleccionar categoría</option>';
+      getCategories().forEach(c => {
+        catSelect.innerHTML += `<option value="${c}">${c}</option>`;
+      });
+    }
+
+    // Inputs search events
+    document.getElementById('search-players').addEventListener('input', debounce((e) => {
+      filters.players = e.target.value.toLowerCase().trim();
+      renderPlayersTable();
+    }, 200));
+
+    document.getElementById('search-tournaments').addEventListener('input', debounce((e) => {
+      filters.tournaments = e.target.value.toLowerCase().trim();
+      renderTournamentsTable();
+    }, 200));
+
+    document.getElementById('search-news').addEventListener('input', debounce((e) => {
+      filters.news = e.target.value.toLowerCase().trim();
+      renderNewsTable();
+    }, 200));
+
+    // Update settings form with local values
+    document.getElementById('cfg-sitename').value = 'PadelBell';
+    document.getElementById('cfg-city').value = 'Bella Vista';
+    document.getElementById('cfg-province').value = 'Corrientes';
+
+    // Rerender all
+    updateDashboardStats();
+    renderPlayersTable();
+    renderTournamentsTable();
+    renderCourtsTable();
+    renderNewsTable();
+  }
+
+  function switchTab(tabId) {
+    activeTab = tabId;
+    
+    // Sidebar nav items class updates
+    document.querySelectorAll('.admin-nav-item').forEach(item => {
+      item.classList.remove('active');
+    });
+    const activeNavItem = document.getElementById(`nav-${tabId}`);
+    if (activeNavItem) activeNavItem.classList.add('active');
+
+    // Panel updates
+    document.querySelectorAll('.admin-tab-panel').forEach(panel => {
+      panel.classList.remove('active');
+    });
+    const targetPanel = document.getElementById(`panel-${tabId}`);
+    if (targetPanel) targetPanel.classList.add('active');
+    
+    renderIcons();
+  }
+
+  function updateDashboardStats() {
+    // Real counts from DB
+    const pCount = DB.players.length;
+    const tCount = DB.tournaments.length;
+    const cCount = DB.courts.length;
+    const nCount = DB.news.length;
+
+    document.getElementById('stat-players-count').textContent = pCount;
+    document.getElementById('stat-tournaments-count').textContent = tCount;
+    document.getElementById('stat-courts-count').textContent = cCount;
+    document.getElementById('stat-news-count').textContent = nCount;
+
+    // Sidebar badges
+    document.getElementById('badge-jugadores').textContent = pCount;
+    document.getElementById('badge-torneos').textContent = tCount;
+
+    // Config info
+    const cfgP = document.getElementById('cfg-info-players');
+    const cfgT = document.getElementById('cfg-info-tournaments');
+    if (cfgP) cfgP.textContent = pCount;
+    if (cfgT) cfgT.textContent = tCount;
+  }
+
+  /* ---------- STATUS BADGE HELPER ---------- */
+  function statusBadge(status) {
+    const labels = {
+      upcoming: 'Próximo',
+      live: 'En Vivo',
+      in_progress: 'En Curso',
+      finished: 'Finalizado'
+    };
+    const cls = status === 'in_progress' ? 'in_progress' : status;
+    return `<span class="status-badge ${cls}">${labels[status] || status}</span>`;
+  }
+
+  /* ---------- PLAYERS CRUD ---------- */
+  function renderPlayersTable() {
+    const tbody = document.getElementById('admin-players-tbody');
+    let list = DB.players;
+
+    if (filters.players) {
+      list = list.filter(p => `${p.first_name} ${p.last_name} ${p.club || ''}`.toLowerCase().includes(filters.players));
+    }
+
+    if (!list.length) {
+      tbody.innerHTML = `
+        <tr><td colspan="8">
+          <div class="empty-state-panel">
+            <div class="empty-icon"><span data-icon="users" data-size="22"></span></div>
+            <div class="empty-title">Sin jugadores</div>
+            <div class="empty-msg">No se encontraron jugadores registrados. Agregá el primero.</div>
+          </div>
+        </td></tr>`;
+      renderIcons();
+      return;
+    }
+
+    tbody.innerHTML = list.map((p) => {
+      const flag = getCountryFlag(p.country);
+      return `
+        <tr>
+          <td style="font-family:var(--font-mono); font-weight:600;">${p.id}</td>
+          <td>
+            <div class="tbl-player" style="display:flex; align-items:center; gap:10px;">
+              <div class="tbl-avatar" style="width:32px; height:32px; border-radius:50%; overflow:hidden; background:var(--bg-elevated); display:flex; align-items:center; justify-content:center;">
+                <img data-src="${p.photo || 'assets/images/player_action.png'}" alt="Avatar" class="lazy-img" style="width:100%; height:100%; object-fit:cover;" onerror="this.parentElement.innerHTML='<span>${flag}</span>'">
+              </div>
+              <div>
+                <strong style="color:var(--text-primary); font-size:14px;">${p.first_name} ${p.last_name}</strong>
+                ${p.nickname ? `<span style="display:block; font-size:11px; color:var(--text-secondary);">"${p.nickname}"</span>` : ''}
+              </div>
+            </div>
+          </td>
+          <td style="text-transform:capitalize;">${p.gender}</td>
+          <td>
+            <span class="badge badge-primary" style="font-size:10px;">${p.category} cat.</span>
+          </td>
+          <td>
+            <span class="badge badge-neutral" style="font-size:8px; padding:1px 3px; border-radius:2px; margin-right:4px;">${flag}</span>
+            <span style="font-size:12px;">${p.province}</span>
+          </td>
+          <td>${p.club || '—'}</td>
+          <td style="text-align:right; font-family:var(--font-mono); font-weight:700; color:var(--accent-primary);">${p.ranking_points.toLocaleString('es-AR')}</td>
+          <td style="text-align:center;">
+            <div style="display:inline-flex; gap:6px;">
+              <button class="btn btn-secondary btn-sm" style="padding:6px 10px;" onclick="openPlayerModal('${p.id}')" title="Editar"><span data-icon="edit"></span></button>
+              <button class="btn btn-orange btn-sm" style="padding:6px 10px; color:white;" onclick="confirmDeletePlayer('${p.id}')" title="Eliminar"><span data-icon="trash"></span></button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+    initLazyImages();
+    renderIcons();
+  }
+
+  function openPlayerModal(id = null) {
+    const form = document.getElementById('form-player');
+    form.reset();
+
+    const provSelect = document.getElementById('p-province');
+    provSelect.innerHTML = '<option value="">Seleccionar provincia</option>';
+    provSelect.disabled = true;
+
+    // Populate Partner Select
+    const partnerSelect = document.getElementById('p-partner');
+    if (partnerSelect) {
+      partnerSelect.innerHTML = '<option value="">Sin compañero asignado</option>';
+      DB.players.forEach(other => {
+        if (id && other.id === id) return;
+        partnerSelect.innerHTML += `<option value="${other.id}">${other.first_name} ${other.last_name}</option>`;
+      });
+    }
+
+    if (id) {
+      document.getElementById('player-modal-title').textContent = 'Editar Jugador';
+      const p = DB.players.find(x => x.id === id);
+      if (p) {
+        document.getElementById('edit-player-id').value = p.id;
+        document.getElementById('p-firstname').value = p.first_name;
+        document.getElementById('p-lastname').value = p.last_name;
+        document.getElementById('p-nickname').value = p.nickname || '';
+        document.getElementById('p-gender').value = p.gender;
+        document.getElementById('p-birthdate').value = p.birthdate || '';
+        document.getElementById('p-club').value = p.club || '';
+        document.getElementById('p-height').value = p.height || 180;
+        document.getElementById('p-weight').value = p.weight || 75;
+        document.getElementById('p-hand').value = p.dominant_hand;
+        document.getElementById('p-position').value = p.position;
+        document.getElementById('p-category').value = p.category;
+        document.getElementById('p-points').value = p.ranking_points;
+        document.getElementById('p-instagram').value = p.instagram || '';
+        document.getElementById('p-bio').value = p.bio || '';
+        
+        // Nuevos campos
+        document.getElementById('p-city').value = p.city || '';
+        document.getElementById('p-active').value = p.active !== false ? 'true' : 'false';
+        document.getElementById('p-partner').value = p.partner_id || '';
+        document.getElementById('p-photo').value = p.photo || '';
+        document.getElementById('p-winrate').value = p.win_rate || 0;
+        document.getElementById('p-tournaments-played').value = p.tournaments_played || 0;
+        document.getElementById('p-titles').value = p.titles || 0;
+
+        const countrySelect = document.getElementById('p-country');
+        countrySelect.value = p.country;
+        if (p.country) {
+          const reg = getRegions()[p.country];
+          if (reg) {
+            provSelect.disabled = false;
+            reg.provinces.forEach(prov => {
+              const opt = document.createElement('option');
+              opt.value = prov;
+              opt.textContent = prov;
+              if (prov === p.province) opt.selected = true;
+              provSelect.appendChild(opt);
+            });
+          }
+        }
+      }
+    } else {
+      document.getElementById('player-modal-title').textContent = 'Agregar Jugador';
+      document.getElementById('edit-player-id').value = '';
+      
+      // Valores por defecto para nuevos
+      document.getElementById('p-city').value = 'Bella Vista';
+      document.getElementById('p-active').value = 'true';
+      document.getElementById('p-partner').value = '';
+      document.getElementById('p-photo').value = '';
+      document.getElementById('p-winrate').value = 0;
+      document.getElementById('p-tournaments-played').value = 0;
+      document.getElementById('p-titles').value = 0;
+    }
+
+    openModal('modal-player');
+    renderIcons();
+  }
+
+  /* ------ Helper: validación visual de formularios ------ */
+  function validateForm(formId, requiredFields) {
+    let valid = true;
+    requiredFields.forEach(function(fieldId) {
+      const el = document.getElementById(fieldId);
+      if (!el) return;
+      el.classList.remove('input-error');
+      const val = el.value.trim();
+      if (!val) {
+        el.classList.add('input-error');
+        el.addEventListener('input', function() { el.classList.remove('input-error'); }, { once: true });
+        valid = false;
+      }
+    });
+    if (!valid) showToast('Completá los campos requeridos (marcados en rojo)', 'error');
+    return valid;
+  }
+
+  function submitPlayerForm(e) {
+    e.preventDefault();
+    if (!validateForm('form-player', ['p-firstname', 'p-lastname', 'p-gender', 'p-birthdate', 'p-category', 'p-country'])) return;
+    const form = document.getElementById('form-player');
+    const formData = new FormData(form);
+    const id = formData.get('id');
+
+    const playerData = {
+      first_name: formData.get('first_name'),
+      last_name: formData.get('last_name'),
+      nickname: formData.get('nickname'),
+      gender: formData.get('gender'),
+      birthdate: formData.get('birthdate'),
+      club: formData.get('club') || '',
+      height: parseInt(formData.get('height')) || 180,
+      weight: parseInt(formData.get('weight')) || 75,
+      dominant_hand: formData.get('dominant_hand'),
+      position: formData.get('position'),
+      category: formData.get('category'),
+      level: formData.get('category'),
+      country: formData.get('country'),
+      province: formData.get('province'),
+      ranking_points: parseInt(formData.get('ranking_points')) || 0,
+      instagram: formData.get('instagram') || '',
+      bio: formData.get('bio') || '',
+      city: formData.get('city') || '',
+      active: formData.get('active') === 'true',
+      partner_id: formData.get('partner_id') || null,
+      photo: formData.get('photo') || null,
+      win_rate: parseInt(formData.get('win_rate')) || 0,
+      tournaments_played: parseInt(formData.get('tournaments_played')) || 0,
+      titles: parseInt(formData.get('titles')) || 0
+    };
+
+    if (id) {
+      updatePlayer(id, playerData);
+      showToast('Jugador actualizado con éxito', 'success');
+    } else {
+      addPlayer(playerData);
+      showToast('Jugador agregado con éxito', 'success');
+    }
+
+    saveDB();
+    closeModal('modal-player');
+    updateDashboardStats();
+    renderPlayersTable();
+  }
+
+  function confirmDeletePlayer(id) {
+    const p = DB.players.find(x => x.id === id);
+    if (!p) return;
+
+    if (confirm(`Eliminar a ${p.first_name} ${p.last_name}?`)) {
+      deletePlayer(id);
+      saveDB();
+      showToast('Jugador eliminado', 'success');
+      updateDashboardStats();
+      renderPlayersTable();
+    }
+  }
+
+
+  /* ---------- TORNEOS CRUD ---------- */
+  function renderTournamentsTable() {
+    const tbody = document.getElementById('admin-tournaments-tbody');
+    let list = DB.tournaments;
+
+    if (filters.tournaments) {
+      list = list.filter(t => t.name.toLowerCase().includes(filters.tournaments) || t.venue.toLowerCase().includes(filters.tournaments));
+    }
+
+    if (!list.length) {
+      tbody.innerHTML = `
+        <tr><td colspan="8">
+          <div class="empty-state-panel">
+            <div class="empty-icon"><span data-icon="trophy" data-size="22"></span></div>
+            <div class="empty-title">Sin torneos</div>
+            <div class="empty-msg">No hay torneos registrados. Creá el primero con el botón "Nuevo Torneo".</div>
+          </div>
+        </td></tr>`;
+      renderIcons();
+      return;
+    }
+
+    tbody.innerHTML = list.map(t => `
+      <tr>
+        <td style="font-family:var(--font-mono); font-weight:600;">${t.id}</td>
+        <td><strong>${t.name}</strong></td>
+        <td>${t.venue} · ${t.city}</td>
+        <td style="font-family:var(--font-mono); font-size:11px;">${formatDateShort(t.start_date)}<br>${formatDateShort(t.end_date)}</td>
+        <td>
+          <span class="badge badge-primary" style="font-size:10px;">${t.category}</span>
+          <span style="font-size:11px; color:var(--text-secondary); display:block; margin-top:2px; text-transform:capitalize;">${t.gender}</span>
+        </td>
+        <td>
+          <select class="status-select" onchange="changeTournamentStatus('${t.id}', this.value)">
+            <option value="upcoming" ${t.status === 'upcoming' ? 'selected' : ''}>Próximo</option>
+            <option value="live" ${t.status === 'live' ? 'selected' : ''}>En Vivo</option>
+            <option value="in_progress" ${t.status === 'in_progress' ? 'selected' : ''}>En Curso</option>
+            <option value="finished" ${t.status === 'finished' ? 'selected' : ''}>Finalizado</option>
+          </select>
+          <div style="margin-top:4px;">${statusBadge(t.status)}</div>
+        </td>
+        <td style="text-align:right; font-family:var(--font-mono); font-weight:600; color:var(--accent-orange);">${formatPrice(t.prize)}</td>
+        <td style="text-align:center;">
+          <div style="display:inline-flex; gap:6px;">
+            <button class="btn btn-primary btn-sm" style="padding:6px 10px;" onclick="openTournamentConsole('${t.id}')" title="Gestionar Fases"><span data-icon="settings"></span></button>
+            <button class="btn btn-secondary btn-sm" style="padding:6px 10px;" onclick="openTournamentModal('${t.id}')" title="Editar"><span data-icon="edit"></span></button>
+            <button class="btn btn-orange btn-sm" style="padding:6px 10px; color:white;" onclick="confirmDeleteTournament('${t.id}')" title="Eliminar"><span data-icon="trash"></span></button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+    renderIcons();
+  }
+
+  function changeTournamentStatus(id, newStatus) {
+    const t = DB.tournaments.find(x => x.id === id);
+    if (!t) return;
+    t.status = newStatus;
+    saveDB();
+    showToast(`Estado de "${t.name}" actualizado a: ${newStatus}`, 'success');
+    renderTournamentsTable();
+  }
+
+  function openTournamentModal(id = null) {
+    const form = document.getElementById('form-tournament');
+    form.reset();
+
+    if (id) {
+      document.getElementById('tournament-modal-title').textContent = 'Editar Torneo';
+      const t = DB.tournaments.find(x => x.id === id);
+      if (t) {
+        document.getElementById('edit-tournament-id').value = t.id;
+        document.getElementById('t-name').value = t.name;
+        document.getElementById('t-venue').value = t.venue;
+        document.getElementById('t-city').value = t.city;
+        document.getElementById('t-start').value = t.start_date;
+        document.getElementById('t-end').value = t.end_date;
+        document.getElementById('t-gender').value = t.gender;
+        document.getElementById('t-category').value = t.category;
+        document.getElementById('t-prize').value = t.prize;
+        document.getElementById('t-status').value = t.status;
+        document.getElementById('t-description').value = t.description || '';
+        if (t.province) document.getElementById('t-province').value = t.province;
+        if (t.scoring_mode) document.getElementById('t-scoring').value = t.scoring_mode;
+        
+        // Nuevos campos
+        document.getElementById('t-shortname').value = t.short_name || '';
+        document.getElementById('t-country').value = t.country || 'argentina';
+        document.getElementById('t-format').value = t.format || 'grupos_y_eliminacion';
+        document.getElementById('t-setstowin').value = t.sets_to_win !== undefined ? t.sets_to_win : 2;
+        document.getElementById('t-gamesperset').value = t.games_per_set !== undefined ? t.games_per_set : 6;
+        document.getElementById('t-image').value = t.image || 'assets/images/hero_padel_bg.png';
+        document.getElementById('t-organizer').value = t.organizer || '';
+      }
+    } else {
+      document.getElementById('tournament-modal-title').textContent = 'Registrar Torneo';
+      document.getElementById('edit-tournament-id').value = '';
+      document.getElementById('t-start').value = new Date().toISOString().split('T')[0];
+      document.getElementById('t-end').value = new Date().toISOString().split('T')[0];
+      
+      // Default nuevos campos
+      document.getElementById('t-shortname').value = '';
+      document.getElementById('t-country').value = 'argentina';
+      document.getElementById('t-format').value = 'grupos_y_eliminacion';
+      document.getElementById('t-setstowin').value = 2;
+      document.getElementById('t-gamesperset').value = 6;
+      document.getElementById('t-image').value = 'assets/images/hero_padel_bg.png';
+      document.getElementById('t-organizer').value = 'Federación Correntina de Pádel';
+    }
+
+    openModal('modal-tournament');
+    renderIcons();
+  }
+
+  function submitTournamentForm(e) {
+    e.preventDefault();
+    if (!validateForm('form-tournament', ['t-name', 't-venue', 't-city', 't-start', 't-end'])) return;
+    const form = document.getElementById('form-tournament');
+    const formData = new FormData(form);
+    const id = formData.get('id');
+
+    const tournamentData = {
+      name: formData.get('name'),
+      venue: formData.get('venue'),
+      city: formData.get('city') || 'Bella Vista',
+      province: formData.get('province') || 'Corrientes',
+      country: formData.get('country') || 'argentina',
+      start_date: formData.get('start_date'),
+      end_date: formData.get('end_date'),
+      gender: formData.get('gender'),
+      category: formData.get('category'),
+      scoring_mode: formData.get('scoring_mode') || 'ventaja',
+      prize: parseInt(formData.get('prize')) || 100000,
+      status: formData.get('status'),
+      description: formData.get('description') || '',
+      short_name: formData.get('short_name') || formData.get('name'),
+      format: formData.get('format') || 'grupos_y_eliminacion',
+      sets_to_win: parseInt(formData.get('sets_to_win')) || 2,
+      games_per_set: parseInt(formData.get('games_per_set')) || 6,
+      image: formData.get('image') || 'assets/images/hero_padel_bg.png',
+      organizer: formData.get('organizer') || ''
+    };
+
+    if (id) {
+      updateTournament(id, tournamentData);
+      showToast('Torneo actualizado con éxito', 'success');
+    } else {
+      addTournament(tournamentData);
+      showToast('Torneo registrado con éxito', 'success');
+    }
+
+    saveDB();
+    closeModal('modal-tournament');
+    updateDashboardStats();
+    renderTournamentsTable();
+  }
+
+  function confirmDeleteTournament(id) {
+    const idx = DB.tournaments.findIndex(x => x.id === id);
+    if (idx === -1) return;
+
+    if (confirm(`Eliminar el torneo: "${DB.tournaments[idx].name}"?`)) {
+      DB.tournaments.splice(idx, 1);
+      saveDB();
+      showToast('Torneo eliminado', 'success');
+      updateDashboardStats();
+      renderTournamentsTable();
+    }
+  }
+
+
+  /* ---------- COURTS CRUD ---------- */
+  function renderCourtsTable() {
+    const tbody = document.getElementById('admin-courts-tbody');
+    const list = DB.courts;
+
+    if (!list.length) {
+      tbody.innerHTML = `
+        <tr><td colspan="8">
+          <div class="empty-state-panel">
+            <div class="empty-icon"><span data-icon="court" data-size="22"></span></div>
+            <div class="empty-title">Sin complejos</div>
+            <div class="empty-msg">No hay complejos deportivos registrados. Agregá el primero.</div>
+          </div>
+        </td></tr>`;
+      renderIcons();
+      return;
+    }
+
+    tbody.innerHTML = list.map(c => `
+      <tr>
+        <td style="font-family:var(--font-mono); font-weight:600;">${c.id}</td>
+        <td><strong>${c.name}</strong></td>
+        <td>${c.address}, ${c.city}</td>
+        <td style="font-family:var(--font-mono); font-weight:600; text-align:center;">${c.courts_count}</td>
+        <td>${c.surface} · ${c.lighting}</td>
+        <td style="text-align:right; font-family:var(--font-mono); font-weight:600; color:var(--accent-orange);">${formatPrice(c.price_per_hour)}</td>
+        <td>
+          <button class="badge ${c.featured ? 'badge-orange' : 'badge-neutral'}" style="cursor:pointer;" onclick="toggleCourtFeatured('${c.id}')">
+            ${c.featured ? 'Destacado' : 'Normal'}
+          </button>
+        </td>
+        <td style="text-align:center;">
+          <div style="display:inline-flex; gap:6px;">
+            <button class="btn btn-secondary btn-sm" style="padding:6px 10px;" onclick="openCourtModal('${c.id}')" title="Editar"><span data-icon="edit"></span></button>
+            <button class="btn btn-orange btn-sm" style="padding:6px 10px; color:white;" onclick="confirmDeleteCourt('${c.id}')" title="Eliminar"><span data-icon="trash"></span></button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+    renderIcons();
+  }
+
+  function openCourtModal(id = null) {
+    const form = document.getElementById('form-court');
+    form.reset();
+
+    document.querySelectorAll('#c-amenities-group input[type="checkbox"]').forEach(cb => cb.checked = false);
+
+    if (id) {
+      document.getElementById('court-modal-title').textContent = 'Editar Cancha / Complejo';
+      const c = DB.courts.find(x => x.id === id);
+      if (c) {
+        document.getElementById('edit-court-id').value = c.id;
+        document.getElementById('c-name').value = c.name;
+        document.getElementById('c-address').value = c.address;
+        document.getElementById('c-city').value = c.city;
+        document.getElementById('c-phone').value = c.phone;
+        document.getElementById('c-instagram').value = c.instagram || '';
+        document.getElementById('c-courts-count').value = c.courts_count;
+        document.getElementById('c-price').value = c.price_per_hour;
+        document.getElementById('c-surface').value = c.surface;
+        document.getElementById('c-lighting').value = c.lighting;
+        document.getElementById('c-schedule').value = c.schedule;
+        document.getElementById('c-description').value = c.description || '';
+        
+        // Nuevos campos
+        document.getElementById('c-province').value = c.province || 'Corrientes';
+        document.getElementById('c-lat').value = c.coordinates?.lat || '';
+        document.getElementById('c-lng').value = c.coordinates?.lng || '';
+        document.getElementById('c-featured').value = c.featured === true ? 'true' : 'false';
+        document.getElementById('c-image').value = c.image || 'assets/images/court_top_view.png';
+        
+        if (c.amenities) {
+          c.amenities.forEach(a => {
+            const cb = Array.from(document.querySelectorAll('#c-amenities-group input[type="checkbox"]')).find(el => el.value === a);
+            if (cb) cb.checked = true;
+          });
+        }
+      }
+    } else {
+      document.getElementById('court-modal-title').textContent = 'Registrar Complejo / Cancha';
+      document.getElementById('edit-court-id').value = '';
+      
+      // Default nuevos campos
+      document.getElementById('c-province').value = 'Corrientes';
+      document.getElementById('c-lat').value = '';
+      document.getElementById('c-lng').value = '';
+      document.getElementById('c-featured').value = 'false';
+      document.getElementById('c-image').value = 'assets/images/court_top_view.png';
+    }
+
+    openModal('modal-court');
+    renderIcons();
+  }
+
+  function submitCourtForm(e) {
+    e.preventDefault();
+    if (!validateForm('form-court', ['c-name', 'c-address', 'c-city', 'c-phone'])) return;
+    const form = document.getElementById('form-court');
+    const formData = new FormData(form);
+    const id = formData.get('id');
+
+    const activeAmenities = [];
+    document.querySelectorAll('#c-amenities-group input[type="checkbox"]:checked').forEach(cb => {
+      activeAmenities.push(cb.value);
+    });
+
+    const courtData = {
+      name: formData.get('name'),
+      address: formData.get('address'),
+      city: formData.get('city') || 'Bella Vista',
+      province: formData.get('province') || 'Corrientes',
+      phone: formData.get('phone'),
+      instagram: formData.get('instagram') || '@padelbell_bv',
+      courts_count: parseInt(formData.get('courts_count')) || 1,
+      price_per_hour: parseInt(formData.get('price_per_hour')) || 3000,
+      surface: formData.get('surface'),
+      lighting: formData.get('lighting'),
+      schedule: formData.get('schedule') || 'Lun-Dom 8:00 - 22:00',
+      amenities: activeAmenities,
+      description: formData.get('description') || '',
+      coordinates: {
+        lat: parseFloat(formData.get('lat')) || -28.5162,
+        lng: parseFloat(formData.get('lng')) || -59.0515
+      },
+      featured: formData.get('featured') === 'true',
+      image: formData.get('image') || 'assets/images/court_top_view.png'
+    };
+
+    if (id) {
+      const idx = DB.courts.findIndex(x => x.id === id);
+      if (idx !== -1) {
+        DB.courts[idx] = { ...DB.courts[idx], ...courtData };
+        showToast('Complejo deportivo actualizado', 'success');
+      }
+    } else {
+      courtData.id = 'c' + Date.now();
+      DB.courts.push(courtData);
+      showToast('Complejo deportivo registrado', 'success');
+    }
+
+    saveDB();
+    closeModal('modal-court');
+    updateDashboardStats();
+    renderCourtsTable();
+  }
+
+  function toggleCourtFeatured(id) {
+    const c = DB.courts.find(x => x.id === id);
+    if (!c) return;
+    c.featured = !c.featured;
+    saveDB();
+    showToast(`Estado destacado modificado para "${c.name}"`, 'success');
+    renderCourtsTable();
+  }
+
+  function confirmDeleteCourt(id) {
+    const idx = DB.courts.findIndex(x => x.id === id);
+    if (idx === -1) return;
+
+    if (confirm(`Eliminar el complejo: "${DB.courts[idx].name}"?`)) {
+      DB.courts.splice(idx, 1);
+      saveDB();
+      showToast('Complejo eliminado', 'success');
+      updateDashboardStats();
+      renderCourtsTable();
+    }
+  }
+
+
+  /* ---------- NEWS CRUD ---------- */
+  function renderNewsTable() {
+    const tbody = document.getElementById('admin-news-tbody');
+    let list = DB.news;
+
+    if (filters.news) {
+      list = list.filter(n => n.title.toLowerCase().includes(filters.news) || n.excerpt.toLowerCase().includes(filters.news));
+    }
+
+    if (!list.length) {
+      tbody.innerHTML = `
+        <tr><td colspan="7">
+          <div class="empty-state-panel">
+            <div class="empty-icon"><span data-icon="news" data-size="22"></span></div>
+            <div class="empty-title">Sin noticias</div>
+            <div class="empty-msg">No hay artículos redactados. Creá el primero con "Nueva Noticia".</div>
+          </div>
+        </td></tr>`;
+      renderIcons();
+      return;
+    }
+
+    tbody.innerHTML = list.map(n => `
+      <tr>
+        <td style="font-family:var(--font-mono); font-weight:600;">${n.id}</td>
+        <td><strong>${n.title.substring(0, 55)}${n.title.length > 55 ? '...' : ''}</strong></td>
+        <td><span class="badge badge-primary" style="font-size:10px;">${n.category}</span></td>
+        <td style="font-family:var(--font-mono); font-size:12px;">${formatDateShort(n.date)}</td>
+        <td>${n.author}</td>
+        <td>
+          <button class="badge ${n.featured ? 'badge-orange' : 'badge-neutral'}" style="cursor:pointer;" onclick="toggleNewsFeatured('${n.id}')">
+            ${n.featured ? 'Destacada' : 'Normal'}
+          </button>
+        </td>
+        <td style="text-align:center;">
+          <div style="display:inline-flex; gap:6px;">
+            <button class="btn btn-secondary btn-sm" style="padding:6px 10px;" onclick="openNewsModal('${n.id}')" title="Editar"><span data-icon="edit"></span></button>
+            <button class="btn btn-orange btn-sm" style="padding:6px 10px; color:white;" onclick="confirmDeleteNews('${n.id}')" title="Eliminar"><span data-icon="trash"></span></button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+    renderIcons();
+  }
+
+  function openNewsModal(id = null) {
+    const form = document.getElementById('form-news');
+    form.reset();
+
+    if (id) {
+      document.getElementById('news-modal-title').textContent = 'Editar Noticia';
+      const n = DB.news.find(x => x.id === id);
+      if (n) {
+        document.getElementById('edit-news-id').value = n.id;
+        document.getElementById('n-title').value = n.title;
+        document.getElementById('n-category').value = n.category;
+        document.getElementById('n-date').value = n.date;
+        document.getElementById('n-excerpt').value = n.excerpt;
+        document.getElementById('n-content').value = n.content;
+        document.getElementById('n-tags').value = n.tags ? n.tags.join(', ') : '';
+        
+        // Nuevos campos
+        document.getElementById('n-author').value = n.author || '';
+        document.getElementById('n-featured').value = n.featured === true ? 'true' : 'false';
+        document.getElementById('n-image').value = n.image || 'assets/images/hero_padel_bg.png';
+      }
+    } else {
+      document.getElementById('news-modal-title').textContent = 'Redactar Noticia';
+      document.getElementById('edit-news-id').value = '';
+      document.getElementById('n-date').value = new Date().toISOString().split('T')[0];
+      
+      // Default nuevos campos
+      document.getElementById('n-author').value = 'Admin PadelBell';
+      document.getElementById('n-featured').value = 'false';
+      document.getElementById('n-image').value = 'assets/images/hero_padel_bg.png';
+    }
+
+    openModal('modal-news');
+    renderIcons();
+  }
+
+  function submitNewsForm(e) {
+    e.preventDefault();
+    const form = document.getElementById('form-news');
+    const formData = new FormData(form);
+    const id = formData.get('id');
+
+    const tagsInput = formData.get('tags');
+    const tagsArr = tagsInput
+      ? tagsInput.split(',').map(t => t.trim().toLowerCase()).filter(Boolean)
+      : [];
+
+    const newsData = {
+      title: formData.get('title'),
+      category: formData.get('category'),
+      date: formData.get('date'),
+      excerpt: formData.get('excerpt'),
+      content: formData.get('content'),
+      tags: tagsArr,
+      author: formData.get('author') || 'Admin PadelBell',
+      featured: formData.get('featured') === 'true',
+      image: formData.get('image') || 'assets/images/hero_padel_bg.png'
+    };
+
+    if (id) {
+      const idx = DB.news.findIndex(x => x.id === id);
+      if (idx !== -1) {
+        DB.news[idx] = { ...DB.news[idx], ...newsData };
+        showToast('Noticia actualizada con éxito', 'success');
+      }
+    } else {
+      newsData.id = 'n' + Date.now();
+      DB.news.unshift(newsData);
+      showToast('Noticia redactada con éxito', 'success');
+    }
+
+    saveDB();
+    closeModal('modal-news');
+    updateDashboardStats();
+    renderNewsTable();
+  }
+
+  function toggleNewsFeatured(id) {
+    const n = DB.news.find(x => x.id === id);
+    if (!n) return;
+
+    const nextFeatured = !n.featured;
+    if (nextFeatured) {
+      DB.news.forEach(item => item.featured = false);
+    }
+    n.featured = nextFeatured;
+
+    saveDB();
+    showToast('Cambiado estado de portada destacada', 'success');
+    renderNewsTable();
+  }
+
+  function confirmDeleteNews(id) {
+    const idx = DB.news.findIndex(x => x.id === id);
+    if (idx === -1) return;
+
+    if (confirm(`Eliminar noticia: "${DB.news[idx].title.substring(0,35)}..."?`)) {
+      DB.news.splice(idx, 1);
+      saveDB();
+      showToast('Artículo eliminado', 'success');
+      updateDashboardStats();
+      renderNewsTable();
+    }
+  }
+
+
+  /* ---------- TOURNAMENT MANAGEMENT CONSOLE ---------- */
+  let consoleTournamentId = null;
+  let consoleActiveTab = 'inicio';
+
+  window.openTournamentConsole = function(id) {
+    consoleTournamentId = id;
+    const t = getTournamentById(id);
+    if (!t) return;
+
+    // Set header details
+    document.getElementById('console-tournament-name').textContent = `Gestionar: ${t.name}`;
+    
+    const statusLabels = { upcoming: 'Programado', live: 'En Vivo', finished: 'Finalizado' };
+    const statusBadge = document.getElementById('console-tournament-status');
+    statusBadge.textContent = statusLabels[t.status] || t.status;
+    statusBadge.className = `badge ${t.status === 'live' ? 'badge-live' : (t.status === 'finished' ? 'badge-neutral' : 'badge-primary')}`;
+    
+    document.getElementById('console-tournament-meta').textContent = `${t.category} · ${t.gender} · Sede: ${t.venue}`;
+
+    openModal('modal-tournament-console');
+    switchConsoleTab('inicio');
+  };
+
+  window.switchConsoleTab = function(tab) {
+    consoleActiveTab = tab;
+    // Update active nav classes
+    document.querySelectorAll('.console-tab-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.id === `console-nav-${tab}`);
+    });
+    renderConsoleContent();
+  };
+
+  window.renderConsoleContent = function() {
+    const t = getTournamentById(consoleTournamentId);
+    const panel = document.getElementById('console-content-panel');
+    if (!t || !panel) return;
+
+    if (consoleActiveTab === 'inicio') {
+      let statusInfo = '';
+      let actionButtons = '';
+
+      if (t.status === 'upcoming') {
+        statusInfo = `<div style="background:rgba(0,180,216,0.06); border:1px solid rgba(0,180,216,0.15); padding:16px; border-radius:var(--radius-md); margin-bottom:20px; font-size:13px; color:var(--text-secondary); line-height:1.6;">
+          <strong>Estado: Programado / Inscripciones Abiertas</strong><br>
+          Para comenzar el torneo, asegúrate de distribuir las parejas en las zonas correspondientes y luego presiona "Empezar Torneo". Esto generará el fixture de todos contra todos automáticamente.
+        </div>`;
+        actionButtons = `
+          <button class="btn btn-primary" onclick="consoleStartTournament()" style="width:100%;">
+            <span data-icon="play" style="margin-right:6px;"></span>Empezar Torneo (Generar Fixture)
+          </button>`;
+      } else {
+        statusInfo = `<div style="background:rgba(232,132,31,0.06); border:1px solid rgba(232,132,31,0.15); padding:16px; border-radius:var(--radius-md); margin-bottom:20px; font-size:13px; color:var(--text-secondary); line-height:1.6;">
+          <strong>Estado: En Juego</strong><br>
+          El fixture de grupos ya está generado. Puedes editar los marcadores de las zonas o avanzar a la fase eliminatoria si todos los partidos terminaron.
+        </div>`;
+        actionButtons = `
+          <button class="btn btn-orange" onclick="consoleResetTournament()" style="width:100%; color:white;">
+            <span data-icon="alert" style="margin-right:6px;"></span>Reiniciar Torneo
+          </button>`;
+      }
+
+      // Render zones configuration
+      let zonesHTML = '';
+      if (!t.zones || !t.zones.length) {
+        zonesHTML = `<div style="color:var(--text-muted); font-size:13px; padding:16px; background:var(--bg-elevated); border-radius:var(--radius-sm); text-align:center;">No hay zonas configuradas en el torneo.</div>`;
+      } else {
+        zonesHTML = t.zones.map(z => {
+          const pairsList = z.pairs && z.pairs.length 
+            ? z.pairs.map((p, idx) => `
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:var(--radius-xs); margin-bottom:6px;">
+                  <span style="font-size:13px; font-weight:600;">${p}</span>
+                  ${t.status === 'upcoming' ? `<button class="btn btn-orange btn-sm" style="padding:4px 8px; font-size:11px;" onclick="consoleRemovePair('${z.id}', '${p}')">Eliminar</button>` : ''}
+                </div>
+              `).join('')
+            : '<div style="color:var(--text-muted); font-size:12px; font-style:italic;">Sin parejas inscritas</div>';
+
+          return `
+            <div style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:16px; margin-bottom:20px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <h4 style="font-family:var(--font-mono); font-size:13px; text-transform:uppercase; color:var(--accent-primary);">${z.name}</h4>
+                <span style="font-size:11px; color:var(--text-muted);">${z.pairs?.length || 0} parejas</span>
+              </div>
+              <div style="margin-bottom:12px;">${pairsList}</div>
+              ${t.status === 'upcoming' ? `
+                <div style="display:flex; gap:8px;">
+                  <input type="text" placeholder="Nueva pareja (ej: Ramírez / Medina)" id="input-new-pair-${z.id}" class="form-input" style="font-size:12px; padding:6px 10px;">
+                  <button class="btn btn-primary btn-sm" onclick="consoleAddPair('${z.id}')">Agregar</button>
+                </div>
+              ` : ''}
+            </div>
+          `;
+        }).join('');
+      }
+
+      panel.innerHTML = `
+        <h3 style="font-family:var(--font-mono); font-size:14px; text-transform:uppercase; color:var(--accent-orange); margin-bottom:16px; border-bottom:1px solid var(--border-subtle); padding-bottom:8px;">Parejas del Torneo</h3>
+        ${statusInfo}
+        <div style="display:grid; grid-template-columns:1.5fr 1fr; gap:24px;">
+          <div>
+            <h4 style="font-size:13px; font-weight:700; color:var(--text-primary); margin-bottom:12px;">Zonas y Equipos</h4>
+            ${zonesHTML}
+          </div>
+          <div>
+            <h4 style="font-size:13px; font-weight:700; color:var(--text-primary); margin-bottom:12px;">Acciones del Ciclo</h4>
+            ${actionButtons}
+          </div>
+        </div>
+      `;
+    } 
+    
+    else if (consoleActiveTab === 'grupos') {
+      if (t.status === 'upcoming') {
+        panel.innerHTML = `<div style="text-align:center; padding:48px 24px; color:var(--text-muted);">
+          <div style="font-size:40px; margin-bottom:12px;"><span data-icon="grid" data-size="40"></span></div>
+          <p>El torneo aún no ha comenzado. Debes configurarlo y presionar "Empezar Torneo" en la pestaña "Inicio y Parejas".</p>
+        </div>`;
+        renderIcons();
+        return;
+      }
+
+      // Check if all group matches finished
+      const groupMatches = t.matches.filter(m => m.round === 'grupo');
+      const pendingCount = groupMatches.filter(m => m.status !== 'finished').length;
+      const isGroupsCompleted = groupMatches.length > 0 && pendingCount === 0;
+
+      let advanceBtn = '';
+      if (t.status === 'live') {
+        advanceBtn = `
+          <div style="margin-top:24px; padding:20px; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); text-align:center;">
+            <p style="font-size:13px; color:var(--text-secondary); margin-bottom:12px;">
+              ${isGroupsCompleted 
+                ? '¡Todos los partidos de zona han finalizado! Ya puedes calcular las posiciones finales y avanzar al cuadro eliminatorio.' 
+                : `Faltan terminar <strong>${pendingCount}</strong> partidos de zona para poder avanzar a las llaves eliminatorias.`}
+            </p>
+            <button class="btn btn-primary" onclick="consoleAdvanceToBracket()" ${isGroupsCompleted ? '' : 'disabled'} style="font-weight:700; min-width:240px;">
+              Avanzar a Fase de Llaves (Semifinales)
+            </button>
+          </div>`;
+      } else if (t.status === 'finished') {
+        advanceBtn = `
+          <div style="margin-top:24px; padding:16px; background:rgba(34,197,94,0.06); border:1px solid rgba(34,197,94,0.15); border-radius:var(--radius-lg); text-align:center; color:#22c55e; font-size:13px; font-weight:600;">
+            El torneo ha finalizado completamente.
+          </div>`;
+      } else {
+        // En llaves ya
+        advanceBtn = `
+          <div style="margin-top:24px; padding:16px; background:rgba(0,180,216,0.06); border:1px solid rgba(0,180,216,0.15); border-radius:var(--radius-lg); text-align:center; color:var(--accent-primary); font-size:13px; font-weight:600;">
+            Fase de grupos completada. Compitiendo en Fase de Llaves.
+          </div>`;
+      }
+
+      let zonesListHTML = t.zones.map(z => {
+        // Recalcular standings para mostrar
+        calculateZoneStandings(t.id, z.id);
+
+        const standingsRows = z.standings && z.standings.length
+          ? z.standings.map(row => `
+              <tr>
+                <td><span style="font-weight:600; font-family:var(--font-mono); color:var(--accent-primary); margin-right:8px;">${row.rank}</span>${row.pair}</td>
+                <td style="text-align:center;">${row.w + row.l}</td>
+                <td style="text-align:center; color:#22c55e;">${row.w}</td>
+                <td style="text-align:center; color:#ef4444;">${row.l}</td>
+                <td style="text-align:center; font-family:var(--font-mono);">${row.sg}</td>
+                <td style="text-align:center; font-weight:700; color:var(--accent-orange);">${row.pts}</td>
+              </tr>
+            `).join('')
+          : '<tr><td colspan="6" style="text-align:center; color:var(--text-muted); font-size:11px;">Sin datos de posiciones</td></tr>';
+
+        const matchesList = t.matches.filter(m => m.zone_id === z.id);
+        const matchesHTML = matchesList.length
+          ? matchesList.map(m => buildConsoleMatchEditorRow(t.id, m)).join('')
+          : '<div style="color:var(--text-muted); font-size:12px; font-style:italic;">No se han generado partidos para esta zona.</div>';
+
+        return `
+          <div style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); padding:20px; margin-bottom:24px;">
+            <h4 style="font-family:var(--font-mono); font-size:14px; text-transform:uppercase; color:var(--accent-primary); margin-bottom:16px;">${z.name}</h4>
+            
+            <div style="display:grid; grid-template-columns:1.2fr 1fr; gap:20px; align-items:start;">
+              <!-- Partidos de la zona -->
+              <div>
+                <h5 style="font-size:12px; color:var(--text-muted); margin-bottom:10px; font-family:var(--font-mono); text-transform:uppercase;">Fixture de Partidos</h5>
+                ${matchesHTML}
+              </div>
+              <!-- Tabla de la zona -->
+              <div>
+                <h5 style="font-size:12px; color:var(--text-muted); margin-bottom:10px; font-family:var(--font-mono); text-transform:uppercase;">Tabla de Posiciones</h5>
+                <table class="data-table" style="font-size:12px;">
+                  <thead>
+                    <tr>
+                      <th>Pareja</th>
+                      <th style="text-align:center; width:30px;">PJ</th>
+                      <th style="text-align:center; width:30px;">G</th>
+                      <th style="text-align:center; width:30px;">P</th>
+                      <th style="text-align:center; width:45px;">Diff S</th>
+                      <th style="text-align:center; width:40px;">Pts</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${standingsRows}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      panel.innerHTML = `
+        <h3 style="font-family:var(--font-mono); font-size:14px; text-transform:uppercase; color:var(--accent-orange); margin-bottom:16px; border-bottom:1px solid var(--border-subtle); padding-bottom:8px;">Control de Fase de Grupos</h3>
+        ${zonesListHTML}
+        ${advanceBtn}
+      `;
+    } 
+    
+    else if (consoleActiveTab === 'llaves') {
+      if (t.status === 'upcoming') {
+        panel.innerHTML = `<div style="text-align:center; padding:48px 24px; color:var(--text-muted);">
+          <div style="font-size:40px; margin-bottom:12px;"><span data-icon="trophy" data-size="40"></span></div>
+          <p>El torneo aún no ha comenzado.</p>
+        </div>`;
+        renderIcons();
+        return;
+      }
+
+      if (!t.bracket || !t.bracket.semiFinals || !t.bracket.semiFinals.length) {
+        panel.innerHTML = `<div style="text-align:center; padding:48px 24px; color:var(--text-muted);">
+          <div style="font-size:40px; color:var(--accent-orange); margin-bottom:12px;"><span data-icon="alert" data-size="40"></span></div>
+          <p style="font-size:13px; color:var(--text-secondary); margin-bottom:12px;">La fase de llaves aún no se ha generado.</p>
+          <p style="font-size:12px;">Debes completar todos los partidos en la fase de grupos y presionar el botón "Avanzar a Fase de Llaves" en la pestaña "Fase de Grupos".</p>
+        </div>`;
+        renderIcons();
+        return;
+      }
+
+      // Render bracket matches
+      const sfList = t.bracket.semiFinals;
+      const finalSlot = t.bracket.final;
+
+      const sfMatchesHTML = sfList.map((slot, idx) => {
+        const match = t.matches.find(m => m.id === slot.matchId);
+        return `
+          <div style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:16px; margin-bottom:16px;">
+            <div style="font-size:11px; font-family:var(--font-mono); color:var(--text-muted); margin-bottom:10px; text-transform:uppercase;">Semifinal #${idx+1}</div>
+            ${match ? buildConsoleMatchEditorRow(t.id, match) : `<div style="font-size:13px; font-weight:600; color:var(--text-secondary);">${slot.pairA || 'Por definir'} vs ${slot.pairB || 'Por definir'}</div>`}
+          </div>
+        `;
+      }).join('');
+
+      const finalMatch = t.matches.find(m => m.id === finalSlot.matchId);
+      const finalHTML = `
+        <div style="background:var(--bg-elevated); border:1px solid var(--accent-orange-glow); border-radius:var(--radius-lg); padding:20px; box-shadow:0 0 16px rgba(232,132,31,0.04);">
+          <div style="font-size:12px; font-family:var(--font-mono); color:var(--accent-orange); margin-bottom:12px; text-transform:uppercase; font-weight:700; display:flex; align-items:center; gap:6px;">
+            <span data-icon="trophy" data-size="12"></span> Gran Final del Torneo
+          </div>
+          ${finalMatch ? buildConsoleMatchEditorRow(t.id, finalMatch) : `<div style="font-size:14px; font-weight:600; color:var(--text-secondary);">${finalSlot.pairA || 'Por definir'} vs ${finalSlot.pairB || 'Por definir'}</div>`}
+        </div>
+      `;
+
+      let champBanner = '';
+      if (t.status === 'finished' && t.champion) {
+        champBanner = `
+          <div style="margin-top:24px; padding:24px; background:linear-gradient(135deg, rgba(232,132,31,0.1) 0%, rgba(212,160,23,0.1) 100%); border:1px solid var(--accent-orange); border-radius:var(--radius-lg); text-align:center; animation:pulse-glow 3s infinite;">
+            <div style="font-size:32px; color:var(--accent-orange); margin-bottom:8px;"><span data-icon="trophy" data-size="32"></span></div>
+            <div style="font-size:12px; font-family:var(--font-mono); text-transform:uppercase; color:var(--text-muted); letter-spacing:1px;">Campeón Consagrado</div>
+            <h4 style="font-family:var(--font-display); font-size:36px; color:var(--text-primary); letter-spacing:1.5px; margin:6px 0;">${t.champion}</h4>
+            <p style="font-size:12px; color:var(--text-secondary);">El torneo ha concluido formalmente y los puntos han sido asignados.</p>
+          </div>
+        `;
+      } else if (finalMatch && finalMatch.status === 'finished') {
+        champBanner = `
+          <div style="margin-top:24px; padding:16px; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:var(--radius-lg); text-align:center;">
+            <p style="font-size:13px; color:var(--text-secondary); margin-bottom:12px;">¡La final ha concluido! Para oficializar y cerrar el torneo presiona el botón de abajo.</p>
+            <button class="btn btn-primary" onclick="consoleFinishTournament()">
+              Cerrar y Finalizar Torneo Oficialmente
+            </button>
+          </div>`;
+      }
+
+      panel.innerHTML = `
+        <h3 style="font-family:var(--font-mono); font-size:14px; text-transform:uppercase; color:var(--accent-orange); margin-bottom:16px; border-bottom:1px solid var(--border-subtle); padding-bottom:8px;">Control de Fase Eliminatoria</h3>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; align-items:start;">
+          <div>
+            <h4 style="font-size:13px; font-weight:700; color:var(--text-primary); margin-bottom:12px;">Semifinales</h4>
+            ${sfMatchesHTML}
+          </div>
+          <div>
+            <h4 style="font-size:13px; font-weight:700; color:var(--text-primary); margin-bottom:12px;">Final</h4>
+            ${finalHTML}
+            ${champBanner}
+          </div>
+        </div>
+      `;
+    }
+
+    renderIcons();
+  };
+
+  /* Generar la fila de edición de un partido */
+  function buildConsoleMatchEditorRow(tournamentId, m) {
+    const sets = m.setsHistory || [];
+    const isFinished = m.status === 'finished';
+
+    // Inputs pre-cargados
+    const s1a = sets[0]?.a !== undefined ? sets[0].a : '';
+    const s1b = sets[0]?.b !== undefined ? sets[0].b : '';
+    const s2a = sets[1]?.a !== undefined ? sets[1].a : '';
+    const s2b = sets[1]?.b !== undefined ? sets[1].b : '';
+    const s3a = sets[2]?.a !== undefined ? sets[2].a : '';
+    const s3b = sets[2]?.b !== undefined ? sets[2].b : '';
+
+    return `
+      <div class="score-edit-row">
+        <div style="flex:1; min-width:180px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; font-size:13px; margin-bottom:4px;">
+            <span style="font-weight:600; color:${m.winner === 'a' ? 'var(--accent-orange)' : 'var(--text-primary)'};">${m.pairA || 'Por definir'}</span>
+            ${m.winner === 'a' ? '<span style="font-size:9px; font-family:var(--font-mono); color:var(--accent-orange); font-weight:700;">GANADOR</span>' : ''}
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; font-size:13px;">
+            <span style="font-weight:600; color:${m.winner === 'b' ? 'var(--accent-orange)' : 'var(--text-primary)'};">${m.pairB || 'Por definir'}</span>
+            ${m.winner === 'b' ? '<span style="font-size:9px; font-family:var(--font-mono); color:var(--accent-orange); font-weight:700;">GANADOR</span>' : ''}
+          </div>
+        </div>
+        
+        <!-- Inputs de Set -->
+        <div style="display:flex; gap:10px; align-items:center;">
+          <div class="score-set-inputs">
+            <div style="display:flex; flex-direction:column; gap:2px;">
+              <input type="number" id="inp-m-${m.id}-s1a" class="score-set-input" min="0" max="7" value="${s1a}" placeholder="A">
+              <input type="number" id="inp-m-${m.id}-s1b" class="score-set-input" min="0" max="7" value="${s1b}" placeholder="B">
+            </div>
+            <span class="score-set-sep">S1</span>
+          </div>
+
+          <div class="score-set-inputs">
+            <div style="display:flex; flex-direction:column; gap:2px;">
+              <input type="number" id="inp-m-${m.id}-s2a" class="score-set-input" min="0" max="7" value="${s2a}" placeholder="A">
+              <input type="number" id="inp-m-${m.id}-s2b" class="score-set-input" min="0" max="7" value="${s2b}" placeholder="B">
+            </div>
+            <span class="score-set-sep">S2</span>
+          </div>
+
+          <div class="score-set-inputs">
+            <div style="display:flex; flex-direction:column; gap:2px;">
+              <input type="number" id="inp-m-${m.id}-s3a" class="score-set-input" min="0" max="7" value="${s3a}" placeholder="A">
+              <input type="number" id="inp-m-${m.id}-s3b" class="score-set-input" min="0" max="7" value="${s3b}" placeholder="B">
+            </div>
+            <span class="score-set-sep">S3</span>
+          </div>
+        </div>
+
+        <!-- Acciones del Partido -->
+        <div style="display:flex; gap:6px;">
+          <button class="btn btn-primary btn-sm" style="padding:6px 10px;" onclick="consoleSaveMatchScore('${m.id}')" title="Guardar marcador">
+            <span data-icon="save"></span>
+          </button>
+          <button class="btn btn-secondary btn-sm" style="padding:6px 10px;" onclick="openEditMatchDetailsModal('${m.id}')" title="Editar detalles del partido">
+            <span data-icon="edit"></span>
+          </button>
+          ${!isFinished ? `
+            <a href="torneos.html?match=${m.id}" class="btn btn-secondary btn-sm" style="padding:6px 10px; display:inline-flex; align-items:center;" title="Marcador en Vivo">
+              <span data-icon="play"></span>
+            </a>
+          ` : ''}
+        </div>
+      </div>
+    `;
+  }
+
+  let editingConsoleMatchId = null;
+
+  window.openEditMatchDetailsModal = function(matchId) {
+    const t = getTournamentById(consoleTournamentId);
+    if (!t) return;
+    const m = t.matches.find(x => x.id === matchId);
+    if (!m) return;
+
+    editingConsoleMatchId = matchId;
+    document.getElementById('edit-match-id').value = matchId;
+    document.getElementById('em-pair-a').value = m.pairA || '';
+    document.getElementById('em-pair-b').value = m.pairB || '';
+    document.getElementById('em-status').value = m.status || 'scheduled';
+    document.getElementById('em-winner').value = m.winner || '';
+    document.getElementById('em-court').value = m.court || '';
+    document.getElementById('em-scoring').value = m.scoringMode || 'ventaja';
+    document.getElementById('em-date').value = m.scheduled_at || '';
+
+    openModal('modal-match-details');
+    renderIcons();
+  };
+
+  window.submitMatchDetailsForm = function(e) {
+    e.preventDefault();
+    const t = getTournamentById(consoleTournamentId);
+    if (!t) return;
+    const m = t.matches.find(x => x.id === editingConsoleMatchId);
+    if (!m) return;
+
+    m.pairA = document.getElementById('em-pair-a').value.trim();
+    m.pairB = document.getElementById('em-pair-b').value.trim();
+    m.status = document.getElementById('em-status').value;
+    m.winner = document.getElementById('em-winner').value || null;
+    m.court = document.getElementById('em-court').value.trim();
+    m.scoringMode = document.getElementById('em-scoring').value;
+    m.scheduled_at = document.getElementById('em-date').value.trim();
+
+    // Sincronizar con llaves si aplica
+    if (m.round === 'semi' && t.bracket) {
+      if (!t.bracket.semiFinals) t.bracket.semiFinals = [];
+      const slotIndex = t.bracket.semiFinals.findIndex(x => x.matchId === m.id);
+      if (slotIndex !== -1) {
+        t.bracket.semiFinals[slotIndex].pairA = m.pairA;
+        t.bracket.semiFinals[slotIndex].pairB = m.pairB;
+        t.bracket.semiFinals[slotIndex].winner = m.winner;
+        if (m.status === 'finished') {
+          const scoreStr = m.setsHistory && m.setsHistory.length ? m.setsHistory.map(s => `${s.a}-${s.b}`).join(' / ') : '';
+          t.bracket.semiFinals[slotIndex].score = scoreStr;
+          
+          // Promover ganador a la final
+          const winnerName = m.winner === 'a' ? m.pairA : m.pairB;
+          if (slotIndex === 0) {
+            if (!t.bracket.final) t.bracket.final = {};
+            t.bracket.final.pairA = winnerName;
+          } else {
+            if (!t.bracket.final) t.bracket.final = {};
+            t.bracket.final.pairB = winnerName;
+          }
+
+          const finalMatch = t.matches.find(x => x.round === 'final');
+          if (finalMatch) {
+            if (slotIndex === 0) finalMatch.pairA = winnerName;
+            else finalMatch.pairB = winnerName;
+          }
+        }
+      }
+    }
+    if (m.round === 'final' && t.bracket) {
+      if (!t.bracket.final) t.bracket.final = {};
+      t.bracket.final.pairA = m.pairA;
+      t.bracket.final.pairB = m.pairB;
+      t.bracket.final.winner = m.winner;
+      if (m.status === 'finished') {
+        const scoreStr = m.setsHistory && m.setsHistory.length ? m.setsHistory.map(s => `${s.a}-${s.b}`).join(' / ') : '';
+        t.bracket.final.score = scoreStr;
+        t.champion = m.winner === 'a' ? m.pairA : m.pairB;
+        t.status = 'finished';
+      }
+    }
+
+    saveDB();
+    closeModal('modal-match-details');
+    showToast('Detalles de partido actualizados', 'success');
+    renderConsoleContent();
+    renderTournamentsTable();
+  };
+
+  /* Guardar marcador manual por sets */
+  window.consoleSaveMatchScore = function(matchId) {
+    const t = getTournamentById(consoleTournamentId);
+    if (!t) return;
+
+    const s1a = parseInt(document.getElementById(`inp-m-${matchId}-s1a`).value);
+    const s1b = parseInt(document.getElementById(`inp-m-${matchId}-s1b`).value);
+    const s2a = parseInt(document.getElementById(`inp-m-${matchId}-s2a`).value);
+    const s2b = parseInt(document.getElementById(`inp-m-${matchId}-s2b`).value);
+    const s3a = parseInt(document.getElementById(`inp-m-${matchId}-s3a`).value);
+    const s3b = parseInt(document.getElementById(`inp-m-${matchId}-s3b`).value);
+
+    // Validar mínimo set 1 y set 2 para un partido de padel
+    if (isNaN(s1a) || isNaN(s1b) || isNaN(s2a) || isNaN(s2b)) {
+      showToast('Carga al menos el Set 1 y Set 2 de forma completa', 'error');
+      return;
+    }
+
+    const sets = [
+      { a: s1a, b: s1b },
+      { a: s2a, b: s2b }
+    ];
+
+    if (!isNaN(s3a) && !isNaN(s3b)) {
+      sets.push({ a: s3a, b: s3b });
+    }
+
+    // Calcular quién ganó en base a sets
+    let setsA = 0;
+    let setsB = 0;
+    sets.forEach(s => {
+      if (s.a > s.b) setsA++;
+      else if (s.b > s.a) setsB++;
+    });
+
+    if (setsA === setsB) {
+      showToast('Los sets cargados no definen un ganador (están empatados)', 'error');
+      return;
+    }
+
+    const winner = setsA > setsB ? 'a' : 'b';
+
+    const result = finalizeMatch(consoleTournamentId, matchId, sets, winner);
+    if (result) {
+      showToast('Marcador guardado y progresión aplicada', 'success');
+      renderConsoleContent();
+      renderTournamentsTable();
+    } else {
+      showToast('Error al guardar el marcador', 'error');
+    }
+  };
+
+  /* Agregar pareja a la zona */
+  window.consoleAddPair = function(zoneId) {
+    const t = getTournamentById(consoleTournamentId);
+    if (!t) return;
+
+    const input = document.getElementById(`input-new-pair-${zoneId}`);
+    const name = input.value.trim();
+    if (!name) {
+      showToast('Escribe el nombre de la pareja', 'error');
+      return;
+    }
+
+    const z = t.zones.find(x => x.id === zoneId);
+    if (z) {
+      if (!z.pairs) z.pairs = [];
+      z.pairs.push(name);
+      saveDB();
+      showToast('Pareja agregada con éxito', 'success');
+      input.value = '';
+      renderConsoleContent();
+    }
+  };
+
+  /* Eliminar pareja de la zona */
+  window.consoleRemovePair = function(zoneId, pairName) {
+    const t = getTournamentById(consoleTournamentId);
+    if (!t) return;
+
+    const z = t.zones.find(x => x.id === zoneId);
+    if (z && z.pairs) {
+      z.pairs = z.pairs.filter(p => p !== pairName);
+      saveDB();
+      showToast('Pareja eliminada de la zona', 'success');
+      renderConsoleContent();
+    }
+  };
+
+  /* Empezar el Torneo */
+  window.consoleStartTournament = function() {
+    const t = getTournamentById(consoleTournamentId);
+    if (!t) return;
+
+    // Validar que las zonas tengan parejas
+    const hasEnough = t.zones.every(z => z.pairs && z.pairs.length >= 2);
+    if (!hasEnough) {
+      showToast('Asegúrate de que cada zona tenga al menos 2 parejas registradas', 'error');
+      return;
+    }
+
+    if (confirm('¿Estás seguro de empezar el torneo? Se generará el fixture y pasará a estado En Vivo.')) {
+      const success = startTournament(consoleTournamentId);
+      if (success) {
+        showToast('¡Torneo iniciado! Partidos de grupos generados.', 'success');
+        
+        // Actualizar badges en la consola
+        const statusBadge = document.getElementById('console-tournament-status');
+        statusBadge.textContent = 'En Vivo';
+        statusBadge.className = 'badge badge-live';
+        
+        switchConsoleTab('grupos');
+        renderTournamentsTable();
+      }
+    }
+  };
+
+  /* Reiniciar Torneo */
+  window.consoleResetTournament = function() {
+    const t = getTournamentById(consoleTournamentId);
+    if (!t) return;
+
+    if (confirm('ATENCION: Esto borrará todos los partidos jugados y restablecerá el torneo a estado Programado. ¿Continuar?')) {
+      t.status = 'upcoming';
+      t.matches = [];
+      t.bracket = { quarterFinals: [], semiFinals: [], final: null };
+      t.champion = null;
+      t.zones.forEach(z => {
+        z.standings = [];
+      });
+      saveDB();
+      showToast('Torneo restablecido con éxito', 'success');
+      
+      const statusBadge = document.getElementById('console-tournament-status');
+      statusBadge.textContent = 'Programado';
+      statusBadge.className = 'badge badge-primary';
+      
+      switchConsoleTab('inicio');
+      renderTournamentsTable();
+    }
+  };
+
+  /* Avanzar a la fase de llaves */
+  window.consoleAdvanceToBracket = function() {
+    if (confirm('¿Generar el cruce de semifinales en base a los 2 primeros puestos de cada zona?')) {
+      const success = advanceToBracket(consoleTournamentId);
+      if (success) {
+        showToast('Fixture de llaves (Semifinales) generado correctamente', 'success');
+        switchConsoleTab('llaves');
+        renderTournamentsTable();
+      } else {
+        showToast('Error al generar las llaves. Revisa los standings de las zonas.', 'error');
+      }
+    }
+  };
+
+  /* Finalizar Torneo (Cierre oficial) */
+  window.consoleFinishTournament = function() {
+    const t = getTournamentById(consoleTournamentId);
+    if (!t) return;
+
+    if (confirm(`¿Finalizar oficialmente el torneo y coronar a ${t.champion || 'el ganador de la final'} como campeón?`)) {
+      t.status = 'finished';
+      saveDB();
+      showToast('¡Torneo finalizado con éxito! Datos del campeón guardados.', 'success');
+      
+      const statusBadge = document.getElementById('console-tournament-status');
+      statusBadge.textContent = 'Finalizado';
+      statusBadge.className = 'badge badge-neutral';
+      
+      renderConsoleContent();
+      renderTournamentsTable();
+    }
+  };
+
+  /* ---------- BACKUP UTILITIES ---------- */
+  function exportDatabase() {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(DB, null, 2));
+    const downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute("href", dataStr);
+    downloadAnchor.setAttribute("download", `padelbell_database_${new Date().toISOString().split('T')[0]}.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+    
+    const nowStr = new Date().toLocaleString('es-AR');
+    document.getElementById('cfg-last-backup').textContent = nowStr;
+    localStorage.setItem('padelbell_last_backup', nowStr);
+    
+    showToast('Base de datos exportada en formato JSON', 'success');
+  }
+
+  function importDatabase(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const parsed = JSON.parse(e.target.result);
+        if (parsed.players && parsed.tournaments && parsed.news) {
+          // Merge into DB
+          if (parsed.players) DB.players = [...DB.players, ...parsed.players.filter(p => !DB.players.find(x => x.id === p.id))];
+          if (parsed.tournaments) DB.tournaments = [...DB.tournaments, ...parsed.tournaments.filter(t => !DB.tournaments.find(x => x.id === t.id))];
+          if (parsed.news) DB.news = [...DB.news, ...parsed.news.filter(n => !DB.news.find(x => x.id === n.id))];
+          if (parsed.courts) DB.courts = [...DB.courts, ...parsed.courts.filter(c => !DB.courts.find(x => x.id === c.id))];
+          saveDB();
+          showToast('Importación completada. Sincronizando sistema...', 'success');
+          setTimeout(() => location.reload(), 1400);
+        } else {
+          showToast('Estructura JSON no válida para PadelBell', 'error');
+        }
+      } catch (err) {
+        showToast('Archivo JSON corrupto o con errores sintácticos', 'error');
+      }
+    };
+    reader.readAsText(file);
+    // Reset so same file can be re-imported
+    event.target.value = '';
+  }
+
+  function resetDatabase() {
+    if (confirm('Atencion: Esta accion limpiara todo el localStorage y recargara los datos por defecto. Continuar?')) {
+      localStorage.removeItem('padelbell_db');
+      localStorage.removeItem('padelbell_last_backup');
+      showToast('Vaciando almacenamiento... Inicializando base de datos.', 'info');
+      setTimeout(() => location.reload(), 1400);
+    }
+  }
+
+  function saveSettings(e) {
+    e.preventDefault();
+    showToast('Ajustes del sitio guardados exitosamente', 'success');
+  }
+
+  /* ========== ORGANIZADORES CRUD ========== */
+  function renderOrgsTable() {
+    const tbody = document.getElementById('admin-orgs-tbody');
+    const list = DB.organizers || [];
+
+    // Update stats
+    const activeOrgs = list.filter(o => o.active);
+    const withTournament = list.filter(o => o.active && o.tournament_id);
+    const statTotal = document.getElementById('stat-org-total');
+    const statWithT = document.getElementById('stat-org-with-tournament');
+    const statLimit = document.getElementById('stat-org-limit');
+    const statProgress = document.getElementById('stat-org-progress');
+
+    if (statTotal) statTotal.textContent = activeOrgs.length;
+    if (statWithT) statWithT.textContent = withTournament.length;
+    if (statLimit) statLimit.textContent = `${list.length} / 50`;
+    if (statProgress) {
+      const pct = Math.min((list.length / 50) * 100, 100);
+      statProgress.style.width = `${pct}%`;
+    }
+
+    if (!list.length) {
+      tbody.innerHTML = `<tr><td colspan="6">
+        <div class="empty-state-panel">
+          <div class="empty-icon"><span data-icon="users" data-size="22"></span></div>
+          <div class="empty-title">Sin organizadores</div>
+          <div class="empty-msg">Creá el primer organizador con "Nuevo Organizador".</div>
+        </div></td></tr>`;
+      renderIcons();
+      return;
+    }
+
+    tbody.innerHTML = list.map(org => {
+      const t = org.tournament_id ? DB.tournaments.find(x => x.id === org.tournament_id) : null;
+      const tName = t ? t.name : '<span style="color:var(--text-muted)">Sin asignar</span>';
+      const statusBadge = org.active
+        ? '<span class="status-badge finished">Activo</span>'
+        : '<span class="status-badge" style="background:rgba(100,100,100,.1);color:var(--text-muted);border:1px solid var(--border-subtle)">Inactivo</span>';
+      return `<tr>
+        <td>
+          <strong>${org.name}</strong>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:2px;font-family:var(--font-mono);">${org.id}</div>
+        </td>
+        <td>${org.contact || '—'}<br><span style="font-size:11px;color:var(--text-muted);">${org.phone || ''}</span></td>
+        <td>
+          <span style="font-family:var(--font-mono);font-size:14px;letter-spacing:1px;color:var(--accent-primary);">${org.pin}</span>
+        </td>
+        <td>${tName}</td>
+        <td>${statusBadge}</td>
+        <td style="text-align:center;">
+          <div style="display:inline-flex;gap:6px;">
+            <button class="btn btn-secondary btn-sm" style="padding:6px 10px;" onclick="openOrgModal('${org.id}')" title="Editar"><span data-icon="edit"></span></button>
+            <button class="btn btn-orange btn-sm" style="padding:6px 10px;color:white;" onclick="confirmDeleteOrg('${org.id}')" title="Eliminar"><span data-icon="trash"></span></button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+    renderIcons();
+  }
+
+  function openOrgModal(id = null) {
+    const form = document.getElementById('form-org');
+    form.reset();
+
+    // Populate tournament select
+    const sel = document.getElementById('org-tournament');
+    sel.innerHTML = '<option value="">-- Sin torneo asignado --</option>';
+    DB.tournaments.forEach(t => {
+      sel.innerHTML += `<option value="${t.id}">${t.name}</option>`;
+    });
+
+    if (id) {
+      const org = DB.organizers.find(o => o.id === id);
+      if (org) {
+        document.getElementById('org-modal-title').textContent = 'Editar Organizador';
+        document.getElementById('edit-org-id').value = org.id;
+        document.getElementById('org-name').value = org.name;
+        document.getElementById('org-contact').value = org.contact || '';
+        document.getElementById('org-phone').value = org.phone || '';
+        document.getElementById('org-pin').value = org.pin;
+        document.getElementById('org-tournament').value = org.tournament_id || '';
+        document.getElementById('org-active').value = org.active ? 'true' : 'false';
+      }
+    } else {
+      document.getElementById('org-modal-title').textContent = 'Nuevo Organizador';
+      document.getElementById('edit-org-id').value = '';
+      document.getElementById('org-pin').value = generateOrgPin();
+    }
+
+    openModal('modal-org');
+    renderIcons();
+  }
+
+  function submitOrgForm(e) {
+    e.preventDefault();
+    if (!validateForm('form-org', ['org-name', 'org-pin'])) return;
+    const form = document.getElementById('form-org');
+    const fd = new FormData(form);
+    const id = fd.get('id');
+
+    const data = {
+      name: fd.get('name'),
+      contact: fd.get('contact') || '',
+      phone: fd.get('phone') || '',
+      pin: fd.get('pin'),
+      tournament_id: fd.get('tournament_id') || null,
+      active: fd.get('active') === 'true'
+    };
+
+    if (id) {
+      updateOrganizer(id, data);
+      showToast('Organizador actualizado', 'success');
+    } else {
+      const result = addOrganizer(data);
+      if (result && result.error) {
+        showToast(result.error, 'error', 5000);
+        return;
+      }
+      showToast(`Organizador "${data.name}" creado. PIN: ${data.pin}`, 'success', 5000);
+    }
+
+    closeModal('modal-org');
+    renderOrgsTable();
+  }
+
+  function confirmDeleteOrg(id) {
+    const org = DB.organizers.find(o => o.id === id);
+    if (!org) return;
+    if (confirm(`Eliminar organizador "${org.name}"?`)) {
+      deleteOrganizer(id);
+      showToast('Organizador eliminado', 'success');
+      renderOrgsTable();
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    initAdmin();
+    renderOrgsTable();
+
+    // Load last backup date
+    const lastBkp = localStorage.getItem('padelbell_last_backup');
+    if (lastBkp) {
+      document.getElementById('cfg-last-backup').textContent = lastBkp;
+    }
+  });
+</script>
+</body>
+</html>

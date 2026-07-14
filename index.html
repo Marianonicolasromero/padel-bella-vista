@@ -1,0 +1,3080 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- PWA -->
+  <link rel="manifest" href="site.webmanifest">
+  <meta name="theme-color" content="#020406">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Padel Bella Vista">
+  <title>Padel Bella Vista — Naturaleza · Deporte · Comunidad</title>
+  <meta name="description" content="La plataforma de pádel de Bella Vista, Corrientes. Jugadores, torneos, ranking y canchas de la región del litoral argentino.">
+  <meta name="keywords" content="pádel, bella vista, corrientes, argentina, torneos, jugadores, ranking, canchas">
+  <meta property="og:title" content="Padel Bella Vista — Corrientes, Argentina">
+  <meta property="og:description" content="La plataforma de pádel del litoral. Jugadores, torneos y rankings de Argentina, Uruguay, Brasil y Paraguay.">
+  <meta property="og:type" content="website">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Cormorant:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/styles.css">
+
+  <!-- 240504: Preload imagen hero (LCP) — above the fold, carga con máxima prioridad -->
+  <link rel="preload" href="assets/images/player_action.png" as="image" fetchpriority="high">
+  <style>
+    /* =====================
+       HEADER
+       ===================== */
+    #main-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 0;
+      transition: all 0.3s ease;
+    }
+
+    #main-header.scrolled {
+      background: rgba(7, 11, 16, 0.95);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-subtle);
+      box-shadow: 0 4px 30px rgba(0,0,0,0.4);
+    }
+
+    #main-header.hidden-nav {
+      transform: translateY(-100%);
+    }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 72px;
+      gap: 32px;
+    }
+
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .logo-icon {
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-orange));
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+
+    .logo-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1;
+    }
+
+    .logo-name {
+      font-family: var(--font-display);
+      font-size: 24px;
+      letter-spacing: 2px;
+      color: var(--text-primary);
+    }
+
+    .logo-tagline {
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--accent-primary);
+      font-weight: 600;
+    }
+
+    .main-nav {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .nav-link {
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-secondary);
+      border-radius: var(--radius-sm);
+      transition: all var(--transition-fast);
+    }
+
+    .nav-link:hover,
+    .nav-link.active {
+      color: var(--text-primary);
+      background: rgba(255,255,255,0.06);
+    }
+
+    .nav-link.active {
+      color: var(--accent-primary);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    #menu-toggler {
+      display: none;
+      width: 40px;
+      height: 40px;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-elevated);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-size: 18px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* Mobile menu */
+    #mobile-menu {
+      display: none;
+      position: fixed;
+      top: 72px;
+      left: 0;
+      right: 0;
+      background: rgba(7, 11, 16, 0.98);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 20px;
+      z-index: 99;
+      flex-direction: column;
+      gap: 4px;
+      transform: translateY(-10px);
+      opacity: 0;
+      transition: all 0.25s ease;
+      pointer-events: none;
+    }
+
+    #mobile-menu.open {
+      display: flex;
+      transform: translateY(0);
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    #mobile-menu .nav-link {
+      padding: 12px 16px;
+      font-size: 15px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    /* =====================
+       HERO
+       ===================== */
+    .hero-section {
+      position: relative;
+      height: 100vh;
+      min-height: 700px;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background-image: url('assets/images/hero_padel_bg.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    .hero-bg::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        135deg,
+        rgba(7, 11, 16, 0.90) 0%,
+        rgba(7, 11, 16, 0.65) 50%,
+        rgba(7, 11, 16, 0.80) 100%
+      );
+    }
+
+    #hero-particles {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      padding-top: 72px;
+    }
+
+    .hero-eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .hero-eyebrow .line {
+      height: 2px;
+      width: 48px;
+      background: var(--accent-primary);
+    }
+
+    .hero-eyebrow span {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--accent-primary);
+    }
+
+    .hero-title {
+      margin-bottom: 24px;
+    }
+
+    .hero-title .line1 {
+      display: block;
+      font-family: var(--font-display);
+      font-size: clamp(52px, 9vw, 110px);
+      line-height: 0.9;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--text-primary);
+    }
+
+    .hero-title .line2 {
+      display: block;
+      font-family: var(--font-display);
+      font-size: clamp(52px, 9vw, 110px);
+      line-height: 0.9;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      background: linear-gradient(90deg, var(--accent-primary), var(--accent-orange));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-subtitle {
+      max-width: 560px;
+      font-size: 16px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin-bottom: 36px;
+    }
+
+    .hero-subtitle strong {
+      color: var(--text-primary);
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 60px;
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 32px;
+      flex-wrap: wrap;
+    }
+
+    .hero-stat {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .hero-stat-num {
+      font-family: var(--font-display);
+      font-size: 36px;
+      color: var(--accent-primary);
+      letter-spacing: 1px;
+      line-height: 1;
+    }
+
+    .hero-stat-lbl {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
+    .hero-sep {
+      width: 1px;
+      height: 40px;
+      background: var(--border-subtle);
+      align-self: center;
+    }
+
+    .hero-right {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hero-image-card {
+      position: relative;
+      width: 440px;
+      max-width: 100%;
+    }
+
+    .hero-image-card img {
+      width: 100%;
+      height: 520px;
+      object-fit: cover;
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .hero-image-overlay {
+      position: absolute;
+      inset: 0;
+      border-radius: var(--radius-xl);
+      background: linear-gradient(
+        to top,
+        rgba(7, 11, 16, 0.85) 0%,
+        transparent 60%
+      );
+    }
+
+    .hero-floating-badge {
+      position: absolute;
+      top: 24px;
+      right: -20px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-lg);
+      padding: 14px 20px;
+      backdrop-filter: blur(10px);
+      animation: float 4s ease-in-out infinite;
+    }
+
+    .hero-floating-badge .badge-top {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 4px;
+    }
+
+    .hero-floating-badge .badge-main {
+      font-family: var(--font-display);
+      font-size: 20px;
+      color: var(--accent-orange);
+      letter-spacing: 1px;
+    }
+
+    .hero-card-info {
+      position: absolute;
+      bottom: 24px;
+      left: 20px;
+      right: 20px;
+    }
+
+    .hero-card-info .player-name {
+      font-family: var(--font-display);
+      font-size: 28px;
+      color: white;
+      letter-spacing: 1px;
+    }
+
+    .hero-card-info .player-meta {
+      font-size: 13px;
+      color: rgba(255,255,255,0.7);
+      margin-top: 4px;
+    }
+
+    /* =====================
+       NEXT TOURNAMENT BANNER
+       ===================== */
+    .tournament-banner {
+      background: linear-gradient(135deg, rgba(0, 180, 216, 0.08), rgba(242, 140, 56, 0.08));
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl);
+      padding: 28px 36px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tournament-banner::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: linear-gradient(to bottom, var(--accent-primary), var(--accent-orange));
+    }
+
+    .tournament-banner-left {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .tournament-banner-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--accent-primary);
+    }
+
+    .tournament-banner-name {
+      font-family: var(--font-display);
+      font-size: clamp(22px, 3vw, 36px);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-primary);
+    }
+
+    .tournament-banner-meta {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .tournament-banner-meta span {
+      font-size: 13px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .countdown-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .countdown-unit {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      min-width: 60px;
+    }
+
+    .countdown-num {
+      font-family: var(--font-display);
+      font-size: 28px;
+      line-height: 1;
+      color: var(--accent-primary);
+      letter-spacing: 1px;
+    }
+
+    .countdown-lbl {
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .countdown-sep {
+      font-family: var(--font-display);
+      font-size: 24px;
+      color: var(--text-muted);
+    }
+
+    /* =====================
+       SECTION: RANKING RÁPIDO
+       ===================== */
+    .ranking-section {
+      background: var(--bg-surface);
+    }
+
+    .ranking-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .ranking-table-wrapper {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+
+    .ranking-table-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .ranking-table-header h3 {
+      font-family: var(--font-display);
+      font-size: 22px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .ranking-row {
+      display: grid;
+      grid-template-columns: 40px 1fr auto auto;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 24px;
+      border-bottom: 1px solid var(--border-subtle);
+      transition: background var(--transition-fast);
+      cursor: pointer;
+    }
+
+    .ranking-row:last-child { border-bottom: none; }
+
+    .ranking-row:hover {
+      background: rgba(0, 180, 216, 0.04);
+    }
+
+    .rank-pos {
+      font-family: var(--font-display);
+      font-size: 22px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    .rank-pos.gold   { color: var(--gold); }
+    .rank-pos.silver { color: var(--silver); }
+    .rank-pos.bronze { color: var(--bronze); }
+
+    .rank-player {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .rank-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--bg-elevated);
+      border: 2px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .rank-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .rank-info .rank-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .rank-info .rank-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .rank-points {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent-primary);
+      text-align: right;
+    }
+
+    .rank-change {
+      font-size: 11px;
+      font-weight: 700;
+      text-align: right;
+      min-width: 30px;
+    }
+
+    .rank-change.up   { color: var(--accent-green); }
+    .rank-change.down { color: var(--accent-red); }
+    .rank-change.same { color: var(--text-muted); }
+
+    /* =====================
+       SECTION: TORNEOS
+       ===================== */
+    .tournaments-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .tournament-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: all var(--transition-normal);
+      cursor: pointer;
+    }
+
+    .tournament-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent-primary);
+      box-shadow: 0 8px 40px rgba(0, 180, 216, 0.15);
+    }
+
+    .tournament-card-img {
+      position: relative;
+      height: 200px;
+      overflow: hidden;
+    }
+
+    .tournament-card-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+
+    .tournament-card:hover .tournament-card-img img {
+      transform: scale(1.05);
+    }
+
+    .tournament-card-img-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(7,11,16,0.9) 0%, transparent 60%);
+    }
+
+    .tournament-card-badges {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      display: flex;
+      gap: 6px;
+    }
+
+    .tournament-card-body {
+      padding: 20px;
+    }
+
+    .tournament-card-name {
+      font-family: var(--font-display);
+      font-size: 22px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+      line-height: 1.1;
+    }
+
+    .tournament-card-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      margin-bottom: 16px;
+    }
+
+    .tournament-card-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .tournament-card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 14px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .tournament-prize {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .tournament-prize .label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-muted);
+    }
+
+    .tournament-prize .amount {
+      font-family: var(--font-mono);
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--accent-orange);
+    }
+
+    /* =====================
+       SECTION: JUGADORES DESTACADOS
+       ===================== */
+    .players-carousel {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 16px;
+    }
+
+    .player-mini-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      cursor: pointer;
+      transition: all var(--transition-normal);
+      text-align: center;
+    }
+
+    .player-mini-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent-primary);
+      box-shadow: 0 8px 30px rgba(0, 180, 216, 0.15);
+    }
+
+    .player-mini-img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      object-position: top;
+    }
+
+    .player-mini-body {
+      padding: 14px 12px;
+    }
+
+    .player-mini-name {
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .player-mini-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .player-mini-points {
+      font-family: var(--font-mono);
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--accent-primary);
+    }
+
+    /* =====================
+       SECTION: CANCHAS
+       ===================== */
+    .courts-section {
+      background: var(--bg-surface);
+    }
+
+    .courts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 20px;
+    }
+
+    .court-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: all var(--transition-normal);
+    }
+
+    .court-card.featured {
+      grid-column: 1 / 3;
+    }
+
+    .court-card:hover {
+      border-color: var(--accent-orange);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px rgba(242, 140, 56, 0.15);
+    }
+
+    .court-card-img {
+      height: 220px;
+      overflow: hidden;
+    }
+
+    .court-card.featured .court-card-img {
+      height: 280px;
+    }
+
+    .court-card-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+
+    .court-card:hover .court-card-img img {
+      transform: scale(1.05);
+    }
+
+    .court-card-body {
+      padding: 20px;
+    }
+
+    .court-card-name {
+      font-family: var(--font-display);
+      font-size: 24px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+
+    .court-card-address {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .court-amenities {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .amenity-tag {
+      padding: 3px 10px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 100px;
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    .court-card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 14px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .court-price {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .court-price .label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-muted);
+    }
+
+    .court-price .amount {
+      font-family: var(--font-mono);
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--accent-orange);
+    }
+
+    /* =====================
+       SECTION: NOTICIAS
+       ===================== */
+    .news-grid {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 20px;
+    }
+
+    .news-featured {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      cursor: pointer;
+      transition: all var(--transition-normal);
+    }
+
+    .news-featured:hover {
+      border-color: var(--accent-primary);
+      box-shadow: 0 8px 30px rgba(0, 180, 216, 0.15);
+    }
+
+    .news-featured-img {
+      height: 300px;
+      overflow: hidden;
+    }
+
+    .news-featured-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+
+    .news-featured:hover .news-featured-img img {
+      transform: scale(1.05);
+    }
+
+    .news-featured-body {
+      padding: 24px;
+    }
+
+    .news-featured-title {
+      font-family: var(--font-display);
+      font-size: 26px;
+      line-height: 1.1;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: var(--text-primary);
+      margin: 12px 0 10px;
+    }
+
+    .news-featured-excerpt {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    .news-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .news-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      display: flex;
+      cursor: pointer;
+      transition: all var(--transition-normal);
+      height: fit-content;
+    }
+
+    .news-item:hover {
+      border-color: var(--accent-primary);
+    }
+
+    .news-item-img {
+      width: 120px;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .news-item-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+
+    .news-item:hover .news-item-img img {
+      transform: scale(1.05);
+    }
+
+    .news-item-body {
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .news-item-title {
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--text-primary);
+      line-height: 1.3;
+      margin-bottom: 8px;
+    }
+
+    .news-item-meta {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .news-item-date {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* =====================
+       SECTION: BELLA VISTA INFO
+       ===================== */
+    .city-section {
+      background: linear-gradient(135deg, var(--bg-base), var(--bg-surface));
+      position: relative;
+      overflow: hidden;
+    }
+
+    .city-section::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -20%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(0, 180, 216, 0.05) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .city-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+    }
+
+    .city-image-stack {
+      position: relative;
+      height: 500px;
+    }
+
+    .city-img-main {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 78%;
+      height: 85%;
+      object-fit: cover;
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .city-img-secondary {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 55%;
+      height: 55%;
+      object-fit: cover;
+      border-radius: var(--radius-lg);
+      border: 2px solid var(--bg-base);
+      box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+    }
+
+    .city-facts {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 28px;
+    }
+
+    .city-fact {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .city-fact-icon {
+      font-size: 22px;
+    }
+
+    .city-fact-text {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+
+    .city-fact-text strong {
+      display: block;
+      color: var(--text-primary);
+      font-size: 14px;
+      margin-bottom: 2px;
+    }
+
+    /* =====================
+       SECTION: AGREGAR JUGADOR
+       ===================== */
+    .add-player-section {
+      background: var(--bg-surface);
+    }
+
+    .add-player-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.5fr;
+      gap: 48px;
+      align-items: start;
+    }
+
+    .add-player-info h2 {
+      font-family: var(--font-display);
+      font-size: 48px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      line-height: 0.95;
+      margin-bottom: 20px;
+    }
+
+    .add-player-info h2 span {
+      color: var(--accent-primary);
+    }
+
+    .add-player-info p {
+      font-size: 15px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin-bottom: 24px;
+    }
+
+    .add-player-features {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .feature-icon {
+      width: 32px;
+      height: 32px;
+      background: rgba(0, 180, 216, 0.1);
+      border: 1px solid rgba(0, 180, 216, 0.3);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    .player-form {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl);
+      padding: 36px;
+    }
+
+    .player-form-title {
+      font-family: var(--font-display);
+      font-size: 28px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 28px;
+      color: var(--text-primary);
+    }
+
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .form-section-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--accent-primary);
+      font-family: var(--font-mono);
+      margin: 20px 0 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    /* =====================
+       FOOTER
+       ===================== */
+    footer {
+      background: var(--bg-surface);
+      border-top: 1px solid var(--border-subtle);
+      padding: 60px 0 30px;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 40px;
+      margin-bottom: 48px;
+    }
+
+    .footer-brand p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin-top: 14px;
+      max-width: 300px;
+    }
+
+    .footer-col h4 {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      font-weight: 600;
+    }
+
+    .footer-links {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .footer-links a {
+      font-size: 14px;
+      color: var(--text-secondary);
+      transition: color var(--transition-fast);
+    }
+
+    .footer-links a:hover { color: var(--accent-primary); }
+
+    .footer-bottom {
+      padding-top: 24px;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .footer-bottom p {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .footer-bottom p span {
+      color: var(--accent-orange);
+    }
+
+    .social-links {
+      display: flex;
+      gap: 10px;
+    }
+
+    .social-link {
+      width: 36px;
+      height: 36px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      transition: all var(--transition-fast);
+      cursor: pointer;
+    }
+
+    .social-link:hover {
+      border-color: var(--accent-primary);
+      background: rgba(0, 180, 216, 0.1);
+    }
+
+    /* =====================
+       RESPONSIVE
+       ===================== */
+    @media (max-width: 1100px) {
+      .tournaments-grid { grid-template-columns: 1fr 1fr; }
+      .players-carousel { grid-template-columns: repeat(3, 1fr); }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+      .courts-grid { grid-template-columns: 1fr 1fr; }
+      .court-card.featured { grid-column: 1 / 3; }
+    }
+
+    @media (max-width: 900px) {
+      .hero-section { flex-direction: column; height: auto; padding: 100px 0 60px; }
+      .hero-right { display: none; }
+      .ranking-grid { grid-template-columns: 1fr; }
+      .news-grid { grid-template-columns: 1fr; }
+      .city-layout { grid-template-columns: 1fr; }
+      .city-image-stack { height: 350px; }
+      .add-player-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 768px) {
+      .main-nav { display: none; }
+      #menu-toggler { display: flex; }
+      .tournaments-grid { grid-template-columns: 1fr; }
+      .players-carousel { grid-template-columns: repeat(2, 1fr); }
+      .courts-grid { grid-template-columns: 1fr; }
+      .court-card.featured { grid-column: auto; }
+      .player-form { padding: 24px; }
+      .form-grid-2 { grid-template-columns: 1fr; }
+      .hero-stats { gap: 20px; }
+      .tournament-banner { flex-direction: column; align-items: flex-start; }
+    }
+
+    @media (max-width: 480px) {
+      .players-carousel { grid-template-columns: 1fr 1fr; }
+      .footer-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Scroll animations */
+    [data-animate] {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    [data-animate].animated {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* =====================
+       SECCIÓN EN JUEGO
+       ===================== */
+    .live-section { border-top: 1px solid var(--border-subtle); }
+
+    .live-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-top: 32px;
+    }
+
+    .live-matches-col, .results-col {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+    }
+
+    .live-col-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--accent-orange);
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .results-col-header {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    /* Pulsing live dot */
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-orange);
+      display: inline-block;
+      animation: live-pulse 1.5s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes live-pulse {
+      0%, 100% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(232,132,31,0.5); }
+      50%       { transform: scale(1.2); opacity: 0.8; box-shadow: 0 0 0 6px rgba(232,132,31,0); }
+    }
+
+    /* Match score card */
+    .live-match-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-orange);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all var(--transition-normal);
+    }
+    .live-match-card:hover { border-color: var(--accent-orange); transform: translateY(-1px); }
+    .live-match-card:last-child { margin-bottom: 0; }
+
+    .lmc-phase {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--accent-orange);
+      margin-bottom: 10px;
+    }
+
+    .lmc-scoreboard {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .lmc-pair {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .lmc-pair.right { text-align: right; align-items: flex-end; }
+
+    .lmc-pair-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.3;
+    }
+
+    .lmc-score-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .lmc-games {
+      font-family: var(--font-display);
+      font-size: 32px;
+      letter-spacing: 1px;
+      line-height: 1;
+      color: var(--text-primary);
+    }
+
+    .lmc-points {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--accent-primary);
+      font-weight: 600;
+    }
+
+    .lmc-sets-row {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .lmc-set-pill {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-muted);
+      background: var(--bg-elevated);
+      padding: 2px 8px;
+      border-radius: 100px;
+    }
+
+    .lmc-serve-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--accent-primary);
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 4px;
+    }
+
+    /* Result rows */
+    .result-row {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .result-row:last-child { border-bottom: none; }
+
+    .rr-phase {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+    }
+
+    .rr-match {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .rr-pairs {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .rr-pairs em {
+      font-style: normal;
+      color: var(--text-muted);
+      font-weight: 400;
+      font-size: 11px;
+      margin: 0 5px;
+    }
+
+    .rr-score {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--accent-primary);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    @media (max-width: 768px) {
+      .live-layout { grid-template-columns: 1fr; }
+    }
+
+    /* =====================
+       HERO SLIDER
+       ===================== */
+    .hero-slider {
+      position: relative;
+      width: 100%;
+      height: 90vh;
+      min-height: 600px;
+      overflow: hidden;
+      background: var(--bg-base);
+    }
+
+    .hero-slide {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      z-index: 1;
+      transition: opacity 0.8s ease-in-out;
+      display: flex;
+      align-items: center;
+    }
+
+    .hero-slide.active {
+      opacity: 1;
+      z-index: 2;
+    }
+
+    .hero-slide-bg {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      transform: scale(1.04);
+      transition: transform 6s ease-out;
+    }
+
+    .hero-slide.active .hero-slide-bg {
+      transform: scale(1);
+    }
+
+    .hero-slide-bg::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        135deg,
+        rgba(2, 4, 6, 0.94) 0%,
+        rgba(2, 4, 6, 0.70) 50%,
+        rgba(2, 4, 6, 0.90) 100%
+      );
+    }
+
+    .hero-slide .container {
+      position: relative;
+      z-index: 5;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 40px;
+      align-items: center;
+      width: 100%;
+    }
+
+    @media (max-width: 992px) {
+      .hero-slide .container {
+        grid-template-columns: 1fr;
+        text-align: center;
+        padding-top: 40px;
+      }
+      .hero-right {
+        display: none;
+      }
+      .hero-slider {
+        height: auto;
+        padding: 100px 0 60px 0;
+      }
+    }
+
+    /* Controles del Slider */
+    .slider-arrows {
+      position: absolute;
+      bottom: 40px;
+      right: 28px;
+      display: flex;
+      gap: 12px;
+      z-index: 10;
+    }
+
+    .slider-arrow {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .slider-arrow:hover {
+      background: var(--accent-primary);
+      border-color: var(--accent-primary);
+      color: var(--text-inverse);
+      box-shadow: var(--shadow-glow);
+    }
+
+    .slider-dots {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 10px;
+      z-index: 10;
+    }
+
+    .slider-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.25);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .slider-dot.active {
+      background: var(--accent-primary);
+      width: 24px;
+      border-radius: 4px;
+    }
+
+    /* =====================
+       PLAYERS CAROUSEL
+       ===================== */
+    .players-carousel-wrapper {
+      position: relative;
+      width: 100%;
+    }
+
+    .players-carousel {
+      display: flex;
+      gap: 20px;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      scrollbar-width: none; /* Firefox */
+      padding: 10px 0;
+      scroll-snap-type: x mandatory;
+    }
+
+    .players-carousel::-webkit-scrollbar {
+      display: none; /* Chrome/Safari */
+    }
+
+    .player-mini-card {
+      flex: 0 0 240px;
+      scroll-snap-align: start;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: all var(--transition-normal);
+      cursor: pointer;
+      position: relative;
+    }
+
+    .player-mini-card:hover {
+      transform: translateY(-6px);
+      border-color: var(--accent-primary);
+      box-shadow: var(--shadow-glow);
+    }
+
+    .player-mini-img-wrap {
+      width: 100%;
+      height: 220px;
+      overflow: hidden;
+      position: relative;
+      background: var(--bg-elevated);
+    }
+
+    .player-mini-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform var(--transition-slow);
+    }
+
+    .player-mini-card:hover .player-mini-img {
+      transform: scale(1.05);
+    }
+
+    .player-mini-body {
+      padding: 16px;
+    }
+
+    .player-mini-name {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .player-mini-meta {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    .player-mini-points {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent-orange);
+      margin-top: 8px;
+    }
+
+    .carousel-nav-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-default);
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 5;
+      transition: all var(--transition-fast);
+      box-shadow: var(--shadow-md);
+    }
+
+    .carousel-nav-btn:hover {
+      background: var(--accent-primary);
+      color: var(--text-inverse);
+      border-color: var(--accent-primary);
+    }
+
+    .carousel-nav-btn.prev { left: -20px; }
+    .carousel-nav-btn.next { right: -20px; }
+
+    @media (max-width: 768px) {
+      .carousel-nav-btn { display: none; }
+    }
+  </style>
+
+</head>
+<body>
+
+<!-- =====================
+     TOAST CONTAINER
+     ===================== -->
+<div id="toast-container"></div>
+
+<!-- =====================
+     HEADER
+     ===================== -->
+<header id="main-header">
+  <div class="container">
+    <div class="header-inner">
+      <!-- Logo -->
+      <a href="index.html" class="header-logo" style="gap:14px;">
+        <!-- Isotipo SVG inline — paleta Bella Vista -->
+        <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
+          <rect width="38" height="38" rx="10" fill="url(#pbv-grad)"/>
+          <defs>
+            <linearGradient id="pbv-grad" x1="0" y1="0" x2="38" y2="38" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#0F4C81"/>
+              <stop offset="60%" stop-color="#1E6B59"/>
+              <stop offset="100%" stop-color="#F28C2B" stop-opacity=".7"/>
+            </linearGradient>
+          </defs>
+          <!-- Paleta de pádel simplificada -->
+          <ellipse cx="17" cy="16" rx="8" ry="10" stroke="#E9DFC8" stroke-width="1.4" fill="none"/>
+          <line x1="17" y1="10" x2="17" y2="22" stroke="#E9DFC8" stroke-width="1" opacity=".6"/>
+          <line x1="11" y1="16" x2="23" y2="16" stroke="#E9DFC8" stroke-width="1" opacity=".6"/>
+          <circle cx="20" cy="10" r="2.5" fill="#F28C2B" opacity=".9"/>
+          <line x1="17" y1="26" x2="17" y2="33" stroke="#E9DFC8" stroke-width="2" stroke-linecap="round"/>
+          <!-- Olas — río Paraná -->
+          <path d="M7 30 Q10 28 13 30 Q16 32 19 30 Q22 28 25 30 Q28 32 31 30" stroke="#E9DFC8" stroke-width="1.2" fill="none" opacity=".5"/>
+          <path d="M9 33 Q12 31 15 33 Q18 35 21 33 Q24 31 27 33" stroke="#E9DFC8" stroke-width="1" fill="none" opacity=".3"/>
+        </svg>
+        <div class="logo-text">
+          <div class="logo-name" style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:15px;letter-spacing:1px;line-height:1;color:#E9DFC8;">
+            PADEL <span style="color:#F28C2B;">BELLA VISTA</span>
+          </div>
+          <div class="logo-tagline" style="font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:2.5px;color:#8BA186;text-transform:uppercase;margin-top:3px;">
+            Naturaleza · Deporte · Comunidad
+          </div>
+        </div>
+      </a>
+
+      <!-- Nav Desktop -->
+      <nav class="main-nav">
+        <a href="index.html" class="nav-link active">Inicio</a>
+        <a href="jugadores.html" class="nav-link">Jugadores</a>
+        <a href="torneos.html" class="nav-link">Torneos</a>
+        <a href="ranking.html" class="nav-link">Ranking</a>
+        <a href="canchas.html" class="nav-link">Canchas</a>
+        <a href="noticias.html" class="nav-link">Noticias</a>
+      </nav>
+
+      <!-- Actions -->
+      <div class="header-actions">
+        <button id="theme-toggle" class="theme-toggle-btn" data-icon="sun" data-size="16" title="Cambiar tema"></button>
+        <a href="login.html" class="btn btn-secondary btn-sm" id="header-login-btn">
+          <span data-icon="user" style="margin-right:4px; vertical-align:middle;"></span>Acceder
+        </a>
+        <button id="menu-toggler" aria-label="Menú" aria-expanded="false">☰</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Mobile Menu -->
+<div id="mobile-menu">
+  <a href="index.html" class="nav-link"><span data-icon="home" style="margin-right:8px; vertical-align:middle;"></span>Inicio</a>
+  <a href="jugadores.html" class="nav-link"><span data-icon="users" style="margin-right:8px; vertical-align:middle;"></span>Jugadores</a>
+  <a href="torneos.html" class="nav-link"><span data-icon="trophy" style="margin-right:8px; vertical-align:middle;"></span>Torneos</a>
+  <a href="ranking.html" class="nav-link"><span data-icon="ranking" style="margin-right:8px; vertical-align:middle;"></span>Ranking</a>
+  <a href="canchas.html" class="nav-link"><span data-icon="court" style="margin-right:8px; vertical-align:middle;"></span>Canchas</a>
+  <a href="noticias.html" class="nav-link"><span data-icon="news" style="margin-right:8px; vertical-align:middle;"></span>Noticias</a>
+  <button class="btn btn-primary" style="margin-top:12px;" onclick="openModal('modal-add-player')">
+    + Agregar Jugador
+  </button>
+</div>
+
+<!-- =====================
+     HERO SLIDER
+     ===================== -->
+<section class="hero-slider">
+  <!-- Slide 1: Bienvenidos -->
+  <div class="hero-slide active" id="slide-1">
+    <div class="hero-slide-bg" style="background-image: url('assets/images/hero_padel_bg.png');"></div>
+    <div class="container">
+      <!-- Left -->
+      <div class="hero-content">
+        <div class="hero-eyebrow" data-animate>
+          <div class="line"></div>
+          <span>Bella Vista · Corrientes</span>
+        </div>
+
+        <div class="hero-title" data-animate data-delay="100">
+          <span class="line1" style="font-family:'Montserrat',sans-serif; font-weight:900;">Padel</span>
+          <span class="line2" style="font-family:'Montserrat',sans-serif; font-weight:900; background: linear-gradient(90deg, var(--accent-cream), var(--accent-orange)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Bella Vista</span>
+        </div>
+
+        <p class="hero-subtitle" data-animate data-delay="200" style="font-family:'Montserrat',sans-serif; font-weight:400; color:var(--text-secondary);">
+          Naturaleza, deporte y comunidad en un solo lugar. Segui los torneos regionales, encontra a tu pareja de juego ideal y conoce las mejores canchas del litoral argentino.
+        </p>
+
+        <div class="hero-actions" data-animate data-delay="300">
+          <a href="jugadores.html" class="btn btn-primary btn-lg">🔍 Buscar Jugadores</a>
+          <a href="torneos.html" class="btn btn-secondary btn-lg">Ver Torneos</a>
+        </div>
+
+        <div class="hero-stats" data-animate data-delay="400">
+          <div class="hero-stat">
+            <span class="hero-stat-num" data-counter="24">0</span>
+            <span class="hero-stat-lbl">Jugadores</span>
+          </div>
+          <div class="hero-sep"></div>
+          <div class="hero-stat">
+            <span class="hero-stat-num" data-counter="12">0</span>
+            <span class="hero-stat-lbl">Torneos</span>
+          </div>
+          <div class="hero-sep"></div>
+          <div class="hero-stat">
+            <span class="hero-stat-num" data-counter="4">0</span>
+            <span class="hero-stat-lbl">Canchas</span>
+          </div>
+          <div class="hero-sep"></div>
+          <div class="hero-stat">
+            <span class="hero-stat-num" data-counter="4">0</span>
+            <span class="hero-stat-lbl">Países</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right - Player Card -->
+      <div class="hero-right">
+        <div class="hero-image-card">
+          <img src="assets/images/player_action.png" alt="Jugador Destacado" fetchpriority="high" loading="eager" class="img-priority" style="border: 1px solid var(--border-default);">
+          <div class="hero-image-overlay"></div>
+          <div class="hero-floating-badge" style="border: 1px solid var(--border-default);">
+            <div class="badge-top">Circuito Litoral</div>
+            <div class="badge-main" style="color:var(--accent-orange); font-weight:800;">RANKING #1</div>
+          </div>
+          <div class="hero-card-info">
+            <div class="player-name" style="font-family:'Montserrat',sans-serif; font-weight:700;">Matías Ramírez</div>
+            <div class="player-meta" style="color:var(--accent-cream); font-family:var(--font-mono); font-size:12px;">Bella Vista · 1.200 pts</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 2: Próximo Torneo Destacado -->
+  <div class="hero-slide" id="slide-2">
+    <div class="hero-slide-bg" style="background-image: url('assets/images/court_top_view.png');"></div>
+    <div class="container">
+      <div class="hero-content">
+        <div class="hero-eyebrow">
+          <div class="line" style="background:var(--accent-orange);"></div>
+          <span style="color:var(--accent-orange);">Copa del Litoral 2026</span>
+        </div>
+
+        <div class="hero-title">
+          <span class="line1" style="font-family:'Montserrat',sans-serif; font-weight:900;">La Gran</span>
+          <span class="line2" style="font-family:'Montserrat',sans-serif; font-weight:900; background: linear-gradient(90deg, var(--accent-orange), var(--accent-cream)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Cita Regional</span>
+        </div>
+
+        <p class="hero-subtitle" style="font-family:'Montserrat',sans-serif; font-weight:400; color:var(--text-secondary);">
+          Prepárate para el evento deportivo más esperado de Bella Vista. Jugadores de toda la provincia de Corrientes, Chaco y Misiones compitiendo al más alto nivel.
+        </p>
+
+        <div class="hero-actions">
+          <a href="torneos.html" class="btn btn-primary btn-lg" style="background:var(--accent-orange); color:white;">Ver Detalles del Torneo</a>
+          <a href="#registrar" class="btn btn-secondary btn-lg">Inscribirme</a>
+        </div>
+
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <span class="hero-stat-num" style="color:var(--accent-orange);">$300K</span>
+            <span class="hero-stat-lbl">En Premios</span>
+          </div>
+          <div class="hero-sep"></div>
+          <div class="hero-stat">
+            <span class="hero-stat-num" style="color:var(--accent-orange);">18-20</span>
+            <span class="hero-stat-lbl">Julio 2026</span>
+          </div>
+          <div class="hero-sep"></div>
+          <div class="hero-stat">
+            <span class="hero-stat-num" style="color:var(--accent-orange);">3</span>
+            <span class="hero-stat-lbl">Categorías</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-right">
+        <div class="hero-image-card">
+          <img src="assets/images/court_top_view.png" alt="Sede Oficial" loading="lazy" style="border: 1px solid var(--border-default);">
+          <div class="hero-image-overlay"></div>
+          <div class="hero-floating-badge" style="border: 1px solid var(--border-default);">
+            <div class="badge-top">Sede Oficial</div>
+            <div class="badge-main" style="color:var(--accent-primary); font-weight:800;">PALMERAS PÁDEL</div>
+          </div>
+          <div class="hero-card-info">
+            <div class="player-name" style="font-family:'Montserrat',sans-serif; font-weight:700;">Club Palmeras</div>
+            <div class="player-meta" style="color:var(--accent-cream); font-family:var(--font-mono); font-size:12px;">Calle Paraná · Bella Vista</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 3: Noticias y Comunidad -->
+  <div class="hero-slide" id="slide-3">
+    <div class="hero-slide-bg" style="background-image: url('assets/images/bella_vista.png');"></div>
+    <div class="container">
+      <div class="hero-content">
+        <div class="hero-eyebrow">
+          <div class="line" style="background:var(--accent-sage);"></div>
+          <span style="color:var(--accent-sage);">Comunidad Bella Vista</span>
+        </div>
+
+        <div class="hero-title">
+          <span class="line1" style="font-family:'Montserrat',sans-serif; font-weight:900;">Sumate al</span>
+          <span class="line2" style="font-family:'Montserrat',sans-serif; font-weight:900; background: linear-gradient(90deg, var(--accent-sage), var(--accent-cream)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Circuito Oficial</span>
+        </div>
+
+        <p class="hero-subtitle" style="font-family:'Montserrat',sans-serif; font-weight:400; color:var(--text-secondary);">
+          Registrá tu perfil, sumá puntos en el ranking y mantente al tanto de todas las novedades y aperturas de nuevas canchas en la ciudad.
+        </p>
+
+        <div class="hero-actions">
+          <a href="#registrar" class="btn btn-primary btn-lg">Registrar Jugador</a>
+          <a href="noticias.html" class="btn btn-secondary btn-lg">Leer Noticias</a>
+        </div>
+
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <span class="hero-stat-num" style="color:var(--accent-sage);">100%</span>
+            <span class="hero-stat-lbl">Local</span>
+          </div>
+          <div class="hero-sep"></div>
+          <div class="hero-stat">
+            <span class="hero-stat-num" style="color:var(--accent-sage);">+120</span>
+            <span class="hero-stat-lbl">Inscriptos</span>
+          </div>
+          <div class="hero-sep"></div>
+          <div class="hero-stat">
+            <span class="hero-stat-num" style="color:var(--accent-sage);">4</span>
+            <span class="hero-stat-lbl">Complejos</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-right">
+        <div class="hero-image-card">
+          <img src="assets/images/player_action.png" alt="Comunidad Pádel" loading="lazy" style="border: 1px solid var(--border-default);">
+          <div class="hero-image-overlay"></div>
+          <div class="hero-floating-badge" style="border: 1px solid var(--border-default);">
+            <div class="badge-top">Barrancas del Paraná</div>
+            <div class="badge-main" style="color:var(--accent-orange); font-weight:800;">BELLA VISTA</div>
+          </div>
+          <div class="hero-card-info">
+            <div class="player-name" style="font-family:'Montserrat',sans-serif; font-weight:700;">Circuito del Litoral</div>
+            <div class="player-meta" style="color:var(--accent-cream); font-family:var(--font-mono); font-size:12px;">Corrientes · Argentina</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Controles manuales del slider -->
+  <div class="slider-arrows">
+    <button class="slider-arrow prev" onclick="moveSlide(-1)" aria-label="Anterior Slide">❮</button>
+    <button class="slider-arrow next" onclick="moveSlide(1)" aria-label="Siguiente Slide">❯</button>
+  </div>
+
+  <!-- Dots indicadores -->
+  <div class="slider-dots">
+    <span class="slider-dot active" onclick="setSlide(0)"></span>
+    <span class="slider-dot" onclick="setSlide(1)"></span>
+    <span class="slider-dot" onclick="setSlide(2)"></span>
+  </div>
+</section>
+
+<!-- =====================
+     PRÓXIMO TORNEO BANNER
+     ===================== -->
+<section class="section-sm">
+  <div class="container">
+    <div class="tournament-banner" data-animate>
+      <div class="tournament-banner-left">
+        <span class="tournament-banner-label"><span data-icon="zap" style="margin-right:5px; vertical-align:middle;"></span>Próximo torneo</span>
+        <h2 class="tournament-banner-name">Copa del Litoral 2026</h2>
+        <div class="tournament-banner-meta">
+          <span><span data-icon="calendar" style="margin-right:5px; vertical-align:middle;"></span>18–20 Jul 2026</span>
+          <span><span data-icon="mapPin" style="margin-right:5px; vertical-align:middle;"></span>Corrientes Capital</span>
+          <span><span data-icon="award" style="margin-right:5px; vertical-align:middle;"></span>Provincial · Masculino</span>
+          <span><span data-icon="dollar" style="margin-right:5px; vertical-align:middle;"></span>$300.000</span>
+        </div>
+      </div>
+      <div class="countdown-wrapper" id="countdown-main">
+        <div class="countdown-unit">
+          <span class="countdown-num">--</span>
+          <span class="countdown-lbl">días</span>
+        </div>
+        <span class="countdown-sep">:</span>
+        <div class="countdown-unit">
+          <span class="countdown-num">--</span>
+          <span class="countdown-lbl">hs</span>
+        </div>
+        <span class="countdown-sep">:</span>
+        <div class="countdown-unit">
+          <span class="countdown-num">--</span>
+          <span class="countdown-lbl">min</span>
+        </div>
+        <span class="countdown-sep">:</span>
+        <div class="countdown-unit">
+          <span class="countdown-num">--</span>
+          <span class="countdown-lbl">seg</span>
+        </div>
+      </div>
+      <a href="torneos.html" class="btn btn-orange">Ver torneo →</a>
+    </div>
+  </div>
+</section>
+
+<!-- =====================
+     PARTIDOS EN VIVO
+     ===================== -->
+<section class="section live-section">
+  <div class="container">
+    <div class="section-title" data-animate>
+      <span class="label">en este momento</span>
+      <h2>En <span>Juego</span></h2>
+      <a href="torneos.html" class="section-cta">Ver todos los partidos</a>
+    </div>
+
+    <div class="live-layout" data-animate data-delay="100">
+
+      <!-- Partidos en vivo -->
+      <div class="live-matches-col">
+        <div class="live-col-header">
+          <span class="live-dot"></span>
+          <span>Semifinales en curso — Copa del Litoral 2026</span>
+        </div>
+        <div id="live-matches-list"></div>
+      </div>
+
+      <!-- Resultados recientes -->
+      <div class="results-col">
+        <div class="results-col-header">Resultados Recientes</div>
+        <div id="recent-results-list"></div>
+        <a href="torneos.html" class="btn btn-ghost btn-sm" style="margin-top:12px; width:100%; justify-content:center;">Ver cuadro completo</a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- =====================
+     RANKING RÁPIDO
+     ===================== -->
+<section class="section ranking-section">
+  <div class="container">
+    <div class="section-title" data-animate>
+      <span class="label">posiciones actuales</span>
+      <h2>Ranking <span>Regional</span></h2>
+    </div>
+
+    <div class="ranking-grid">
+      <!-- Masculino -->
+      <div class="ranking-table-wrapper" data-animate data-delay="100">
+        <div class="ranking-table-header">
+          <h3>Masculino</h3>
+          <a href="ranking.html" class="btn btn-ghost btn-sm">Ver completo</a>
+        </div>
+        <div id="ranking-masc-list"></div>
+      </div>
+
+      <!-- Femenino -->
+      <div class="ranking-table-wrapper" data-animate data-delay="200">
+        <div class="ranking-table-header">
+          <h3>Femenino</h3>
+          <a href="ranking.html" class="btn btn-ghost btn-sm">Ver completo</a>
+        </div>
+        <div id="ranking-fem-list"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =====================
+     TORNEOS PRÓXIMOS
+     ===================== -->
+<section class="section">
+  <div class="container">
+    <div style="display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:40px;" data-animate>
+      <div class="section-title" style="margin-bottom:0;">
+        <span class="label">calendario</span>
+        <h2>Próximos <span>Torneos</span></h2>
+      </div>
+      <a href="torneos.html" class="btn btn-secondary">Ver todos →</a>
+    </div>
+
+    <div class="tournaments-grid" id="tournaments-grid"></div>
+  </div>
+</section>
+
+<!-- =====================
+     JUGADORES DESTACADOS
+     ===================== -->
+<section class="section" style="background: var(--bg-surface);">
+  <div class="container">
+    <div style="display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:40px;" data-animate>
+      <div class="section-title" style="margin-bottom:0;">
+        <span class="label">los mejores</span>
+        <h2>Jugadores <span>Destacados</span></h2>
+      </div>
+      <a href="jugadores.html" class="btn btn-secondary">Ver todos →</a>
+    </div>
+
+    <div class="players-carousel-wrapper" data-animate data-delay="100">
+      <!-- Botones de navegación en desktop -->
+      <button class="carousel-nav-btn prev" onclick="scrollCarousel(-1)" aria-label="Anterior jugador">❮</button>
+      
+      <div class="players-carousel" id="players-carousel">
+        <!-- Renderizado dinámico con JS -->
+      </div>
+      
+      <button class="carousel-nav-btn next" onclick="scrollCarousel(1)" aria-label="Siguiente jugador">❯</button>
+    </div>
+  </div>
+</section>
+
+
+<!-- =====================
+     CANCHAS LOCALES
+     ===================== -->
+<section class="section courts-section">
+  <div class="container">
+    <div style="display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:40px;" data-animate>
+      <div class="section-title" style="margin-bottom:0;">
+        <span class="label">donde jugar</span>
+        <h2>Canchas en <span>Bella Vista</span></h2>
+      </div>
+      <a href="canchas.html" class="btn btn-secondary">Ver mapa →</a>
+    </div>
+
+    <div class="courts-grid" id="courts-grid"></div>
+  </div>
+</section>
+
+<!-- =====================
+     BELLA VISTA INFO
+     ===================== -->
+<section class="section city-section">
+  <div class="container">
+    <div class="city-layout">
+      <!-- Images -->
+      <div class="city-image-stack" data-animate>
+        <div class="img-skeleton" style="width:100%; height:360px; border-radius: var(--radius-lg);">
+          <img data-src="assets/images/bella_vista.png" alt="Bella Vista, Corrientes"
+            class="city-img-main lazy-img" loading="lazy">
+        </div>
+        <div class="img-skeleton" style="position:absolute; bottom:-20px; right:-20px; width:200px; height:150px; border-radius:var(--radius-md);">
+          <img data-src="assets/images/court_top_view.png" alt="Canchas de pádel"
+            class="city-img-secondary lazy-img" loading="lazy" style="width:100%;height:100%;object-fit:cover;">
+        </div>
+      </div>
+
+      <!-- Info -->
+      <div data-animate data-delay="150">
+        <div class="section-title" style="margin-bottom: 20px;">
+          <span class="label">nuestra ciudad</span>
+          <h2>Bella Vista <span>Corrientes</span></h2>
+        </div>
+
+        <p style="font-size: 15px; color: var(--text-secondary); line-height: 1.8; margin-bottom: 20px;">
+          Fundada en 1825 por el brigadier Pedro Ferré sobre las impresionantes
+          <strong style="color:var(--text-primary)">barrancas del río Paraná</strong>,
+          Bella Vista es una ciudad que enamora desde el agua. Su nombre lo dice todo:
+          la vista desde el río es simplemente espectacular.
+        </p>
+
+        <p style="font-size: 15px; color: var(--text-secondary); line-height: 1.8; margin-bottom: 28px;">
+          Capital de la <strong style="color:var(--text-primary)">Fiesta Nacional de la Naranja</strong>,
+          ciudad de carnavales vibrantes y pesca deportiva de primer nivel.
+          Hoy también es el epicentro del pádel del litoral.
+        </p>
+
+        <div class="city-facts">
+          <div class="city-fact">
+            <span class="city-fact-icon" data-icon="globe" data-size="20"></span>
+            <div class="city-fact-text">
+              <strong>Río Paraná</strong>
+              Vista privilegiada desde las barrancas
+            </div>
+          </div>
+          <div class="city-fact">
+            <span class="city-fact-icon" data-icon="zap" data-size="20"></span>
+            <div class="city-fact-text">
+              <strong>Fiesta Nacional</strong>
+              Capital citrícola de Argentina
+            </div>
+          </div>
+          <div class="city-fact">
+            <span class="city-fact-icon" data-icon="shield" data-size="20"></span>
+            <div class="city-fact-text">
+              <strong>Reserva Toropí</strong>
+              "La tierra de los gigantes"
+            </div>
+          </div>
+          <div class="city-fact">
+            <span class="city-fact-icon" data-icon="star" data-size="20"></span>
+            <div class="city-fact-text">
+              <strong>Carnavales</strong>
+              Tradición cultural correntina
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =====================
+     NOTICIAS
+     ===================== -->
+<section class="section">
+  <div class="container">
+    <div style="display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:40px;" data-animate>
+      <div class="section-title" style="margin-bottom:0;">
+        <span class="label">novedades</span>
+        <h2>Últimas <span>Noticias</span></h2>
+      </div>
+      <a href="noticias.html" class="btn btn-secondary">Ver todas →</a>
+    </div>
+
+    <div class="news-grid" id="news-grid"></div>
+  </div>
+</section>
+
+<!-- =====================
+     SECCIÓN AGREGAR JUGADOR
+     ===================== -->
+<section class="section add-player-section" id="registrar">
+  <div class="container">
+    <div class="add-player-grid">
+      <!-- Info izquierda -->
+      <div data-animate>
+        <div class="section-title" style="margin-bottom:20px;">
+          <span class="label">base de datos</span>
+          <h2 class="add-player-info"><span>Registrá</span> tu<br>Jugador</h2>
+        </div>
+
+        <p style="font-size:15px; color:var(--text-secondary); line-height:1.8; margin-bottom:24px;">
+          Sumá a cualquier jugador de la región al directorio oficial de PadelBell.
+          Completá el formulario con sus datos y estará visible en el ranking y búsquedas.
+        </p>
+
+        <div class="add-player-features">
+          <div class="feature-item">
+            <div class="feature-icon" data-icon="search" data-size="14"></div>
+            <span>Aparecé en búsquedas con filtros avanzados</span>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon" data-icon="ranking" data-size="14"></div>
+            <span>Tu ranking actualizado en tiempo real</span>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon" data-icon="trophy" data-size="14"></div>
+            <span>Historial de torneos y palmarés</span>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon" data-icon="globe" data-size="14"></div>
+            <span>Visible para toda la región: ARG, URU, BRA, PAR</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Formulario derecho -->
+      <div class="player-form" data-animate data-delay="150">
+        <h3 class="player-form-title">Datos del jugador</h3>
+
+        <form id="form-add-player-inline" onsubmit="submitPlayerForm(event, 'form-add-player-inline')">
+          <!-- Foto -->
+          <div class="form-group" style="margin-bottom: 20px;">
+            <label class="form-label">Foto del jugador</label>
+            <div class="photo-upload-area">
+              <input type="file" accept="image/*" style="display:none" id="photo-inline">
+              <div class="photo-upload-icon" data-icon="upload" data-size="20"></div>
+              <p class="photo-upload-text">
+                <strong>Clic para subir</strong> o arrastrá una imagen
+              </p>
+              <p style="font-size:11px; color:var(--text-muted); margin-top:6px;">JPG, PNG · Máx 5MB</p>
+            </div>
+          </div>
+
+          <p class="form-section-title">01 · Datos personales</p>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label" for="inline-nombre">Nombre *</label>
+              <input type="text" id="inline-nombre" name="first_name" class="form-input" placeholder="Ej: Juan" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="inline-apellido">Apellido *</label>
+              <input type="text" id="inline-apellido" name="last_name" class="form-input" placeholder="Ej: García" required>
+            </div>
+          </div>
+
+          <div class="form-grid-2" style="margin-top:14px;">
+            <div class="form-group">
+              <label class="form-label" for="inline-apodo">Apodo</label>
+              <input type="text" id="inline-apodo" name="nickname" class="form-input" placeholder="Ej: El Colo">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="inline-nacimiento">Fecha de nacimiento</label>
+              <input type="date" id="inline-nacimiento" name="birthdate" class="form-input">
+            </div>
+          </div>
+
+          <p class="form-section-title">02 · Ubicación</p>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label" for="inline-pais">País *</label>
+              <select id="inline-pais" name="country" class="form-select"
+                data-country-select="inline" required>
+                <option value="">Seleccionar país</option>
+                <option value="argentina">Argentina</option>
+                <option value="uruguay">Uruguay</option>
+                <option value="brasil">Brasil</option>
+                <option value="paraguay">Paraguay</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="inline-provincia">Provincia / Departamento *</label>
+              <select id="inline-provincia" name="province" class="form-select"
+                data-province-select="inline" disabled required>
+                <option value="">Primero seleccioná un país</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-grid-2" style="margin-top:14px;">
+            <div class="form-group">
+              <label class="form-label" for="inline-ciudad">Ciudad</label>
+              <input type="text" id="inline-ciudad" name="city" class="form-input" placeholder="Ej: Bella Vista">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="inline-club">Club</label>
+              <input type="text" id="inline-club" name="club" class="form-input" placeholder="Ej: Palmeras Pádel">
+            </div>
+          </div>
+
+          <p class="form-section-title">03 · Características físicas</p>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label">Género *</label>
+              <select name="gender" class="form-select" required>
+                <option value="">Seleccionar</option>
+                <option value="masculino">Masculino</option>
+                <option value="femenino">Femenino</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Mano dominante *</label>
+              <select name="dominant_hand" class="form-select" required>
+                <option value="">Seleccionar</option>
+                <option value="derecha">Derecha</option>
+                <option value="izquierda">Izquierda</option>
+                <option value="ambas">Ambas</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-grid-2" style="margin-top:14px;">
+            <div class="form-group">
+              <label class="form-label">Altura (cm)</label>
+              <div class="range-with-display" data-unit="cm">
+                <input type="range" name="height" min="150" max="215" value="175">
+                <div style="display:flex; justify-content:space-between; margin-top:4px;">
+                  <span style="font-size:11px; color:var(--text-muted)">150cm</span>
+                  <span class="range-display" style="font-family:var(--font-mono); font-size:13px; color:var(--accent-primary); font-weight:600;">175cm</span>
+                  <span style="font-size:11px; color:var(--text-muted)">215cm</span>
+                </div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Peso (kg)</label>
+              <div class="range-with-display" data-unit="kg">
+                <input type="range" name="weight" min="50" max="120" value="75">
+                <div style="display:flex; justify-content:space-between; margin-top:4px;">
+                  <span style="font-size:11px; color:var(--text-muted)">50kg</span>
+                  <span class="range-display" style="font-family:var(--font-mono); font-size:13px; color:var(--accent-primary); font-weight:600;">75kg</span>
+                  <span style="font-size:11px; color:var(--text-muted)">120kg</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <p class="form-section-title">04 · Datos de juego</p>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label">Posición *</label>
+              <select name="position" class="form-select" required>
+                <option value="">Seleccionar</option>
+                <option value="drive">Drive</option>
+                <option value="reves">Revés</option>
+                <option value="ambas">Ambas</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Categoría *</label>
+              <select name="category" class="form-select" required>
+                <option value="">Seleccionar</option>
+                <option value="1ra">1ra categoría</option>
+                <option value="2da">2da categoría</option>
+                <option value="3ra">3ra categoría</option>
+                <option value="4ta">4ta categoría</option>
+                <option value="5ta">5ta categoría</option>
+                <option value="6ta">6ta categoría</option>
+                <option value="7ma">7ma categoría</option>
+                <option value="8va">8va categoría</option>
+                <option value="Principiante">Principiante</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-grid-2" style="margin-top:14px;">
+            <div class="form-group">
+              <label class="form-label">Club de residencia</label>
+              <input type="text" name="club" class="form-input" placeholder="ej. Palmeras Pádel">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Instagram</label>
+              <input type="text" name="instagram" class="form-input" placeholder="@usuario">
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-top:14px;">
+            <label class="form-label">Bio / Descripción</label>
+            <textarea name="bio" class="form-textarea" rows="2"
+              placeholder="Breve descripción del jugador..."></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width:100%; margin-top:24px;">
+            Registrar Jugador
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =====================
+     MODAL: AGREGAR JUGADOR
+     ===================== -->
+
+<!-- =====================
+     MODAL: AGREGAR JUGADOR
+     ===================== -->
+<div class="modal-overlay" id="modal-add-player">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Agregar Jugador</h2>
+      <button class="modal-close" onclick="closeModal('modal-add-player')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="color:var(--text-secondary); margin-bottom:20px;">
+        Completá el formulario en la sección de abajo o
+        <a href="#registrar" onclick="closeModal('modal-add-player')"
+          style="color:var(--accent-primary);">ir directamente al formulario</a>.
+      </p>
+      <button class="btn btn-primary" style="width:100%;"
+        onclick="closeModal('modal-add-player'); document.getElementById('registrar').scrollIntoView({behavior:'smooth'})">
+        Ir al formulario completo ↓
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="js/icons.js"></script>
+<script src="js/data.js"></script>
+<script src="js/scorer.js"></script>
+<script src="js/main.js"></script>
+<script>
+  /* =====================
+     RENDER RANKING
+     ===================== */
+  function renderRanking(containerId, players) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const posClasses = ['gold', 'silver', 'bronze'];
+
+    container.innerHTML = players.slice(0, 5).map((p, i) => {
+      const changeClass = p.ranking_change > 0 ? 'up' : p.ranking_change < 0 ? 'down' : 'same';
+      const changeText  = p.ranking_change > 0 ? `↑${p.ranking_change}` : p.ranking_change < 0 ? `↓${Math.abs(p.ranking_change)}` : '−';
+      const flag        = getCountryFlag(p.country);
+      const posClass    = posClasses[i] || '';
+
+      return `
+        <div class="ranking-row" onclick="window.location='jugadores.html'">
+          <div class="rank-pos ${posClass}">${i + 1}</div>
+          <div class="rank-player">
+            <div class="rank-avatar">
+              <img src="${p.photo || ''}" alt="${p.first_name}" onerror="this.parentElement.innerHTML='<span class=&quot;badge badge-neutral&quot;>${flag}</span>'">
+            </div>
+            <div class="rank-info">
+              <div class="rank-name">${p.first_name} ${p.last_name}</div>
+              <div class="rank-meta"><span class="badge badge-neutral" style="font-size:9px; padding:1px 4px; border-radius:3px;">${flag}</span> ${p.province} · ${p.club}</div>
+            </div>
+          </div>
+          <div class="rank-points">${p.ranking_points.toLocaleString('es-AR')}</div>
+          <div class="rank-change ${changeClass}">${changeText}</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  /* =====================
+     RENDER TOURNAMENTS
+     ===================== */
+  function renderTournaments() {
+    const container = document.getElementById('tournaments-grid');
+    if (!container) return;
+
+    const tournaments = getUpcomingTournaments(3);
+    const categoryColors = {
+      local: 'badge-green',
+      regional: 'badge-primary',
+      provincial: 'badge-orange',
+      internacional: 'badge-red'
+    };
+    const genderLabels = { masculino: 'Masc.', femenino: 'Fem.', mixto: 'Mixto' };
+
+    container.innerHTML = tournaments.map(t => `
+      <div class="tournament-card" onclick="window.location='torneos.html'">
+        <div class="tournament-card-img">
+          <img src="${t.image}" alt="${t.name}">
+          <div class="tournament-card-img-overlay"></div>
+          <div class="tournament-card-badges">
+            <span class="badge ${categoryColors[t.category] || 'badge-primary'}">${t.category}</span>
+            <span class="badge badge-green">${genderLabels[t.gender]}</span>
+          </div>
+        </div>
+        <div class="tournament-card-body">
+          <div class="tournament-card-name">${t.name}</div>
+          <div class="tournament-card-meta">
+            <div class="tournament-card-meta-row"><span data-icon="calendar" style="margin-right:5px; vertical-align:middle;"></span>${formatDate(t.start_date)}</div>
+            <div class="tournament-card-meta-row"><span data-icon="mapPin" style="margin-right:5px; vertical-align:middle;"></span>${t.venue} · ${t.city}</div>
+            <div class="tournament-card-meta-row"><span data-icon="users" style="margin-right:5px; vertical-align:middle;"></span>${t.participants || 16} parejas</div>
+          </div>
+          <div class="tournament-card-footer">
+            <div class="tournament-prize">
+              <span class="label">Premio</span>
+              <span class="amount">${formatPrice(t.prize)}</span>
+            </div>
+            <span class="btn btn-ghost btn-sm">Ver info →</span>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  /* =====================
+     RENDER PLAYERS CAROUSEL
+     ===================== */
+  function renderPlayersCarousel() {
+    const container = document.getElementById('players-carousel');
+    if (!container) return;
+
+    const players = DB.players.slice(0, 5);
+
+    container.innerHTML = players.map(p => {
+      const flag = getCountryFlag(p.country);
+      return `
+        <div class="player-mini-card" onclick="window.location='jugadores.html'">
+          <div class="img-skeleton player-mini-img-wrap">
+            <img data-src="${p.photo || 'assets/images/player_action.png'}"
+              alt="${p.first_name}" class="player-mini-img lazy-img"
+              loading="lazy"
+              onerror="this.src='assets/images/player_action.png'">
+          </div>
+          <div class="player-mini-body">
+            <div class="player-mini-name">${p.first_name} ${p.last_name}</div>
+            <div class="player-mini-meta"><span class="badge badge-neutral" style="font-size:8px; padding:1px 3px; border-radius:2px;">${flag}</span> ${p.province}</div>
+            <div class="player-mini-points">${p.ranking_points.toLocaleString('es-AR')} pts</div>
+            <div style="margin-top:8px;">
+              <span class="badge badge-primary" style="font-size:10px;">#${p.ranking_masc || p.ranking_fem || 1} ${p.gender === 'femenino' ? 'Fem.' : 'Masc.'}</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+    initLazyImages(); // 240504 — activar lazy en imágenes recién insertadas
+  }
+
+  /* =====================
+     RENDER COURTS
+     ===================== */
+  function renderCourts() {
+    const container = document.getElementById('courts-grid');
+    if (!container) return;
+
+    const courts = getAllCourts();
+
+    container.innerHTML = courts.map((c, i) => `
+      <div class="court-card ${c.featured ? 'featured' : ''}">
+        <div class="court-card-img">
+          <img src="${c.image}" alt="${c.name}">
+        </div>
+        <div class="court-card-body">
+          <div class="court-card-name">${c.name}</div>
+          <div class="court-card-address"><span data-icon="mapPin" style="margin-right:5px; vertical-align:middle;"></span>${c.address}, ${c.city}</div>
+          <div class="court-amenities">
+            ${c.amenities.map(a => `<span class="amenity-tag">${a}</span>`).join('')}
+            <span class="amenity-tag">${c.courts_count} canchas</span>
+            <span class="amenity-tag">${c.lighting}</span>
+          </div>
+          <div class="court-card-footer">
+            <div class="court-price">
+              <span class="label">Precio / hora</span>
+              <span class="amount">${formatPrice(c.price_per_hour)}</span>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <span class="badge badge-primary"><span data-icon="clock" style="margin-right:4px; vertical-align:middle;"></span>${c.schedule.split('·')[0].trim()}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  /* =====================
+     RENDER NEWS
+     ===================== */
+  function renderNews() {
+    const container = document.getElementById('news-grid');
+    if (!container) return;
+
+    const news = getAllNews();
+    if (!news || !news.length) {
+      container.innerHTML = `
+        <div class="empty-state" style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-secondary); width: 100%;">
+          <span data-icon="news" data-size="32" style="margin-bottom:12px; display:inline-block; opacity:0.5;"></span>
+          <p style="font-size:14px; font-family:'Montserrat',sans-serif;">No hay noticias publicadas en este momento.</p>
+        </div>`;
+      if (typeof renderIcons === 'function') renderIcons();
+      return;
+    }
+
+    const featured = news.find(n => n.featured) || news[0];
+    const secondary = news.filter(n => n !== featured).slice(0, 3);
+
+    const categoryColors = {
+      torneos: 'badge-orange',
+      jugadores: 'badge-primary',
+      canchas: 'badge-green',
+      equipamiento: 'badge-red'
+    };
+
+    container.innerHTML = `
+      <div class="news-featured" onclick="window.location='noticias.html'">
+        <div class="news-featured-img img-skeleton">
+          <img data-src="${featured.image}" alt="${featured.title}" class="lazy-img" loading="lazy">
+        </div>
+        <div class="news-featured-body">
+          <span class="badge ${categoryColors[featured.category.toLowerCase()] || 'badge-primary'}">${featured.category}</span>
+          <div class="news-featured-title">${featured.title}</div>
+          <p class="news-featured-excerpt">${featured.excerpt}</p>
+          <div style="margin-top:14px; font-size:12px; color:var(--text-muted);">
+            <span data-icon="calendar" style="margin-right:5px; vertical-align:middle;"></span>${formatDate(featured.date)}
+          </div>
+        </div>
+      </div>
+      <div class="news-list">
+        ${secondary.map(n => `
+          <div class="news-item" onclick="window.location='noticias.html'">
+            <div class="news-item-img img-skeleton">
+              <img data-src="${n.image}" alt="${n.title}" class="lazy-img" loading="lazy">
+            </div>
+            <div class="news-item-body">
+              <div>
+                <span class="badge ${categoryColors[n.category.toLowerCase()] || 'badge-primary'}" style="margin-bottom:6px;">${n.category}</span>
+                <div class="news-item-title">${n.title}</div>
+              </div>
+              <div class="news-item-meta">
+                <span class="news-item-date"><span data-icon="calendar" style="margin-right:5px; vertical-align:middle;"></span>${formatDate(n.date)}</span>
+              </div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+    initLazyImages(); // 240504
+  }
+
+  /* =====================
+     FORM SUBMIT
+     ===================== */
+  function submitPlayerForm(event, formId) {
+    event.preventDefault();
+    const form = document.getElementById(formId);
+    const data = new FormData(form);
+    const playerData = {};
+    for (let [key, value] of data.entries()) {
+      playerData[key] = value;
+    }
+
+    playerData.age = playerData.birthdate
+      ? new Date().getFullYear() - new Date(playerData.birthdate).getFullYear()
+      : 0;
+    playerData.height = parseInt(playerData.height) || 175;
+    playerData.weight = parseInt(playerData.weight) || 75;
+
+    const newPlayer = addPlayer(playerData);
+
+    showToast(`✅ ¡${newPlayer.first_name} ${newPlayer.last_name} registrado exitosamente!`, 'success', 4000);
+    form.reset();
+
+    // Re-render
+    renderPlayersCarousel();
+    renderRankingAll();
+    renderIcons();
+
+    // Scroll top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function renderRankingAll() {
+    renderRanking('ranking-masc-list', getRankingMasculino());
+    renderRanking('ranking-fem-list', getRankingFemenino());
+  }
+
+  /* =====================
+     PARTIDOS EN VIVO
+     ===================== */
+  function renderLiveMatches() {
+    const container = document.getElementById('live-matches-list');
+    if (!container) return;
+
+    const matches = (typeof getLiveMatches === 'function') ? getLiveMatches() : [];
+
+    if (!matches.length) {
+      container.innerHTML = `<div style="text-align:center; padding:24px; color:var(--text-muted); font-size:13px;">Sin partidos en curso actualmente</div>`;
+      return;
+    }
+
+    container.innerHTML = matches.map(m => {
+      const setsHTML = (m.setsHistory || []).map(s => `<span class="lmc-set-pill">${s.a}-${s.b}</span>`).join('');
+      const serveA = m.serve === 'a' ? '<span class="lmc-serve-dot"></span>' : '';
+      const serveB = m.serve === 'b' ? '<span class="lmc-serve-dot"></span>' : '';
+
+      return `
+        <div class="live-match-card" onclick="window.location='torneos.html'">
+          <div class="lmc-phase">${m.phase} &nbsp;·&nbsp; ${m.court || 'Cancha principal'}</div>
+          <div class="lmc-scoreboard">
+            <div class="lmc-pair">
+              <div class="lmc-pair-name">${serveA}${m.pairA}</div>
+            </div>
+            <div class="lmc-score-block">
+              <div class="lmc-games">${m.gamesA ?? 0}&ndash;${m.gamesB ?? 0}</div>
+              <div class="lmc-points">${m.pointLabelA ?? '0'} · ${m.pointLabelB ?? '0'}</div>
+            </div>
+            <div class="lmc-pair right">
+              <div class="lmc-pair-name">${m.pairB}${serveB}</div>
+            </div>
+          </div>
+          ${setsHTML ? `<div class="lmc-sets-row"><span style="font-size:10px;color:var(--text-muted);margin-right:4px;">Sets:</span>${setsHTML}</div>` : ''}
+        </div>
+      `;
+    }).join('');
+  }
+
+  function renderRecentResults() {
+    const container = document.getElementById('recent-results-list');
+    if (!container) return;
+
+    const results = (typeof getRecentResults === 'function') ? getRecentResults() : [];
+
+    if (!results.length) {
+      container.innerHTML = `<div style="text-align:center; padding:24px; color:var(--text-muted); font-size:13px;">Sin resultados recientes</div>`;
+      return;
+    }
+
+    container.innerHTML = results.map(r => {
+      const winnerPair  = r.winner === 'a' ? r.pairA : r.pairB;
+      const loserPair   = r.winner === 'a' ? r.pairB : r.pairA;
+      return `
+        <div class="result-row">
+          <div class="rr-phase">${r.phase} &nbsp;·&nbsp; ${formatDateShort(r.date)}</div>
+          <div class="rr-match">
+            <div class="rr-pairs">
+              <strong>${winnerPair}</strong>
+              <em>def.</em>
+              ${loserPair}
+            </div>
+            <div class="rr-score">${r.score}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  /* =====================
+     HERO SLIDER LOGIC
+     ===================== */
+  let currentSlideIdx = 0;
+  let slideInterval;
+
+  function showSlide(index) {
+    const slides = document.querySelectorAll('.hero-slide');
+    const dots = document.querySelectorAll('.slider-dot');
+    if (!slides.length) return;
+
+    if (index >= slides.length) currentSlideIdx = 0;
+    else if (index < 0) currentSlideIdx = slides.length - 1;
+    else currentSlideIdx = index;
+
+    slides.forEach((slide, i) => {
+      slide.classList.toggle('active', i === currentSlideIdx);
+    });
+
+    dots.forEach((dot, i) => {
+      dot.classList.toggle('active', i === currentSlideIdx);
+    });
+  }
+
+  function moveSlide(step) {
+    clearInterval(slideInterval);
+    showSlide(currentSlideIdx + step);
+    startSlideAutoplay();
+  }
+
+  function setSlide(index) {
+    clearInterval(slideInterval);
+    showSlide(index);
+    startSlideAutoplay();
+  }
+
+  function startSlideAutoplay() {
+    clearInterval(slideInterval);
+    slideInterval = setInterval(() => {
+      showSlide(currentSlideIdx + 1);
+    }, 6000);
+  }
+
+  /* =====================
+     PLAYERS CAROUSEL LOGIC
+     ===================== */
+  function scrollCarousel(direction) {
+    const carousel = document.getElementById('players-carousel');
+    if (!carousel) return;
+    const scrollAmount = 260; // card width + gap
+    carousel.scrollBy({
+      left: direction * scrollAmount,
+      behavior: 'smooth'
+    });
+  }
+
+  /* =====================
+     INIT
+     ===================== */
+  document.addEventListener('DOMContentLoaded', () => {
+    renderRankingAll();
+    renderTournaments();
+    renderPlayersCarousel();
+    renderCourts();
+    renderNews();
+    renderLiveMatches();
+    renderRecentResults();
+    renderIcons();
+
+    // Iniciar slider
+    showSlide(0);
+    startSlideAutoplay();
+
+    // Countdown al próximo torneo
+    startCountdown('countdown-main', '2026-07-18T09:00:00-03:00');
+  });
+</script>
+
+<!-- ======= FOOTER ======= -->
+<footer class="site-footer" role="contentinfo" style="border-top: 1px solid var(--border-subtle); background: var(--bg-surface); padding: 60px 0 30px 0;">
+  <div class="container">
+    <div class="site-footer-inner" style="display:grid; grid-template-columns: 1.5fr 1fr 1fr 1.2fr; gap: 40px; margin-bottom: 40px;">
+      <div class="footer-brand">
+        <!-- Logo en footer -->
+        <a href="index.html" style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+          <svg width="34" height="34" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
+            <rect width="38" height="38" rx="10" fill="url(#pbv-grad-ft)"/>
+            <defs>
+              <linearGradient id="pbv-grad-ft" x1="0" y1="0" x2="38" y2="38" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#0F4C81"/>
+                <stop offset="60%" stop-color="#1E6B59"/>
+                <stop offset="100%" stop-color="#F28C2B" stop-opacity=".7"/>
+              </linearGradient>
+            </defs>
+            <ellipse cx="17" cy="16" rx="8" ry="10" stroke="#E9DFC8" stroke-width="1.4" fill="none"/>
+            <line x1="17" y1="10" x2="17" y2="22" stroke="#E9DFC8" stroke-width="1" opacity=".6"/>
+            <line x1="11" y1="16" x2="23" y2="16" stroke="#E9DFC8" stroke-width="1" opacity=".6"/>
+            <circle cx="20" cy="10" r="2.5" fill="#F28C2B" opacity=".9"/>
+            <line x1="17" y1="26" x2="17" y2="33" stroke="#E9DFC8" stroke-width="2" stroke-linecap="round"/>
+            <path d="M7 30 Q10 28 13 30 Q16 32 19 30 Q22 28 25 30 Q28 32 31 30" stroke="#E9DFC8" stroke-width="1.2" fill="none" opacity=".5"/>
+          </svg>
+          <div class="logo-text">
+            <div class="logo-name" style="font-family:'Montserrat',sans-serif; font-weight:800; font-size:14px; letter-spacing:1px; color:#E9DFC8;">
+              PADEL <span style="color:#F28C2B;">BELLA VISTA</span>
+            </div>
+            <div class="logo-tagline" style="font-family:'Montserrat',sans-serif; font-size:8px; letter-spacing:1.5px; color:#8BA186; text-transform:uppercase;">
+              Naturaleza · Deporte · Comunidad
+            </div>
+          </div>
+        </a>
+        <p style="font-size:13px; color:var(--text-secondary); line-height:1.6; max-width:300px;">
+          La plataforma del pádel regional del litoral sudamericano. Conectando jugadores, canchas y torneos locales en Bella Vista, Corrientes.
+        </p>
+      </div>
+      <div>
+        <div class="footer-col-title" style="font-family:'Montserrat',sans-serif; font-weight:700; font-size:12px; text-transform:uppercase; letter-spacing:1px; color:var(--text-primary); margin-bottom:16px;">Navegación</div>
+        <ul class="footer-links" style="display:flex; flex-direction:column; gap:10px; font-size:13px; color:var(--text-secondary);">
+          <li><a href="index.html" style="transition:color var(--transition-fast);">Inicio</a></li>
+          <li><a href="jugadores.html" style="transition:color var(--transition-fast);">Jugadores</a></li>
+          <li><a href="torneos.html" style="transition:color var(--transition-fast);">Torneos</a></li>
+          <li><a href="ranking.html" style="transition:color var(--transition-fast);">Ranking</a></li>
+          <li><a href="canchas.html" style="transition:color var(--transition-fast);">Canchas</a></li>
+          <li><a href="noticias.html" style="transition:color var(--transition-fast);">Noticias</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title" style="font-family:'Montserrat',sans-serif; font-weight:700; font-size:12px; text-transform:uppercase; letter-spacing:1px; color:var(--text-primary); margin-bottom:16px;">Circuito</div>
+        <ul class="footer-links" style="display:flex; flex-direction:column; gap:10px; font-size:13px; color:var(--text-secondary);">
+          <li><a href="torneos.html" style="transition:color var(--transition-fast);">Copa del Litoral 2026</a></li>
+          <li><a href="ranking.html" style="transition:color var(--transition-fast);">Ranking Masculino</a></li>
+          <li><a href="ranking.html" style="transition:color var(--transition-fast);">Ranking Femenino</a></li>
+          <li><a href="canchas.html" style="transition:color var(--transition-fast);">Canchas Homologadas</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title" style="font-family:'Montserrat',sans-serif; font-weight:700; font-size:12px; text-transform:uppercase; letter-spacing:1px; color:var(--text-primary); margin-bottom:16px;">Información</div>
+        <ul class="footer-links" style="display:flex; flex-direction:column; gap:10px; font-size:13px; color:var(--text-secondary); margin-bottom:20px;">
+          <li><a href="admin.html" style="transition:color var(--transition-fast);">Panel Admin</a></li>
+          <li><a href="noticias.html" style="transition:color var(--transition-fast);">Noticias</a></li>
+        </ul>
+        <div style="font-size:11px; color:var(--text-muted); font-family:var(--font-mono); display:flex; align-items:center; gap:6px;">
+          <span class="footer-status-dot" style="background:#1E6B59;"></span>Sistema activo
+        </div>
+      </div>
+    </div>
+    
+    <div style="border-top:1px solid rgba(255,255,255,0.05); padding-top:20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; font-size:12px; color:var(--text-muted);">
+      <p>© 2026 Padel Bella Vista · Hecho con pasión en Corrientes, Argentina</p>
+      <div>
+        <a href="admin.html" style="margin-left:16px; transition:color var(--transition-fast);">Administración</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
+
