@@ -1442,7 +1442,7 @@ img.img-priority {
 }
 
 /* Reglas responsivas para navegación */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .main-nav { display: none !important; }
   #menu-toggler { display: inline-flex !important; }
 }

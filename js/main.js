@@ -750,10 +750,47 @@ function _adjustBodyPaddingForBars() {
   const header  = document.getElementById('main-header');
   const role    = document.getElementById('role-banner');
   const playing = document.getElementById('playing-bar');
-  let total = header ? header.offsetHeight : 72;
-  if (role    && !role.classList.contains('is-hidden'))    total += role.offsetHeight;
-  if (playing && !playing.classList.contains('is-hidden')) total += playing.offsetHeight;
+  const mobileMenu = document.getElementById('mobile-menu');
+  const restore = document.getElementById('playing-bar-restore');
+  
+  let h1 = header ? header.offsetHeight : 72;
+  
+  if (role) {
+    role.style.top = h1 + 'px';
+    role.style.position = 'fixed';
+    role.style.left = '0';
+    role.style.right = '0';
+    role.style.zIndex = '98';
+  }
+  
+  let h2 = (role && !role.classList.contains('is-hidden')) ? role.offsetHeight : 0;
+  
+  if (playing) {
+    playing.style.top = (h1 + h2) + 'px';
+  }
+  
+  if (restore) {
+    restore.style.top = (h1 + h2) + 'px';
+  }
+  
+  let h3 = (playing && !playing.classList.contains('is-hidden')) ? playing.offsetHeight : 0;
+  
+  const total = h1 + h2 + h3;
   document.body.style.paddingTop = total + 'px';
+  
+  if (mobileMenu) {
+    mobileMenu.style.top = total + 'px';
+  }
+  
+  // Posicionamiento dinámico de elementos sticky en páginas específicas
+  const filterBar = document.querySelector('.filter-bar');
+  if (filterBar) {
+    filterBar.style.top = total + 'px';
+    const thead = document.querySelector('.ranking-table thead');
+    if (thead) {
+      thead.style.top = (total + filterBar.offsetHeight) + 'px';
+    }
+  }
 }
 
 // Compatibilidad con el nombre antiguo
