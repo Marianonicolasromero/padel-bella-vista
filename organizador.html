@@ -326,11 +326,36 @@
 <header id="main-header">
   <div class="container">
     <div class="header-inner">
-      <a href="index.html" class="logo" style="display:flex;align-items:center;gap:12px;">
-        <div class="logo-icon"><span data-icon="court" data-size="20"></span></div>
+      <a href="index.html" class="header-logo" style="gap:12px; display:flex; align-items:center;">
+        <!-- Nuevo Isotipo SVG — sol, pelota de pádel, naranja y Paraná -->
+        <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
+          <circle cx="19" cy="19" r="16" fill="url(#pbv-logo-grad)" opacity="0.15"/>
+          <circle cx="19" cy="19" r="14" stroke="var(--accent-cream)" stroke-width="1.5" fill="none" opacity="0.9"/>
+          <!-- Cancha / Red grid -->
+          <line x1="19" y1="5" x2="19" y2="33" stroke="var(--accent-cream)" stroke-width="0.8" opacity="0.35" stroke-dasharray="2 2"/>
+          <line x1="5" y1="19" x2="33" y2="19" stroke="var(--accent-cream)" stroke-width="0.8" opacity="0.35" stroke-dasharray="2 2"/>
+          <!-- Costura pelota / Paraná curves -->
+          <path d="M8 15 Q19 26 30 15" stroke="var(--accent-primary)" stroke-width="1.5" fill="none" opacity="0.9"/>
+          <path d="M8 23 Q19 12 30 23" stroke="var(--accent-orange)" stroke-width="1.5" fill="none" opacity="0.9"/>
+          <!-- Puntos / Geometría naranja y pala -->
+          <circle cx="19" cy="19" r="2" fill="var(--accent-cream)"/>
+          <circle cx="13" cy="19" r="1.5" fill="var(--accent-cream)" opacity="0.7"/>
+          <circle cx="25" cy="19" r="1.5" fill="var(--accent-cream)" opacity="0.7"/>
+          <defs>
+            <linearGradient id="pbv-logo-grad" x1="0" y1="0" x2="38" y2="38" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="var(--accent-primary)"/>
+              <stop offset="50%" stop-color="var(--accent-teal)"/>
+              <stop offset="100%" stop-color="var(--accent-orange)"/>
+            </linearGradient>
+          </defs>
+        </svg>
         <div class="logo-text">
-          <div class="logo-name">PadelBell</div>
-          <div class="logo-tagline">Bella Vista · Corrientes</div>
+          <div class="logo-name" style="font-family:var(--font-display);font-weight:900;font-size:16px;letter-spacing:1px;line-height:1;color:var(--accent-cream);">
+            PADEL <span style="color:var(--accent-orange);">BELLA VISTA</span>
+          </div>
+          <div class="logo-tagline" style="font-family:var(--font-body);font-size:9px;letter-spacing:2px;color:var(--text-secondary);text-transform:uppercase;margin-top:4px;font-weight:700;">
+            Naturaleza · Deporte · Comunidad
+          </div>
         </div>
       </a>
       <nav class="main-nav" id="main-nav">

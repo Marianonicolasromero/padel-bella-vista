@@ -476,13 +476,34 @@
   <!-- SIDEBAR (LEFT) -->
   <aside class="admin-sidebar">
     <div class="admin-sidebar-logo" style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom: 32px; padding: 0 8px;">
-      <div style="display:flex; align-items:center; gap:10px;">
-        <div class="logo-icon" data-icon="court" data-size="20"></div>
+      <a href="index.html" style="display:flex; align-items:center; gap:10px; text-decoration:none;">
+        <!-- Nuevo Isotipo SVG — sol, pelota de pádel, naranja y Paraná -->
+        <svg width="28" height="28" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
+          <circle cx="19" cy="19" r="16" fill="url(#pbv-logo-grad)" opacity="0.15"/>
+          <circle cx="19" cy="19" r="14" stroke="var(--accent-cream)" stroke-width="1.5" fill="none" opacity="0.9"/>
+          <!-- Cancha / Red grid -->
+          <line x1="19" y1="5" x2="19" y2="33" stroke="var(--accent-cream)" stroke-width="0.8" opacity="0.35" stroke-dasharray="2 2"/>
+          <line x1="5" y1="19" x2="33" y2="19" stroke="var(--accent-cream)" stroke-width="0.8" opacity="0.35" stroke-dasharray="2 2"/>
+          <!-- Costura pelota / Paraná curves -->
+          <path d="M8 15 Q19 26 30 15" stroke="var(--accent-primary)" stroke-width="1.5" fill="none" opacity="0.9"/>
+          <path d="M8 23 Q19 12 30 23" stroke="var(--accent-orange)" stroke-width="1.5" fill="none" opacity="0.9"/>
+          <!-- Puntos / Geometría naranja y pala -->
+          <circle cx="19" cy="19" r="2" fill="var(--accent-cream)"/>
+          <circle cx="13" cy="19" r="1.5" fill="var(--accent-cream)" opacity="0.7"/>
+          <circle cx="25" cy="19" r="1.5" fill="var(--accent-cream)" opacity="0.7"/>
+          <defs>
+            <linearGradient id="pbv-logo-grad" x1="0" y1="0" x2="38" y2="38" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="var(--accent-primary)"/>
+              <stop offset="50%" stop-color="var(--accent-teal)"/>
+              <stop offset="100%" stop-color="var(--accent-orange)"/>
+            </linearGradient>
+          </defs>
+        </svg>
         <div class="logo-text">
-          <span class="logo-name" style="font-size:20px; letter-spacing:1px;">PadelBell</span>
-          <span class="logo-tagline" style="font-size:8px;">Control Administrativo</span>
+          <span class="logo-name" style="font-family:var(--font-display); font-weight:900; font-size:16px; letter-spacing:1px; color:var(--accent-cream); display:block; line-height:1.1;">PADEL <span style="color:var(--accent-orange);">BV</span></span>
+          <span class="logo-tagline" style="font-family:var(--font-body); font-size:8px; color:var(--text-secondary); text-transform:uppercase; font-weight:700;">Administración</span>
         </div>
-      </div>
+      </a>
       <button id="theme-toggle" class="theme-toggle-btn" data-icon="sun" data-size="14" title="Cambiar tema" style="width:32px; height:32px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center;"></button>
     </div>
     

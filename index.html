@@ -1826,32 +1826,34 @@
   <div class="container">
     <div class="header-inner">
       <!-- Logo -->
-      <a href="index.html" class="header-logo" style="gap:14px;">
-        <!-- Isotipo SVG inline — paleta Bella Vista -->
+      <a href="index.html" class="header-logo" style="gap:12px; display:flex; align-items:center;">
+        <!-- Nuevo Isotipo SVG — sol, pelota de pádel, naranja y Paraná -->
         <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
-          <rect width="38" height="38" rx="10" fill="url(#pbv-grad)"/>
+          <circle cx="19" cy="19" r="16" fill="url(#pbv-logo-grad)" opacity="0.15"/>
+          <circle cx="19" cy="19" r="14" stroke="var(--accent-cream)" stroke-width="1.5" fill="none" opacity="0.9"/>
+          <!-- Cancha / Red grid -->
+          <line x1="19" y1="5" x2="19" y2="33" stroke="var(--accent-cream)" stroke-width="0.8" opacity="0.35" stroke-dasharray="2 2"/>
+          <line x1="5" y1="19" x2="33" y2="19" stroke="var(--accent-cream)" stroke-width="0.8" opacity="0.35" stroke-dasharray="2 2"/>
+          <!-- Costura pelota / Paraná curves -->
+          <path d="M8 15 Q19 26 30 15" stroke="var(--accent-primary)" stroke-width="1.5" fill="none" opacity="0.9"/>
+          <path d="M8 23 Q19 12 30 23" stroke="var(--accent-orange)" stroke-width="1.5" fill="none" opacity="0.9"/>
+          <!-- Puntos / Geometría naranja y pala -->
+          <circle cx="19" cy="19" r="2" fill="var(--accent-cream)"/>
+          <circle cx="13" cy="19" r="1.5" fill="var(--accent-cream)" opacity="0.7"/>
+          <circle cx="25" cy="19" r="1.5" fill="var(--accent-cream)" opacity="0.7"/>
           <defs>
-            <linearGradient id="pbv-grad" x1="0" y1="0" x2="38" y2="38" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stop-color="#0F4C81"/>
-              <stop offset="60%" stop-color="#1E6B59"/>
-              <stop offset="100%" stop-color="#F28C2B" stop-opacity=".7"/>
+            <linearGradient id="pbv-logo-grad" x1="0" y1="0" x2="38" y2="38" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="var(--accent-primary)"/>
+              <stop offset="50%" stop-color="var(--accent-teal)"/>
+              <stop offset="100%" stop-color="var(--accent-orange)"/>
             </linearGradient>
           </defs>
-          <!-- Paleta de pádel simplificada -->
-          <ellipse cx="17" cy="16" rx="8" ry="10" stroke="#E9DFC8" stroke-width="1.4" fill="none"/>
-          <line x1="17" y1="10" x2="17" y2="22" stroke="#E9DFC8" stroke-width="1" opacity=".6"/>
-          <line x1="11" y1="16" x2="23" y2="16" stroke="#E9DFC8" stroke-width="1" opacity=".6"/>
-          <circle cx="20" cy="10" r="2.5" fill="#F28C2B" opacity=".9"/>
-          <line x1="17" y1="26" x2="17" y2="33" stroke="#E9DFC8" stroke-width="2" stroke-linecap="round"/>
-          <!-- Olas — río Paraná -->
-          <path d="M7 30 Q10 28 13 30 Q16 32 19 30 Q22 28 25 30 Q28 32 31 30" stroke="#E9DFC8" stroke-width="1.2" fill="none" opacity=".5"/>
-          <path d="M9 33 Q12 31 15 33 Q18 35 21 33 Q24 31 27 33" stroke="#E9DFC8" stroke-width="1" fill="none" opacity=".3"/>
         </svg>
         <div class="logo-text">
-          <div class="logo-name" style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:15px;letter-spacing:1px;line-height:1;color:#E9DFC8;">
-            PADEL <span style="color:#F28C2B;">BELLA VISTA</span>
+          <div class="logo-name" style="font-family:var(--font-display);font-weight:900;font-size:16px;letter-spacing:1px;line-height:1;color:var(--accent-cream);">
+            PADEL <span style="color:var(--accent-orange);">BELLA VISTA</span>
           </div>
-          <div class="logo-tagline" style="font-family:'Montserrat',sans-serif;font-size:9px;letter-spacing:2.5px;color:#8BA186;text-transform:uppercase;margin-top:3px;">
+          <div class="logo-tagline" style="font-family:var(--font-body);font-size:9px;letter-spacing:2px;color:var(--text-secondary);text-transform:uppercase;margin-top:4px;font-weight:700;">
             Naturaleza · Deporte · Comunidad
           </div>
         </div>

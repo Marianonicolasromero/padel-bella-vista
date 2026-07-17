@@ -3,7 +3,8 @@
    Bella Vista, Corrientes · Naturaleza · Deporte · Comunidad
    ============================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Cormorant:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,700,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Cormorant:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 /* =====================
    VARIABLES / TOKENS
@@ -17,16 +18,16 @@
   --bg-overlay:     rgba(2, 4, 6, 0.96);
 
   /* Paleta Padel Bella Vista */
-  /* Azul profundo — río, cielo del litoral */
-  --accent-primary:      #0F6DAD;  /* azul más brillante para dark mode */
+  /* Azul Paraná — río, cielo del litoral */
+  --accent-primary:      #0F6DAD;  
   --accent-primary-raw:  #0F4C81;
   --accent-primary-dim:  #0A3E6A;
   --accent-glow:         rgba(15, 109, 173, 0.20);
 
-  /* Verde botánico — barrancas, naturaleza */
-  --accent-teal:         #1E6B59;
-  --accent-teal-light:   #2A8F75;
-  --accent-teal-glow:    rgba(30, 107, 89, 0.20);
+  /* Verde Barranca — barrancas, naturaleza */
+  --accent-teal:         #365943;
+  --accent-teal-light:   #4E7A5E;
+  --accent-teal-glow:    rgba(54, 89, 67, 0.20);
 
   /* Verde salvia — tono tierra */
   --accent-sage:         #8BA186;
@@ -40,8 +41,8 @@
   --accent-orange-glow:  rgba(242, 140, 43, 0.18);
 
   /* Estados */
-  --accent-green:    #1E6B59;
-  --accent-green-bg: rgba(30, 107, 89, 0.12);
+  --accent-green:    #365943;
+  --accent-green-bg: rgba(54, 89, 67, 0.12);
   --accent-red:      #DC2626;
   --accent-red-bg:   rgba(220, 38, 38, 0.10);
 
@@ -68,9 +69,9 @@
   --shadow-lg:   0 8px 32px rgba(0,0,0,0.7);
   --shadow-glow: 0 0 24px rgba(15, 76, 129, 0.22);
 
-  /* Tipografía — Montserrat + Cormorant */
-  --font-display: 'Montserrat', sans-serif;
-  --font-body:    'Montserrat', sans-serif;
+  /* Tipografía — Satoshi + Manrope + Cormorant */
+  --font-display: 'Satoshi', sans-serif;
+  --font-body:    'Manrope', sans-serif;
   --font-serif:   'Cormorant', serif;
   --font-mono:    'JetBrains Mono', monospace;
 
