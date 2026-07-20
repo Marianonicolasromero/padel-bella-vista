@@ -518,9 +518,9 @@
 <div class="players-layout">
 
   <!-- SIDEBAR FILTROS -->
-  <aside class="filters-sidebar">
-    <div class="filter-header">
-      <h3>🔍 Filtros</h3>
+  <aside class="filters-sidebar" id="filters-sidebar">
+    <div class="filter-header" id="filter-header-toggle">
+      <h3><span data-icon="search" data-size="14" style="margin-right:6px;"></span> Filtros</h3>
       <button class="filter-reset" id="btn-reset-filters">Limpiar todo</button>
     </div>
 
@@ -551,90 +551,7 @@
       </div>
     </div>
 
-
-
-    <!-- País -->
-    <div class="filter-block">
-      <div class="filter-block-title">País</div>
-      <div class="filter-chips" id="chips-country">
-        <button class="filter-chip active" data-value="todos">Todos</button>
-        <button class="filter-chip" data-value="argentina">Argentina</button>
-        <button class="filter-chip" data-value="uruguay">Uruguay</button>
-        <button class="filter-chip" data-value="brasil">Brasil</button>
-        <button class="filter-chip" data-value="paraguay">Paraguay</button>
-      </div>
-    </div>
-
-    <!-- Provincia -->
-    <div class="filter-block">
-      <div class="filter-block-title">Provincia / Dpto.</div>
-      <select class="form-select" id="filter-province" style="width:100%;">
-        <option value="todos">Todas las provincias</option>
-      </select>
-    </div>
-
-    <!-- Mano dominante -->
-    <div class="filter-block">
-      <div class="filter-block-title">Mano dominante</div>
-      <div class="filter-chips" id="chips-hand">
-        <button class="filter-chip active" data-value="todos">Todas</button>
-        <button class="filter-chip" data-value="derecha">Derecha</button>
-        <button class="filter-chip" data-value="izquierda">Izquierda</button>
-        <button class="filter-chip" data-value="ambidiestro">Ambidiestro</button>
-      </div>
-    </div>
-
-    <!-- Posición -->
-    <div class="filter-block">
-      <div class="filter-block-title">Posición</div>
-      <div class="filter-chips" id="chips-position">
-        <button class="filter-chip active" data-value="todos">Todas</button>
-        <button class="filter-chip" data-value="drive">Drive</button>
-        <button class="filter-chip" data-value="reves">Revés</button>
-        <button class="filter-chip" data-value="ambas">Ambas</button>
-      </div>
-    </div>
-
-    <!-- Edad -->
-    <div class="filter-block">
-      <div class="filter-block-title">Edad</div>
-      <div class="range-block">
-        <div class="range-row">
-          <input type="number" id="filter-age-min" placeholder="Min" min="10" max="80" value="">
-          <span class="range-sep">—</span>
-          <input type="number" id="filter-age-max" placeholder="Máx" min="10" max="80" value="">
-          <span class="range-sep" style="font-size:11px; color:var(--text-muted);">años</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Altura -->
-    <div class="filter-block">
-      <div class="filter-block-title">Altura</div>
-      <div class="range-block">
-        <div class="range-row">
-          <input type="number" id="filter-height-min" placeholder="Min" min="140" max="220" value="">
-          <span class="range-sep">—</span>
-          <input type="number" id="filter-height-max" placeholder="Máx" min="140" max="220" value="">
-          <span class="range-sep" style="font-size:11px; color:var(--text-muted);">cm</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Peso -->
-    <div class="filter-block">
-      <div class="filter-block-title">Peso</div>
-      <div class="range-block">
-        <div class="range-row">
-          <input type="number" id="filter-weight-min" placeholder="Min" min="40" max="130" value="">
-          <span class="range-sep">—</span>
-          <input type="number" id="filter-weight-max" placeholder="Máx" min="40" max="130" value="">
-          <span class="range-sep" style="font-size:11px; color:var(--text-muted);">kg</span>
-        </div>
-      </div>
-    </div>
-
-    <div style="height:24px;"></div>
+    <div style="height:16px;"></div>
   </aside>
 
   <!-- MAIN CONTENT -->
@@ -898,9 +815,7 @@
    ================================================ */
 const state = {
   filters: {
-    search:'', gender:'todos', category:'todos', level:'todos',
-    country:'todos', province:'todos', hand:'todos', position:'todos',
-    age_min:'', age_max:'', height_min:'', height_max:'', weight_min:'', weight_max:''
+    search: '', gender: 'todos', category: 'todos'
   },
   sort: 'ranking',
   view: 'grid',
@@ -950,11 +865,7 @@ function initChips() {
   document.querySelectorAll('.filter-chips').forEach(group => {
     const key = {
       'chips-gender':   'gender',
-      'chips-category': 'category',
-      'chips-level':    'level',
-      'chips-country':  'country',
-      'chips-hand':     'hand',
-      'chips-position': 'position'
+      'chips-category': 'category'
     }[group.id];
 
     if (!key) return;
@@ -965,35 +876,9 @@ function initChips() {
       group.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       state.filters[key] = btn.dataset.value;
-
-      // Si cambió país → actualizar provincias en filtro sidebar
-      if (key === 'country') updateProvinceFilter(btn.dataset.value);
-
       renderPlayers();
     });
   });
-}
-
-/* ================================================
-   PROVINCIA FILTER (sidebar)
-   ================================================ */
-function updateProvinceFilter(country) {
-  const sel = document.getElementById('filter-province');
-  sel.innerHTML = '<option value="todos">Todas las provincias</option>';
-  state.filters.province = 'todos';
-
-  if (country && country !== 'todos' && REGIONS[country]) {
-    REGIONS[country].provinces.forEach(p => {
-      sel.innerHTML += `<option value="${p}">${p}</option>`;
-    });
-  } else {
-    // Todas las provincias de todos los países
-    Object.values(REGIONS).forEach(r => {
-      r.provinces.forEach(p => {
-        sel.innerHTML += `<option value="${p}">${p}</option>`;
-      });
-    });
-  }
 }
 
 /* ================================================
@@ -1006,21 +891,6 @@ function initTextFilters() {
     renderPlayers();
   }, 250));
 
-  document.getElementById('filter-province').addEventListener('change', e => {
-    state.filters.province = e.target.value;
-    renderPlayers();
-  });
-
-  ['age','height','weight'].forEach(field => {
-    ['min','max'].forEach(bound => {
-      const id = `filter-${field}-${bound}`;
-      document.getElementById(id)?.addEventListener('input', debounce(() => {
-        state.filters[`${field}_${bound}`] = document.getElementById(id).value;
-        renderPlayers();
-      }, 400));
-    });
-  });
-
   document.getElementById('sort-select').addEventListener('change', e => {
     state.sort = e.target.value;
     renderPlayers();
@@ -1031,25 +901,24 @@ function initTextFilters() {
    RESET FILTROS
    ================================================ */
 function resetFilters() {
-  state.filters = {
-    search:'', gender:'todos', category:'todos', level:'todos',
-    country:'todos', province:'todos', hand:'todos', position:'todos',
-    age_min:'', age_max:'', height_min:'', height_max:'', weight_min:'', weight_max:''
-  };
-
+  state.filters = { search: '', gender: 'todos', category: 'todos' };
   document.getElementById('filter-search').value = '';
-  document.getElementById('filter-province').value = 'todos';
-  ['age-min','age-max','height-min','height-max','weight-min','weight-max'].forEach(id => {
-    const el = document.getElementById('filter-' + id);
-    if (el) el.value = '';
-  });
-
   document.querySelectorAll('.filter-chips .filter-chip').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.value === 'todos');
   });
-
-  updateProvinceFilter('todos');
   renderPlayers();
+}
+
+/* ================================================
+   TOGGLE SIDEBAR MÓVIL
+   ================================================ */
+function initSidebarToggle() {
+  const sidebar = document.getElementById('filters-sidebar');
+  const toggle  = document.getElementById('filter-header-toggle');
+  if (!sidebar || !toggle) return;
+  toggle.addEventListener('click', () => {
+    sidebar.classList.toggle('open');
+  });
 }
 
 /* ================================================
@@ -1576,8 +1445,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initFilterOptions();
   initChips();
   initTextFilters();
+  initSidebarToggle();
   initAdminPhoto();
-  updateProvinceFilter('todos');
   renderPlayers();
 });
 </script>

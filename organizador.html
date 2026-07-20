@@ -131,7 +131,6 @@
     }
     .panel-hdr h2 span { color: var(--accent-primary); }
 
-    /* ── Stats row ── */
     .stats-row-sm {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -141,15 +140,40 @@
     .stat-sm {
       background: var(--bg-elevated);
       border: 1px solid var(--border-subtle);
-      border-radius: 12px;
-      padding: 14px 16px;
+      border-radius: 14px;
+      padding: 16px 18px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.25s, transform 0.2s;
     }
+    .stat-sm:hover { border-color: var(--accent-primary); transform: translateY(-2px); }
+    .stat-sm::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      border-radius: 14px 14px 0 0;
+    }
+    .stat-sm.accent-blue::before  { background: var(--accent-primary); }
+    .stat-sm.accent-orange::before { background: var(--accent-orange); }
+    .stat-sm.accent-green::before  { background: #4ade80; }
+    .stat-sm__icon {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 10px;
+    }
+    .stat-sm.accent-blue  .stat-sm__icon { background: rgba(0,180,216,0.12); color: var(--accent-primary); }
+    .stat-sm.accent-orange .stat-sm__icon { background: rgba(232,132,31,0.12); color: var(--accent-orange); }
+    .stat-sm.accent-green  .stat-sm__icon { background: rgba(74,222,128,0.12); color: #4ade80; }
     .stat-sm__num {
       font-family: 'Bebas Neue', sans-serif;
-      font-size: 32px;
-      color: var(--accent-primary);
+      font-size: 34px;
       line-height: 1;
     }
+    .stat-sm.accent-blue  .stat-sm__num { color: var(--accent-primary); }
+    .stat-sm.accent-orange .stat-sm__num { color: var(--accent-orange); }
+    .stat-sm.accent-green  .stat-sm__num { color: #4ade80; }
     .stat-sm__lbl { font-size: 11px; color: var(--text-muted); margin-top: 4px; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 1px; }
 
     /* ── Tournament info card ── */
@@ -243,6 +267,43 @@
     .empty-org-icon { color: var(--text-muted); margin-bottom: 12px; }
     .empty-org-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 1px; color: var(--text-muted); }
     .empty-org-msg { font-size: 13px; color: var(--text-muted); margin-top: 6px; }
+
+    /* ── Category chips ── */
+    .cat-chips { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+    .cat-chip {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 14px;
+      background: rgba(0,180,216,0.08);
+      border: 1px solid rgba(0,180,216,0.25);
+      border-radius: 30px;
+      font-size: 13px;
+      font-family: var(--font-mono);
+      color: var(--accent-primary);
+      transition: all 0.2s;
+    }
+    .cat-chip:hover { background: rgba(0,180,216,0.14); border-color: var(--accent-primary); }
+    .cat-chip.fem {
+      background: rgba(233,30,140,0.08);
+      border-color: rgba(233,30,140,0.25);
+      color: #e91e8c;
+    }
+    .cat-chip.fem:hover { background: rgba(233,30,140,0.14); }
+    .cat-chip-del {
+      background: none; border: none; cursor: pointer;
+      color: inherit; opacity: 0.6; padding: 0; font-size: 14px; line-height: 1;
+      transition: opacity 0.2s;
+    }
+    .cat-chip-del:hover { opacity: 1; }
+    .cat-add-form {
+      display: flex; gap: 10px; flex-wrap: wrap;
+      align-items: flex-end;
+      padding: 16px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      margin-top: 16px;
+    }
+    .cat-add-form .fg { margin-bottom: 0; flex: 1; min-width: 120px; }
 
     /* ── Modal ── */
     .modal-overlay {
@@ -419,6 +480,10 @@
         <span class="org-nav-icon" data-icon="settings" data-size="16"></span>
         <span>Config</span>
       </div>
+      <div class="org-nav-item" onclick="switchTab('categorias')" id="nav-categorias">
+        <span class="org-nav-icon" data-icon="list" data-size="16"></span>
+        <span>Categorías</span>
+      </div>
     </nav>
   </aside>
 
@@ -435,9 +500,21 @@
       </div>
 
       <div class="stats-row-sm" id="torneo-stats">
-        <div class="stat-sm"><div class="stat-sm__num" id="stat-players">0</div><div class="stat-sm__lbl">Jugadores</div></div>
-        <div class="stat-sm"><div class="stat-sm__num" id="stat-matches-done">0</div><div class="stat-sm__lbl">Partidos jugados</div></div>
-        <div class="stat-sm"><div class="stat-sm__num" id="stat-matches-pending">0</div><div class="stat-sm__lbl">Pendientes</div></div>
+        <div class="stat-sm accent-blue">
+          <div class="stat-sm__icon"><span data-icon="users" data-size="16"></span></div>
+          <div class="stat-sm__num" id="stat-players">0</div>
+          <div class="stat-sm__lbl">Jugadores</div>
+        </div>
+        <div class="stat-sm accent-orange">
+          <div class="stat-sm__icon"><span data-icon="court" data-size="16"></span></div>
+          <div class="stat-sm__num" id="stat-matches-done">0</div>
+          <div class="stat-sm__lbl">Partidos jugados</div>
+        </div>
+        <div class="stat-sm accent-green">
+          <div class="stat-sm__icon"><span data-icon="clock" data-size="16"></span></div>
+          <div class="stat-sm__num" id="stat-matches-pending">0</div>
+          <div class="stat-sm__lbl">Pendientes</div>
+        </div>
       </div>
 
       <div class="tournament-info-card" id="tournament-info-card">
@@ -576,6 +653,57 @@
         <button class="btn-org-danger" onclick="logout()">
           <span data-icon="logout" data-size="14"></span> Cerrar Sesión
         </button>
+      </div>
+    </div>
+
+    <!-- ── TAB: CATEGORÍAS ── -->
+    <div class="org-panel" id="panel-categorias">
+      <div class="panel-hdr">
+        <h2>Categorías <span>del Torneo</span></h2>
+        <div style="font-size:12px; color:var(--text-muted); font-family:var(--font-mono);">
+          Las categorías se juegan simultáneamente
+        </div>
+      </div>
+
+      <!-- Chips de categorías activas -->
+      <div class="tournament-info-card" style="margin-bottom:20px;">
+        <div style="font-family:var(--font-mono); font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--text-muted); margin-bottom:8px;">
+          Categorías activas en este torneo
+        </div>
+        <div class="cat-chips" id="cat-chips-container">
+          <!-- rendered by JS -->
+        </div>
+        <div id="cat-chips-empty" style="display:none; font-size:13px; color:var(--text-muted); padding:12px 0;">
+          Sin categorías definidas. Agregá una abajo.
+        </div>
+      </div>
+
+      <!-- Formulario para agregar categoría -->
+      <div class="config-section">
+        <h3>Agregar Categoría</h3>
+        <div class="cat-add-form" id="cat-add-form">
+          <div class="fg">
+            <label>Nombre</label>
+            <input type="text" id="cat-name-input" placeholder="ej. 1ra, 2da, Principiante">
+          </div>
+          <div class="fg">
+            <label>Género</label>
+            <select id="cat-gender-select">
+              <option value="masculino">Masculino</option>
+              <option value="femenino">Femenino</option>
+              <option value="mixto">Mixto</option>
+            </select>
+          </div>
+          <div class="fg" style="flex:0; min-width:auto;">
+            <label>&nbsp;</label>
+            <button class="btn-org-primary" onclick="addTournamentCategory()" style="white-space:nowrap;">
+              <span data-icon="plus" data-size="14" style="margin-right:4px;"></span>Agregar
+            </button>
+          </div>
+        </div>
+        <p style="font-size:12px; color:var(--text-muted); margin-top:10px;">
+          Cada categoría tiene su propio grupo de jugadores, partidos y bracket independiente.
+        </p>
       </div>
     </div>
 
@@ -846,7 +974,86 @@ function switchTab(tab) {
   document.querySelectorAll('.org-nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('panel-' + tab).classList.add('active');
   document.getElementById('nav-' + tab).classList.add('active');
+  if (tab === 'categorias') renderCategorias();
 }
+
+/* =====================
+   CATEGORÍAS MÚLTIPLES
+   ===================== */
+function getTournamentCategories() {
+  if (!currentTournament) return [];
+  // Soporte retrocompatible: si viene de category (string legacy), convertir
+  if (!currentTournament.categories) {
+    currentTournament.categories = currentTournament.category
+      ? [{ id: 'cat0', name: currentTournament.category, gender: currentTournament.gender || 'masculino' }]
+      : [];
+  }
+  return currentTournament.categories;
+}
+
+function renderCategorias() {
+  const cats = getTournamentCategories();
+  const container = document.getElementById('cat-chips-container');
+  const empty = document.getElementById('cat-chips-empty');
+  if (!container) return;
+
+  if (!cats.length) {
+    container.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  container.innerHTML = cats.map(cat => {
+    const isFem = cat.gender === 'femenino';
+    const genderLabel = cat.gender === 'masculino' ? 'Masc' : cat.gender === 'femenino' ? 'Fem' : 'Mixto';
+    return `<span class="cat-chip ${isFem ? 'fem' : ''}">
+      <span data-icon="${isFem ? 'users' : 'users'}" data-size="12"></span>
+      ${cat.name} · ${genderLabel}
+      <button class="cat-chip-del" onclick="removeTournamentCategory('${cat.id}')" title="Eliminar categoría">×</button>
+    </span>`;
+  }).join('');
+  renderIcons();
+}
+
+function addTournamentCategory() {
+  if (!currentTournament) return showOrgToast('No tenés un torneo asignado', 'error');
+  const nameInput  = document.getElementById('cat-name-input');
+  const genderSel  = document.getElementById('cat-gender-select');
+  const name   = (nameInput.value || '').trim();
+  const gender = genderSel.value;
+  if (!name) { nameInput.focus(); return showOrgToast('Escribí el nombre de la categoría', 'error'); }
+
+  if (!currentTournament.categories) currentTournament.categories = [];
+  // Evitar duplicados
+  if (currentTournament.categories.some(c => c.name.toLowerCase() === name.toLowerCase() && c.gender === gender)) {
+    return showOrgToast(`La categoría "${name}" (${gender}) ya existe`, 'error');
+  }
+
+  currentTournament.categories.push({ id: 'cat_' + Date.now(), name, gender, pairs: [], matches: [] });
+  saveCurrentTournament();
+  nameInput.value = '';
+  renderCategorias();
+  showOrgToast(`Categoría "${name}" agregada`, 'success');
+}
+
+function removeTournamentCategory(catId) {
+  if (!currentTournament || !currentTournament.categories) return;
+  const cat = currentTournament.categories.find(c => c.id === catId);
+  if (!cat) return;
+  currentTournament.categories = currentTournament.categories.filter(c => c.id !== catId);
+  saveCurrentTournament();
+  renderCategorias();
+  showOrgToast(`Categoría eliminada`, 'success');
+}
+
+function saveCurrentTournament() {
+  if (!currentTournament) return;
+  const idx = DB.tournaments.findIndex(t => t.id === currentTournament.id);
+  if (idx >= 0) DB.tournaments[idx] = currentTournament;
+  saveDB();
+}
+
 
 /* =====================
    MI TORNEO

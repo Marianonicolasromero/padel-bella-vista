@@ -1960,3 +1960,226 @@ body:not(:has(#role-banner)) .playing-bar__restore { top: 72px; }
 @media (max-width: 380px) {
   .playing-bar__hide { display: none; }
 }
+
+/* =====================================================================
+   SPRINT 12 — RESPONSIVIDAD MÓVIL COMPLETA
+   Breakpoints: 768px (tablet), 480px (móvil), 380px (móvil pequeño)
+   ===================================================================== */
+
+/* ── Header y nav en móvil ── */
+@media (max-width: 768px) {
+  .header-inner {
+    padding: 0 16px;
+    height: 60px;
+  }
+  .logo-name { font-size: 18px; }
+  .logo-tagline { font-size: 8px; display: none; }
+  #menu-toggler { display: inline-flex !important; font-size: 20px; }
+
+  /* Menú móvil desplegado */
+  .mobile-menu {
+    top: 60px;
+    padding: 12px 0;
+  }
+  .mobile-menu-link {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+}
+
+/* ── Modals ── */
+@media (max-width: 768px) {
+  .modal-overlay { align-items: flex-end; padding: 0; }
+  .modal {
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 20px 20px 0 0 !important;
+    max-height: 92vh;
+    overflow-y: auto;
+  }
+  .modal-header { padding: 16px 20px; }
+  .modal-body { padding: 16px 20px; }
+  .modal-footer { padding: 14px 20px; flex-direction: column; gap: 8px; }
+  .modal-footer .btn { width: 100%; justify-content: center; }
+  .form-grid-2, .form-grid-3, .res-form-grid { grid-template-columns: 1fr !important; }
+}
+
+/* ── Página de jugadores — filtros colapsables ── */
+@media (max-width: 900px) {
+  .players-layout {
+    flex-direction: column !important;
+    gap: 0 !important;
+  }
+  .filters-sidebar {
+    position: relative !important;
+    height: auto !important;
+    width: 100% !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--border-subtle) !important;
+    padding: 16px !important;
+    overflow: hidden;
+    max-height: 72px;
+    transition: max-height 0.4s ease;
+  }
+  .filters-sidebar.open { max-height: 600px; }
+  .filter-header { cursor: pointer; margin-bottom: 0; }
+  .filter-header::after {
+    content: '▼';
+    font-size: 11px;
+    color: var(--text-muted);
+    transition: transform 0.3s;
+  }
+  .filters-sidebar.open .filter-header::after { transform: rotate(180deg); }
+  .filter-block { margin-top: 16px; }
+  .players-main { width: 100% !important; }
+}
+
+/* ── Panel Organizador en móvil ── */
+@media (max-width: 768px) {
+  /* Sidebar → Bottom nav bar */
+  .org-layout {
+    flex-direction: column !important;
+    padding-top: 60px !important;
+  }
+  .org-sidebar {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: auto !important;
+    width: 100% !important;
+    height: 58px !important;
+    border-right: none !important;
+    border-top: 1px solid var(--border-subtle) !important;
+    z-index: 100 !important;
+    background: var(--bg-surface) !important;
+  }
+  .org-sidebar-nav {
+    flex-direction: row !important;
+    justify-content: space-around !important;
+    align-items: center !important;
+    height: 100% !important;
+    padding: 0 8px !important;
+    gap: 0 !important;
+    overflow-x: auto;
+  }
+  .org-nav-item {
+    flex-direction: column !important;
+    gap: 2px !important;
+    padding: 6px 8px !important;
+    min-width: 48px !important;
+    text-align: center !important;
+    font-size: 9px !important;
+    border-left: none !important;
+    border-bottom: 3px solid transparent !important;
+    border-radius: 0 !important;
+    flex: 1;
+  }
+  .org-nav-item.active {
+    border-left: none !important;
+    border-bottom: 3px solid var(--accent-primary) !important;
+    background: rgba(0,180,216,0.06) !important;
+  }
+  .org-nav-item span:not(.org-nav-icon) { display: block !important; }
+  .org-main {
+    padding: 16px !important;
+    padding-bottom: 74px !important; /* espacio para bottom nav */
+    width: 100% !important;
+  }
+  .org-session-bar { padding: 0 12px; font-size: 11px; }
+  .org-session-right { display: none; } /* ocultar logout en mobile, va en config */
+  .panel-hdr {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+  }
+  .panel-hdr h2 { font-size: 22px !important; }
+  .stats-row-sm {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+  }
+  /* Tablas del organizador → scroll horizontal */
+  .org-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .org-table th, .org-table td { padding: 8px 10px !important; font-size: 12px !important; white-space: nowrap; }
+  /* Bracket scroll */
+  .bracket-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+}
+
+/* ── Página de canchas en móvil ── */
+@media (max-width: 768px) {
+  .canchas-grid { grid-template-columns: 1fr !important; }
+  .canchas-stats { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+  .court-card { width: 100%; }
+  /* Mapa Leaflet en modal */
+  #court-map-picker { height: 220px !important; }
+}
+
+/* ── Admin dashboard en móvil ── */
+@media (max-width: 768px) {
+  .admin-layout { flex-direction: column !important; }
+  .admin-sidebar {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: auto !important;
+    width: 100% !important;
+    height: 58px !important;
+    flex-direction: row !important;
+    border-right: none !important;
+    border-top: 1px solid var(--border-subtle) !important;
+    z-index: 100 !important;
+    overflow-x: auto;
+    padding: 0 4px !important;
+  }
+  .admin-sidebar-nav { flex-direction: row !important; gap: 0 !important; width: 100%; justify-content: space-around; }
+  .admin-nav-item {
+    flex-direction: column !important;
+    gap: 2px !important;
+    padding: 6px 4px !important;
+    font-size: 9px !important;
+    flex: 1;
+    text-align: center;
+    border-left: none !important;
+    border-bottom: 3px solid transparent !important;
+    border-radius: 0 !important;
+    min-width: 0;
+  }
+  .admin-nav-item.active { border-left: none !important; border-bottom: 3px solid var(--accent-primary) !important; }
+  .admin-main { padding: 16px !important; padding-bottom: 74px !important; }
+  .admin-stats-grid { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+}
+
+/* ── Ranking, noticias, torneos en móvil ── */
+@media (max-width: 768px) {
+  /* Ranking podium */
+  .podium-row, .podium-grid { flex-direction: column !important; gap: 12px !important; }
+  .podium-card { width: 100% !important; max-width: 100% !important; }
+  /* Torneos sidebar layout */
+  .torneos-layout { flex-direction: column !important; }
+  .torneos-sidebar { width: 100% !important; max-width: 100% !important; border-right: none !important; border-bottom: 1px solid var(--border-subtle) !important; max-height: 280px; overflow-y: auto; }
+  .torneos-main { width: 100% !important; }
+  /* Noticias grid */
+  .news-grid { grid-template-columns: 1fr !important; }
+  .news-featured { flex-direction: column !important; }
+  .news-featured-img { width: 100% !important; height: 200px !important; }
+}
+
+/* ── Página de inicio en móvil ── */
+@media (max-width: 480px) {
+  .hero-title { font-size: clamp(36px, 10vw, 60px) !important; }
+  .hero-subtitle { font-size: 14px !important; }
+  .hero-actions { flex-direction: column !important; gap: 10px !important; }
+  .hero-actions .btn { width: 100% !important; justify-content: center; }
+  .stats-grid { grid-template-columns: 1fr 1fr !important; }
+  .features-grid { grid-template-columns: 1fr !important; }
+  .section-title { font-size: clamp(24px, 7vw, 36px) !important; }
+}
+
+/* ── Utilidades globales móvil ── */
+@media (max-width: 480px) {
+  .btn { padding: 10px 18px; font-size: 12px; }
+  .tab-btn, .filter-chip { padding: 6px 12px !important; font-size: 11px !important; }
+  .badge { font-size: 9px !important; padding: 3px 7px !important; }
+}
+
