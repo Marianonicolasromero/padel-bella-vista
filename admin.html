@@ -121,15 +121,44 @@
     .admin-stat-card {
       background: var(--bg-card);
       border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-lg);
-      padding: 24px;
+      border-radius: 16px;
+      padding: 24px 20px 20px;
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      transition: border-color var(--transition-normal);
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.25s, transform 0.2s, box-shadow 0.25s;
     }
     .admin-stat-card:hover {
-      border-color: var(--border-default);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.35);
+    }
+    /* Top accent bar por color */
+    .admin-stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      border-radius: 16px 16px 0 0;
+    }
+    .admin-stat-card.blue::before   { background: linear-gradient(90deg, #00B4D8, #48CAE4); }
+    .admin-stat-card.orange::before { background: linear-gradient(90deg, #E8841F, #F4A348); }
+    .admin-stat-card.teal::before   { background: linear-gradient(90deg, #4ade80, #22d3ee); }
+    .admin-stat-card.purple::before { background: linear-gradient(90deg, #a855f7, #ec4899); }
+    .admin-stat-card.blue:hover   { border-color: rgba(0,180,216,0.4); }
+    .admin-stat-card.orange:hover { border-color: rgba(232,132,31,0.4); }
+    .admin-stat-card.teal:hover   { border-color: rgba(74,222,128,0.4); }
+    .admin-stat-card.purple:hover { border-color: rgba(168,85,247,0.4); }
+    /* Glow sutil detrás */
+    .admin-stat-card.blue::after   { content:''; position:absolute; bottom:-20px; right:-20px; width:80px; height:80px; border-radius:50%; background:rgba(0,180,216,0.06); pointer-events:none; }
+    .admin-stat-card.orange::after { content:''; position:absolute; bottom:-20px; right:-20px; width:80px; height:80px; border-radius:50%; background:rgba(232,132,31,0.06); pointer-events:none; }
+    .admin-stat-card.teal::after   { content:''; position:absolute; bottom:-20px; right:-20px; width:80px; height:80px; border-radius:50%; background:rgba(74,222,128,0.06); pointer-events:none; }
+    .admin-stat-card.purple::after { content:''; position:absolute; bottom:-20px; right:-20px; width:80px; height:80px; border-radius:50%; background:rgba(168,85,247,0.06); pointer-events:none; }
+    .admin-stat-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
     }
     .admin-stat-info {
       display: flex;
@@ -138,11 +167,14 @@
     }
     .admin-stat-num {
       font-family: var(--font-display);
-      font-size: 36px;
-      color: var(--text-primary);
+      font-size: 40px;
       line-height: 1;
       letter-spacing: 1px;
     }
+    .admin-stat-card.blue   .admin-stat-num { color: #00B4D8; }
+    .admin-stat-card.orange .admin-stat-num { color: #E8841F; }
+    .admin-stat-card.teal   .admin-stat-num { color: #4ade80; }
+    .admin-stat-card.purple .admin-stat-num { color: #a855f7; }
     .admin-stat-label {
       font-size: 10px;
       font-family: var(--font-mono);
@@ -151,14 +183,23 @@
       color: var(--text-muted);
     }
     .admin-stat-icon {
-      width: 48px;
-      height: 48px;
-      background: rgba(0, 180, 216, 0.06);
-      border-radius: var(--radius-md);
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: var(--accent-primary);
+      flex-shrink: 0;
+    }
+    .admin-stat-card.blue   .admin-stat-icon { background: rgba(0,180,216,0.12);  color: #00B4D8; }
+    .admin-stat-card.orange .admin-stat-icon { background: rgba(232,132,31,0.12); color: #E8841F; }
+    .admin-stat-card.teal   .admin-stat-icon { background: rgba(74,222,128,0.12); color: #4ade80; }
+    .admin-stat-card.purple .admin-stat-icon { background: rgba(168,85,247,0.12); color: #a855f7; }
+    .admin-stat-trend {
+      font-size: 10px;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+      margin-top: 2px;
     }
     
     /* PANEL HEADER CONTROLS */
@@ -386,6 +427,104 @@
     .app-info-row .key { color: var(--text-muted); }
     .app-info-row .val { font-family: var(--font-mono); font-weight: 600; color: var(--text-primary); }
 
+    /* ORG CARDS */
+    .org-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      transition: border-color 0.25s, transform 0.2s;
+    }
+    .org-card:hover { border-color: var(--border-default); transform: translateY(-2px); }
+    .org-card.inactive { opacity: 0.6; }
+    .org-card-top {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .org-avatar {
+      width: 46px; height: 46px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-orange));
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display);
+      font-size: 22px;
+      color: #020406;
+      flex-shrink: 0;
+      letter-spacing: 0;
+    }
+    .org-card-identity { flex: 1; min-width: 0; }
+    .org-card-name {
+      font-weight: 700; font-size: 15px;
+      color: var(--text-primary);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .org-card-id {
+      font-family: var(--font-mono); font-size: 10px;
+      color: var(--text-muted); margin-top: 2px;
+    }
+    .org-card-meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .org-meta-item {
+      background: var(--bg-elevated);
+      border-radius: 10px;
+      padding: 10px 12px;
+    }
+    .org-meta-label {
+      font-family: var(--font-mono); font-size: 9px;
+      text-transform: uppercase; letter-spacing: 1px;
+      color: var(--text-muted); margin-bottom: 4px;
+    }
+    .org-meta-value {
+      font-size: 13px; font-weight: 600;
+      color: var(--text-primary);
+    }
+    /* PIN field */
+    .pin-field {
+      display: flex; align-items: center; gap: 8px;
+    }
+    .pin-dots {
+      font-family: var(--font-mono); font-size: 18px;
+      color: var(--text-muted); letter-spacing: 4px;
+      line-height: 1;
+    }
+    .pin-reveal-btn {
+      background: none; border: none;
+      color: var(--text-muted); cursor: pointer;
+      padding: 2px 4px; border-radius: 4px;
+      transition: color 0.15s, background 0.15s;
+      display: flex; align-items: center;
+    }
+    .pin-reveal-btn:hover { color: var(--accent-primary); background: rgba(0,180,216,0.08); }
+    .org-card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 12px;
+      border-top: 1px solid var(--border-subtle);
+    }
+    .org-status-dot {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: var(--font-mono); font-size: 10px;
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .org-status-dot::before {
+      content: ''; width: 7px; height: 7px;
+      border-radius: 50%; flex-shrink: 0;
+    }
+    .org-status-dot.active { color: #4ade80; }
+    .org-status-dot.active::before { background: #4ade80; box-shadow: 0 0 6px #4ade80; animation: blink-green 2s infinite; }
+    .org-status-dot.inactive { color: var(--text-muted); }
+    .org-status-dot.inactive::before { background: var(--text-muted); }
+    @keyframes blink-green { 0%,100%{ opacity:1; } 50%{ opacity:0.3; } }
+    .org-actions { display: flex; gap: 6px; }
+
     /* RESPONSIVE */
     @media (max-width: 1024px) {
       .admin-stats-grid { grid-template-columns: repeat(2, 1fr); }
@@ -400,6 +539,7 @@
       .admin-main-panel { margin-left: 0; width: 100%; padding: 24px 16px; }
       .admin-stats-grid { grid-template-columns: 1fr 1fr; }
       .nav-count-badge { display: none; }
+      #admin-orgs-grid { grid-template-columns: 1fr !important; }
     }
     /* CONSOLE MODAL STYLES */
     .console-tab-btn {
@@ -475,63 +615,94 @@
 <div class="admin-container">
   <!-- SIDEBAR (LEFT) -->
   <aside class="admin-sidebar">
-    <div class="admin-sidebar-logo" style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom: 32px; padding: 0 8px;">
+    <!-- Logo -->
+    <div style="padding: 4px 8px 28px; border-bottom: 1px solid var(--border-subtle); margin-bottom: 20px;">
       <a href="index.html" style="display:flex; align-items:center; gap:10px; text-decoration:none;">
-        <!-- Nuevo Isotipo SVG — sol, pelota de pádel, naranja y Paraná -->
-        <svg width="28" height="28" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
-          <circle cx="19" cy="19" r="16" fill="url(#pbv-logo-grad)" opacity="0.15"/>
+        <svg width="32" height="32" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
+          <circle cx="19" cy="19" r="16" fill="url(#pbv-logo-grad-adm)" opacity="0.15"/>
           <circle cx="19" cy="19" r="14" stroke="var(--accent-cream)" stroke-width="1.5" fill="none" opacity="0.9"/>
-          <!-- Cancha / Red grid -->
           <line x1="19" y1="5" x2="19" y2="33" stroke="var(--accent-cream)" stroke-width="0.8" opacity="0.35" stroke-dasharray="2 2"/>
           <line x1="5" y1="19" x2="33" y2="19" stroke="var(--accent-cream)" stroke-width="0.8" opacity="0.35" stroke-dasharray="2 2"/>
-          <!-- Costura pelota / Paraná curves -->
           <path d="M8 15 Q19 26 30 15" stroke="var(--accent-primary)" stroke-width="1.5" fill="none" opacity="0.9"/>
           <path d="M8 23 Q19 12 30 23" stroke="var(--accent-orange)" stroke-width="1.5" fill="none" opacity="0.9"/>
-          <!-- Puntos / Geometría naranja y pala -->
           <circle cx="19" cy="19" r="2" fill="var(--accent-cream)"/>
           <circle cx="13" cy="19" r="1.5" fill="var(--accent-cream)" opacity="0.7"/>
           <circle cx="25" cy="19" r="1.5" fill="var(--accent-cream)" opacity="0.7"/>
           <defs>
-            <linearGradient id="pbv-logo-grad" x1="0" y1="0" x2="38" y2="38" gradientUnits="userSpaceOnUse">
+            <linearGradient id="pbv-logo-grad-adm" x1="0" y1="0" x2="38" y2="38" gradientUnits="userSpaceOnUse">
               <stop offset="0%" stop-color="var(--accent-primary)"/>
-              <stop offset="50%" stop-color="var(--accent-teal)"/>
               <stop offset="100%" stop-color="var(--accent-orange)"/>
             </linearGradient>
           </defs>
         </svg>
-        <div class="logo-text">
-          <span class="logo-name" style="font-family:var(--font-display); font-weight:900; font-size:16px; letter-spacing:1px; color:var(--accent-cream); display:block; line-height:1.1;">PADEL <span style="color:var(--accent-orange);">BV</span></span>
-          <span class="logo-tagline" style="font-family:var(--font-body); font-size:8px; color:var(--text-secondary); text-transform:uppercase; font-weight:700;">Administración</span>
+        <div>
+          <div style="font-family:var(--font-display); font-size:18px; letter-spacing:2px; color:var(--accent-cream); line-height:1;">PADEL <span style="color:var(--accent-orange);">BV</span></div>
+          <div style="font-size:8px; color:var(--text-muted); text-transform:uppercase; letter-spacing:2px; margin-top:2px;">Administración</div>
         </div>
       </a>
-      <button id="theme-toggle" class="theme-toggle-btn" data-icon="sun" data-size="14" title="Cambiar tema" style="width:32px; height:32px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center;"></button>
+      <button id="theme-toggle" class="theme-toggle-btn" data-icon="sun" data-size="14" title="Cambiar tema"
+        style="margin-top:14px; width:100%; padding:8px; border-radius:8px; background:var(--bg-elevated); border:1px solid var(--border-subtle); color:var(--text-secondary); cursor:pointer; font-size:11px; font-family:var(--font-mono); letter-spacing:1px; text-transform:uppercase; display:flex; align-items:center; justify-content:center; gap:6px;">
+        Cambiar tema
+      </button>
     </div>
     
     <nav class="admin-sidebar-nav">
+      <!-- Label sección -->
+      <div style="font-size:9px; font-family:var(--font-mono); color:var(--text-muted); text-transform:uppercase; letter-spacing:2px; padding:0 8px; margin-bottom:4px;">Contenido</div>
+
       <div class="admin-nav-item active" onclick="switchTab('jugadores')" id="nav-jugadores">
-        <div class="admin-nav-item-inner"><span data-icon="users"></span> Jugadores</div>
+        <div class="admin-nav-item-inner">
+          <span data-icon="users" style="color:#00B4D8;"></span>
+          Jugadores
+        </div>
         <span class="nav-count-badge" id="badge-jugadores">0</span>
       </div>
       <div class="admin-nav-item" onclick="switchTab('torneos')" id="nav-torneos">
-        <div class="admin-nav-item-inner"><span data-icon="trophy"></span> Torneos</div>
+        <div class="admin-nav-item-inner">
+          <span data-icon="trophy" style="color:#E8841F;"></span>
+          Torneos
+        </div>
         <span class="nav-count-badge" id="badge-torneos">0</span>
       </div>
       <div class="admin-nav-item" onclick="switchTab('canchas')" id="nav-canchas">
-        <div class="admin-nav-item-inner"><span data-icon="court"></span> Canchas</div>
+        <div class="admin-nav-item-inner">
+          <span data-icon="court" style="color:#4ade80;"></span>
+          Canchas
+        </div>
       </div>
       <div class="admin-nav-item" onclick="switchTab('noticias')" id="nav-noticias">
-        <div class="admin-nav-item-inner"><span data-icon="news"></span> Noticias</div>
+        <div class="admin-nav-item-inner">
+          <span data-icon="news" style="color:#a855f7;"></span>
+          Noticias
+        </div>
       </div>
+
+      <!-- Separador -->
+      <div style="height:1px; background:var(--border-subtle); margin:10px 8px;"></div>
+      <div style="font-size:9px; font-family:var(--font-mono); color:var(--text-muted); text-transform:uppercase; letter-spacing:2px; padding:0 8px; margin-bottom:4px;">Gestión</div>
+
       <div class="admin-nav-item" onclick="switchTab('organizadores')" id="nav-organizadores">
-        <div class="admin-nav-item-inner"><span data-icon="users"></span> Organizadores</div>
+        <div class="admin-nav-item-inner">
+          <span data-icon="users" style="color:#22d3ee;"></span>
+          Organizadores
+        </div>
       </div>
       <div class="admin-nav-item" onclick="switchTab('configuracion')" id="nav-configuracion">
-        <div class="admin-nav-item-inner"><span data-icon="settings"></span> Configuración</div>
+        <div class="admin-nav-item-inner">
+          <span data-icon="settings" style="color:var(--text-muted);"></span>
+          Configuración
+        </div>
       </div>
     </nav>
 
     <div class="admin-sidebar-footer">
-      <div class="divider" style="margin-bottom:8px;"></div>
+      <div style="background:var(--bg-elevated); border:1px solid var(--border-subtle); border-radius:10px; padding:12px 14px; margin-bottom:10px;">
+        <div style="font-size:9px; font-family:var(--font-mono); color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Sistema</div>
+        <div style="display:flex; align-items:center; gap:6px;">
+          <span style="width:6px; height:6px; border-radius:50%; background:#4ade80; box-shadow:0 0 6px #4ade80;"></span>
+          <span style="font-size:11px; color:var(--text-secondary);">Operativo</span>
+        </div>
+      </div>
       <a href="index.html" class="btn btn-secondary btn-sm" style="width:100%; justify-content:center;">
         <span data-icon="undo"></span> Volver al Sitio
       </a>
@@ -540,35 +711,56 @@
 
   <!-- MAIN AREA (RIGHT) -->
   <main class="admin-main-panel">
+    <!-- Welcome header -->
+    <div style="margin-bottom:32px;">
+      <div style="font-size:11px; font-family:var(--font-mono); color:var(--accent-primary); text-transform:uppercase; letter-spacing:2px; margin-bottom:8px;">Panel de Control</div>
+      <h1 style="font-family:var(--font-display); font-size:36px; letter-spacing:2px; line-height:1; margin-bottom:6px;">
+        ADMINISTRACIÓN <span style="color:var(--accent-orange);">PADELBELL</span>
+      </h1>
+      <p style="font-size:13px; color:var(--text-muted); font-family:var(--font-mono);">Bella Vista · Corrientes · Temporada 2026</p>
+    </div>
+
     <!-- STATS DASHBOARD ROW -->
     <section class="admin-stats-grid">
-      <div class="admin-stat-card">
-        <div class="admin-stat-info">
-          <span class="admin-stat-num" id="stat-players-count">0</span>
-          <span class="admin-stat-label">Jugadores</span>
+      <div class="admin-stat-card blue">
+        <div class="admin-stat-top">
+          <div class="admin-stat-info">
+            <span class="admin-stat-num" id="stat-players-count">0</span>
+            <span class="admin-stat-label">Jugadores</span>
+          </div>
+          <div class="admin-stat-icon"><span data-icon="users" data-size="18"></span></div>
         </div>
-        <div class="admin-stat-icon"><span data-icon="users" data-size="20"></span></div>
+        <div class="admin-stat-trend">Directorio activo del circuito</div>
       </div>
-      <div class="admin-stat-card">
-        <div class="admin-stat-info">
-          <span class="admin-stat-num" id="stat-tournaments-count">0</span>
-          <span class="admin-stat-label">Torneos</span>
+      <div class="admin-stat-card orange">
+        <div class="admin-stat-top">
+          <div class="admin-stat-info">
+            <span class="admin-stat-num" id="stat-tournaments-count">0</span>
+            <span class="admin-stat-label">Torneos</span>
+          </div>
+          <div class="admin-stat-icon"><span data-icon="trophy" data-size="18"></span></div>
         </div>
-        <div class="admin-stat-icon"><span data-icon="trophy" data-size="20"></span></div>
+        <div class="admin-stat-trend">Copa del Litoral · 2026</div>
       </div>
-      <div class="admin-stat-card">
-        <div class="admin-stat-info">
-          <span class="admin-stat-num" id="stat-courts-count">0</span>
-          <span class="admin-stat-label">Complejos</span>
+      <div class="admin-stat-card teal">
+        <div class="admin-stat-top">
+          <div class="admin-stat-info">
+            <span class="admin-stat-num" id="stat-courts-count">0</span>
+            <span class="admin-stat-label">Complejos</span>
+          </div>
+          <div class="admin-stat-icon"><span data-icon="court" data-size="18"></span></div>
         </div>
-        <div class="admin-stat-icon"><span data-icon="court" data-size="20"></span></div>
+        <div class="admin-stat-trend">Canchas activas en la región</div>
       </div>
-      <div class="admin-stat-card">
-        <div class="admin-stat-info">
-          <span class="admin-stat-num" id="stat-news-count">0</span>
-          <span class="admin-stat-label">Noticias</span>
+      <div class="admin-stat-card purple">
+        <div class="admin-stat-top">
+          <div class="admin-stat-info">
+            <span class="admin-stat-num" id="stat-news-count">0</span>
+            <span class="admin-stat-label">Noticias</span>
+          </div>
+          <div class="admin-stat-icon"><span data-icon="news" data-size="18"></span></div>
         </div>
-        <div class="admin-stat-icon"><span data-icon="news" data-size="20"></span></div>
+        <div class="admin-stat-trend">Publicaciones del circuito</div>
       </div>
     </section>
 
@@ -724,51 +916,31 @@
         </div>
       </div>
 
-      <div class="stats-row" style="margin-bottom:24px; display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
-        <div class="stat-card" style="margin-bottom:0;">
-          <div class="stat-card__icon"><span data-icon="users" data-size="20"></span></div>
-          <div class="stat-card__body">
-            <div class="stat-card__num" id="stat-org-total">0</div>
-            <div class="stat-card__lbl">Organizadores activos</div>
-          </div>
+      <!-- Mini stats organizadores -->
+      <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:14px; margin-bottom:28px;">
+        <div style="background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:14px; padding:16px 20px; border-top: 3px solid var(--accent-primary);">
+          <div style="font-family:var(--font-mono); font-size:10px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px;">Organizadores activos</div>
+          <div style="font-family:var(--font-display); font-size:32px; color:var(--accent-primary); line-height:1;" id="stat-org-total">0</div>
         </div>
-        <div class="stat-card" style="margin-bottom:0;">
-          <div class="stat-card__icon orange"><span data-icon="trophy" data-size="20"></span></div>
-          <div class="stat-card__body">
-            <div class="stat-card__num" id="stat-org-with-tournament">0</div>
-            <div class="stat-card__lbl">Con torneo asignado</div>
-          </div>
+        <div style="background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:14px; padding:16px 20px; border-top: 3px solid var(--accent-orange);">
+          <div style="font-family:var(--font-mono); font-size:10px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px;">Con torneo asignado</div>
+          <div style="font-family:var(--font-display); font-size:32px; color:var(--accent-orange); line-height:1;" id="stat-org-with-tournament">0</div>
         </div>
-        <div class="stat-card" style="margin-bottom:0;">
-          <div class="stat-card__icon" style="color:var(--accent-orange);"><span data-icon="shield" data-size="20"></span></div>
-          <div class="stat-card__body" style="width:100%; display:flex; flex-direction:column; justify-content:center;">
-            <div style="display:flex; justify-content:space-between; align-items:baseline; width:100%;">
-              <div class="stat-card__num" id="stat-org-limit" style="font-size:24px;">0 / 50</div>
-              <span style="font-size:9px; color:var(--text-muted); font-family:var(--font-mono); letter-spacing:0.5px;">CAPACIDAD</span>
-            </div>
-            <div style="width:100%; height:5px; background:rgba(255,255,255,0.06); border-radius:10px; margin-top:8px; overflow:hidden;">
-              <div id="stat-org-progress" style="width:0%; height:100%; background:linear-gradient(90deg, var(--accent-primary), var(--accent-orange)); transition:width .4s ease;"></div>
-            </div>
+        <div style="background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:14px; padding:16px 20px; border-top: 3px solid #4ade80;">
+          <div style="display:flex; justify-content:space-between; align-items:baseline;">
+            <div style="font-family:var(--font-mono); font-size:10px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px;">Capacidad usada</div>
+            <span style="font-size:9px; color:var(--text-muted); font-family:var(--font-mono);">/ 50</span>
+          </div>
+          <div style="font-family:var(--font-display); font-size:32px; color:#4ade80; line-height:1; margin-bottom:10px;" id="stat-org-limit">0</div>
+          <div style="width:100%; height:5px; background:rgba(255,255,255,0.06); border-radius:10px; overflow:hidden;">
+            <div id="stat-org-progress" style="width:0%; height:100%; background:linear-gradient(90deg, #4ade80, #22d3ee); transition:width .4s ease;"></div>
           </div>
         </div>
       </div>
 
-      <div class="table-wrap">
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <th>Organizador</th>
-              <th>Contacto</th>
-              <th>PIN</th>
-              <th>Torneo Asignado</th>
-              <th>Estado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody id="admin-orgs-tbody">
-            <tr><td colspan="6"><div class="empty-state-panel"><div class="empty-title">Cargando...</div></div></td></tr>
-          </tbody>
-        </table>
+      <!-- Cards de organizadores -->
+      <div id="admin-orgs-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap:16px;">
+        <!-- rendered by JS -->
       </div>
     </section>
 
@@ -3094,62 +3266,120 @@
 
   /* ========== ORGANIZADORES CRUD ========== */
   function renderOrgsTable() {
-    const tbody = document.getElementById('admin-orgs-tbody');
+    const grid = document.getElementById('admin-orgs-grid');
     const list = DB.organizers || [];
 
     // Update stats
-    const activeOrgs = list.filter(o => o.active);
-    const withTournament = list.filter(o => o.active && o.tournament_id);
-    const statTotal = document.getElementById('stat-org-total');
-    const statWithT = document.getElementById('stat-org-with-tournament');
-    const statLimit = document.getElementById('stat-org-limit');
-    const statProgress = document.getElementById('stat-org-progress');
+    const activeOrgs      = list.filter(o => o.active);
+    const withTournament  = list.filter(o => o.active && o.tournament_id);
+    const statTotal       = document.getElementById('stat-org-total');
+    const statWithT       = document.getElementById('stat-org-with-tournament');
+    const statLimit       = document.getElementById('stat-org-limit');
+    const statProgress    = document.getElementById('stat-org-progress');
 
-    if (statTotal) statTotal.textContent = activeOrgs.length;
-    if (statWithT) statWithT.textContent = withTournament.length;
-    if (statLimit) statLimit.textContent = `${list.length} / 50`;
+    if (statTotal)    statTotal.textContent    = activeOrgs.length;
+    if (statWithT)    statWithT.textContent    = withTournament.length;
+    if (statLimit)    statLimit.textContent    = list.length;
     if (statProgress) {
       const pct = Math.min((list.length / 50) * 100, 100);
       statProgress.style.width = `${pct}%`;
     }
 
     if (!list.length) {
-      tbody.innerHTML = `<tr><td colspan="6">
-        <div class="empty-state-panel">
+      grid.innerHTML = `
+        <div class="empty-state-panel" style="grid-column:1/-1; background:var(--bg-card); border:1px solid var(--border-subtle); border-radius:16px; padding:56px 24px;">
           <div class="empty-icon"><span data-icon="users" data-size="22"></span></div>
           <div class="empty-title">Sin organizadores</div>
           <div class="empty-msg">Creá el primer organizador con "Nuevo Organizador".</div>
-        </div></td></tr>`;
+        </div>`;
       renderIcons();
       return;
     }
 
-    tbody.innerHTML = list.map(org => {
-      const t = org.tournament_id ? DB.tournaments.find(x => x.id === org.tournament_id) : null;
-      const tName = t ? t.name : '<span style="color:var(--text-muted)">Sin asignar</span>';
-      const statusBadge = org.active
-        ? '<span class="status-badge finished">Activo</span>'
-        : '<span class="status-badge" style="background:rgba(100,100,100,.1);color:var(--text-muted);border:1px solid var(--border-subtle)">Inactivo</span>';
-      return `<tr>
-        <td>
-          <strong>${org.name}</strong>
-          <div style="font-size:11px;color:var(--text-muted);margin-top:2px;font-family:var(--font-mono);">${org.id}</div>
-        </td>
-        <td>${org.contact || '—'}<br><span style="font-size:11px;color:var(--text-muted);">${org.phone || ''}</span></td>
-        <td>
-          <span style="font-family:var(--font-mono);font-size:14px;letter-spacing:1px;color:var(--accent-primary);">${org.pin}</span>
-        </td>
-        <td>${tName}</td>
-        <td>${statusBadge}</td>
-        <td style="text-align:center;">
-          <div style="display:inline-flex;gap:6px;">
-            <button class="btn btn-secondary btn-sm" style="padding:6px 10px;" onclick="openOrgModal('${org.id}')" title="Editar"><span data-icon="edit"></span></button>
-            <button class="btn btn-orange btn-sm" style="padding:6px 10px;color:white;" onclick="confirmDeleteOrg('${org.id}')" title="Eliminar"><span data-icon="trash"></span></button>
+    grid.innerHTML = list.map(org => {
+      const t      = org.tournament_id ? DB.tournaments.find(x => x.id === org.tournament_id) : null;
+      const tName  = t ? t.name : '—';
+      const tColor = t ? 'var(--accent-orange)' : 'var(--text-muted)';
+      const initial = (org.name || '?')[0].toUpperCase();
+      const pinId   = `pin-${org.id}`;
+      const isActive = org.active !== false;
+
+      return `
+      <div class="org-card ${isActive ? '' : 'inactive'}" id="org-card-${org.id}">
+        <!-- Cabecera -->
+        <div class="org-card-top">
+          <div class="org-avatar">${initial}</div>
+          <div class="org-card-identity">
+            <div class="org-card-name">${org.name}</div>
+            <div class="org-card-id">${org.id}</div>
           </div>
-        </td>
-      </tr>`;
+          <span class="org-status-dot ${isActive ? 'active' : 'inactive'}">${isActive ? 'Activo' : 'Inactivo'}</span>
+        </div>
+
+        <!-- Meta grid -->
+        <div class="org-card-meta">
+          <div class="org-meta-item">
+            <div class="org-meta-label">Contacto</div>
+            <div class="org-meta-value" style="font-size:12px;">${org.contact || '—'}</div>
+          </div>
+          <div class="org-meta-item">
+            <div class="org-meta-label">Teléfono</div>
+            <div class="org-meta-value" style="font-size:12px;">${org.phone || '—'}</div>
+          </div>
+          <div class="org-meta-item">
+            <div class="org-meta-label">PIN de acceso</div>
+            <div class="pin-field">
+              <span class="pin-dots" id="${pinId}">••••</span>
+              <button class="pin-reveal-btn"
+                onclick="togglePin('${pinId}', '${org.pin}')"
+                title="Mostrar/ocultar PIN">
+                <span data-icon="eye" data-size="13"></span>
+              </button>
+            </div>
+          </div>
+          <div class="org-meta-item">
+            <div class="org-meta-label">Torneo asignado</div>
+            <div class="org-meta-value" style="font-size:12px; color:${tColor};">${tName}</div>
+          </div>
+        </div>
+
+        <!-- Footer acciones -->
+        <div class="org-card-footer">
+          <span style="font-size:11px; color:var(--text-muted); font-family:var(--font-mono);">Panel org → <a href="organizador.html" style="color:var(--accent-primary);">organizador.html</a></span>
+          <div class="org-actions">
+            <button class="btn btn-secondary btn-sm" onclick="openOrgModal('${org.id}')" title="Editar">
+              <span data-icon="edit" data-size="13"></span> Editar
+            </button>
+            <button class="btn btn-sm" style="background:rgba(239,68,68,0.12);color:#f87171;border:1px solid rgba(239,68,68,0.25);" onclick="confirmDeleteOrg('${org.id}')" title="Eliminar">
+              <span data-icon="trash" data-size="13"></span>
+            </button>
+          </div>
+        </div>
+      </div>`;
     }).join('');
     renderIcons();
+  }
+
+  /* Toggle PIN visibility */
+  function togglePin(spanId, realPin) {
+    const el = document.getElementById(spanId);
+    if (!el) return;
+    if (el.dataset.visible === 'true') {
+      el.textContent = '••••';
+      el.style.color = '';
+      el.dataset.visible = 'false';
+    } else {
+      el.textContent = realPin;
+      el.style.color = 'var(--accent-primary)';
+      el.style.letterSpacing = '3px';
+      el.dataset.visible = 'true';
+      // Auto-hide en 4 segundos
+      setTimeout(() => {
+        el.textContent = '••••';
+        el.style.color = '';
+        el.dataset.visible = 'false';
+      }, 4000);
+    }
   }
 
   function openOrgModal(id = null) {
