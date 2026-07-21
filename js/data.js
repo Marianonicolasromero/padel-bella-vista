@@ -572,6 +572,7 @@ function addPlayer(data) {
     weight: parseInt(data.weight) || 75
   };
   DB.players.push(p);
+  saveDB(); // ← Persistir inmediatamente
   return p;
 }
 
@@ -590,6 +591,7 @@ function updatePlayer(id, data) {
   if (data.birthdate) {
     DB.players[idx].age = Math.floor((Date.now() - new Date(data.birthdate)) / 3.156e10);
   }
+  saveDB(); // ← Persistir
   return DB.players[idx];
 }
 
@@ -597,6 +599,7 @@ function deletePlayer(id) {
   const idx = DB.players.findIndex(p => p.id === id);
   if (idx === -1) return false;
   DB.players.splice(idx, 1);
+  saveDB(); // ← Persistir
   return true;
 }
 
