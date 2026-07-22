@@ -194,6 +194,46 @@
     .tinfo-label { font-size: 10px; color: var(--text-muted); font-family: var(--font-mono); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
     .tinfo-value { font-size: 14px; color: var(--text-primary); font-weight: 500; }
 
+    /* ── Multi-categoría chips ── */
+    .cat-chips-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+      background: var(--bg-surface);
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+    }
+    .cat-chip-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-default);
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 12px;
+      color: var(--text-secondary);
+      user-select: none;
+      transition: all 0.2s ease;
+    }
+    .cat-chip-label:hover {
+      border-color: var(--accent-primary);
+      color: var(--text-primary);
+    }
+    .cat-chip-label input[type="checkbox"] {
+      accent-color: var(--accent-orange);
+      cursor: pointer;
+    }
+    .cat-chip-label.active {
+      background: rgba(232, 132, 31, 0.15);
+      border-color: var(--accent-orange);
+      color: var(--accent-orange);
+      font-weight: 600;
+    }
+
     /* ── Tabla jugadores ── */
     .org-table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border-subtle); }
     .org-table { width: 100%; border-collapse: collapse; font-size: 13px; }
@@ -712,7 +752,7 @@
 
 <!-- MODAL: EDITAR TORNEO -->
 <div class="modal-overlay" id="modal-edit-tournament">
-  <div class="modal">
+  <div class="modal" style="max-width:680px;">
     <div class="modal-hdr">
       <h3>Editar Torneo</h3>
       <button class="modal-close" onclick="closeModalOrg('modal-edit-tournament')">&#x2715;</button>
@@ -721,8 +761,8 @@
       <form id="form-edit-tournament" onsubmit="submitEditTournament(event)">
         <input type="hidden" id="edit-t-id">
         <div class="fg-row">
-          <div class="fg"><label>Nombre</label><input type="text" id="edit-t-name" required></div>
-          <div class="fg"><label>Sede</label><input type="text" id="edit-t-venue"></div>
+          <div class="fg"><label>Nombre del Torneo</label><input type="text" id="edit-t-name" required></div>
+          <div class="fg"><label>Sede Principal / Complejo</label><input type="text" id="edit-t-venue" placeholder="ej. Palmeras Pádel"></div>
         </div>
         <div class="fg-row">
           <div class="fg"><label>Fecha inicio</label><input type="date" id="edit-t-start"></div>
@@ -730,7 +770,7 @@
         </div>
         <div class="fg-row">
           <div class="fg">
-            <label>Estado</label>
+            <label>Estado del Torneo</label>
             <select id="edit-t-status">
               <option value="upcoming">Próximo</option>
               <option value="in_progress">En curso</option>
@@ -738,18 +778,40 @@
             </select>
           </div>
           <div class="fg">
-            <label>Categoría</label>
-            <select id="edit-t-category">
-              <option>1ra</option><option>2da</option><option>3ra</option><option>4ta</option>
-              <option>5ta</option><option>6ta</option><option>7ma</option><option>8va</option><option>Principiante</option>
+            <label>Género / Rama</label>
+            <select id="edit-t-gender">
+              <option value="masculino">Masculino</option>
+              <option value="femenino">Femenino</option>
+              <option value="mixto">Mixto</option>
+              <option value="varios">Varios / Todos</option>
             </select>
           </div>
         </div>
         <div class="fg-row">
-          <div class="fg"><label>Premio ($)</label><input type="number" id="edit-t-prize" min="0"></div>
+          <div class="fg">
+            <label>Modo Puntuación</label>
+            <select id="edit-t-scoring">
+              <option value="ventaja">Ventaja (con Ventaja)</option>
+              <option value="punto_de_oro">Punto de Oro</option>
+            </select>
+          </div>
+          <div class="fg"><label>Premio Ofrecido ($)</label><input type="number" id="edit-t-prize" min="0" placeholder="0"></div>
           <div class="fg"><label>Costo Inscripción ($)</label><input type="number" id="edit-t-fee" min="0" value="5000"></div>
         </div>
-        <div class="fg"><label>Descripción</label><textarea id="edit-t-description" rows="3"></textarea></div>
+
+        <div class="fg" style="margin-top:12px;">
+          <label style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <span>Categorías del Torneo (seleccionar una o varias)</span>
+            <span style="font-size:11px;color:var(--accent-orange);font-weight:normal;">Múltiples categorías permitidas</span>
+          </label>
+          <div id="cat-chips-wrap" class="cat-chips-grid"></div>
+          <div style="margin-top:8px;">
+            <input type="text" id="edit-t-custom-cat" placeholder="+ Otra categoría personalizada (ej. Suma 15, Libres)" style="font-size:12px;padding:8px 12px;width:100%;border-radius:6px;background:var(--bg-base);border:1px solid var(--border-default);color:var(--text-primary);">
+          </div>
+        </div>
+
+        <div class="fg" style="margin-top:12px;"><label>Descripción / Información General</label><textarea id="edit-t-description" rows="3" placeholder="Detalles de premios, horarios, reglamento..."></textarea></div>
+
         <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px;">
           <button type="button" class="btn-org-secondary" onclick="closeModalOrg('modal-edit-tournament')">Cancelar</button>
           <button type="submit" class="btn-org-primary">Guardar Cambios</button>
@@ -1058,6 +1120,8 @@ function saveCurrentTournament() {
 /* =====================
    MI TORNEO
    ===================== */
+const ALL_CATEGORIES = ['1ra', '2da', '3ra', '4ta', '5ta', '6ta', '7ma', '8va', 'Principiante', 'Suma 11', 'Suma 12', 'Suma 13', 'Suma 14', 'Mixto A', 'Mixto B'];
+
 function renderTournamentInfo() {
   const t = currentTournament;
   if (!t) {
@@ -1076,14 +1140,34 @@ function renderTournamentInfo() {
   const st = statusMap[t.status] || statusMap.upcoming;
   document.getElementById('torneo-status-badge-wrap').innerHTML = `<span class="badge ${st.cls}">${st.label}</span>`;
 
+  // Visualización de categorías (lista o string)
+  let catDisplay = '—';
+  if (Array.isArray(t.categories) && t.categories.length > 0) {
+    catDisplay = t.categories.join(', ');
+  } else if (t.category) {
+    catDisplay = t.category;
+  }
+
+  // Visualización de género
+  const genderMap = {
+    masculino: 'Masculino',
+    femenino:  'Femenino',
+    mixto:     'Mixto',
+    varios:    'Varios / Todos'
+  };
+  const genderStr = genderMap[t.gender] || (t.gender ? capitalize(t.gender) : '—');
+
+  // Visualización de puntuación
+  const scoringStr = t.scoring_mode === 'punto_de_oro' ? 'Punto de Oro (sin ventaja)' : 'Ventaja clásica';
+
   document.getElementById('torneo-info-grid').innerHTML = `
     <div class="tinfo-item"><div class="tinfo-label">Sede Principal</div><div class="tinfo-value">${t.venue || t.city || '—'}</div></div>
     <div class="tinfo-item"><div class="tinfo-label">Fechas</div><div class="tinfo-value">${t.start_date || '—'} al ${t.end_date || '—'}</div></div>
-    <div class="tinfo-item"><div class="tinfo-label">Categoría</div><div class="tinfo-value">${t.category || '—'}</div></div>
-    <div class="tinfo-item"><div class="tinfo-label">Género</div><div class="tinfo-value">${capitalize(t.gender || '—')}</div></div>
+    <div class="tinfo-item"><div class="tinfo-label">Categorías</div><div class="tinfo-value" style="color:var(--accent-orange);font-weight:600;">${catDisplay}</div></div>
+    <div class="tinfo-item"><div class="tinfo-label">Género</div><div class="tinfo-value">${genderStr}</div></div>
     <div class="tinfo-item"><div class="tinfo-label">Premio Ofrecido</div><div class="tinfo-value">${t.prize ? '$' + Number(t.prize).toLocaleString('es-AR') : '—'}</div></div>
     <div class="tinfo-item"><div class="tinfo-label">Costo Inscripción</div><div class="tinfo-value">$${(t.fee || 5000).toLocaleString('es-AR')} por jugador</div></div>
-    <div class="tinfo-item"><div class="tinfo-label">Modo puntuación</div><div class="tinfo-value">${t.scoring_mode === 'punto_de_oro' ? 'Punto de Oro' : 'Ventaja'}</div></div>
+    <div class="tinfo-item"><div class="tinfo-label">Modo puntuación</div><div class="tinfo-value">${scoringStr}</div></div>
     ${t.description ? `<div class="tinfo-item" style="grid-column:1/-1;"><div class="tinfo-label">Descripción</div><div class="tinfo-value" style="line-height:1.5;">${t.description}</div></div>` : ''}
   `;
 }
@@ -1101,30 +1185,80 @@ function openEditTournamentModal() {
   const t = currentTournament;
   if (!t) { showOrgToast('No tenés un torneo asignado', 'error'); return; }
   document.getElementById('edit-t-id').value          = t.id;
-  document.getElementById('edit-t-name').value        = t.name;
+  document.getElementById('edit-t-name').value        = t.name || '';
   document.getElementById('edit-t-venue').value       = t.venue || t.city || '';
   document.getElementById('edit-t-start').value       = t.start_date || '';
   document.getElementById('edit-t-end').value         = t.end_date   || '';
   document.getElementById('edit-t-status').value      = t.status     || 'upcoming';
-  document.getElementById('edit-t-category').value    = t.category   || '1ra';
+  document.getElementById('edit-t-gender').value      = t.gender     || 'masculino';
+  document.getElementById('edit-t-scoring').value     = t.scoring_mode || 'ventaja';
   document.getElementById('edit-t-prize').value       = t.prize      || 0;
   document.getElementById('edit-t-fee').value         = t.fee        || 5000;
   document.getElementById('edit-t-description').value = t.description || '';
+
+  // Obtener categorías activas del torneo
+  let activeCats = [];
+  if (Array.isArray(t.categories) && t.categories.length > 0) {
+    activeCats = t.categories;
+  } else if (t.category) {
+    activeCats = t.category.split(',').map(s => s.trim());
+  }
+
+  // Renderizar chips interactivos de categorías
+  const wrap = document.getElementById('cat-chips-wrap');
+  let customCats = [];
+  wrap.innerHTML = ALL_CATEGORIES.map(cat => {
+    const isChecked = activeCats.includes(cat);
+    return `
+      <label class="cat-chip-label ${isChecked ? 'active' : ''}">
+        <input type="checkbox" name="edit-cat-chip" value="${cat}" ${isChecked ? 'checked' : ''} onchange="this.parentElement.classList.toggle('active', this.checked)">
+        ${cat}
+      </label>
+    `;
+  }).join('');
+
+  // Identificar si hay categorías personalizadas adicionales
+  activeCats.forEach(c => {
+    if (c && !ALL_CATEGORIES.includes(c)) customCats.push(c);
+  });
+  document.getElementById('edit-t-custom-cat').value = customCats.join(', ');
+
   openModalOrg('modal-edit-tournament');
 }
 
 function submitEditTournament(e) {
   e.preventDefault();
   const id = document.getElementById('edit-t-id').value;
+
+  // Recolectar categorías estándar seleccionadas
+  const checkboxes = document.querySelectorAll('input[name="edit-cat-chip"]:checked');
+  const selectedCats = Array.from(checkboxes).map(cb => cb.value);
+
+  // Recolectar categorías personalizadas escritas
+  const customTxt = document.getElementById('edit-t-custom-cat').value.trim();
+  if (customTxt) {
+    customTxt.split(',').forEach(s => {
+      const trimmed = s.trim();
+      if (trimmed && !selectedCats.includes(trimmed)) {
+        selectedCats.push(trimmed);
+      }
+    });
+  }
+
+  const categoryStr = selectedCats.length > 0 ? selectedCats.join(', ') : 'Varias';
+
   const data = {
     name:        document.getElementById('edit-t-name').value,
     venue:       document.getElementById('edit-t-venue').value,
     start_date:  document.getElementById('edit-t-start').value,
     end_date:    document.getElementById('edit-t-end').value,
     status:      document.getElementById('edit-t-status').value,
-    category:    document.getElementById('edit-t-category').value,
+    gender:      document.getElementById('edit-t-gender').value,
+    scoring_mode:document.getElementById('edit-t-scoring').value,
     prize:       parseInt(document.getElementById('edit-t-prize').value) || 0,
     fee:         parseInt(document.getElementById('edit-t-fee').value) || 5000,
+    categories:  selectedCats,
+    category:    categoryStr,
     description: document.getElementById('edit-t-description').value,
   };
 
