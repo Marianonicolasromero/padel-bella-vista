@@ -1788,6 +1788,13 @@ img.img-priority {
   pointer-events: none;
 }
 
+/* Auto-ocultar al scrollear hacia abajo */
+.playing-bar.scroll-hidden {
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
 /* Posición top dependiendo de si hay role-banner */
 body:has(#role-banner) .playing-bar { top: 108px; }
 body:not(:has(#role-banner)) .playing-bar { top: 72px; }

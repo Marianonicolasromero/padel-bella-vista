@@ -725,6 +725,38 @@ function initPlayingBar() {
 
   // Ajustar padding del body
   _adjustBodyPaddingForBars();
+
+  // ── Auto-ocultar al scrollear hacia abajo ──
+  let lastScrollY = window.scrollY;
+  let scrollTicking = false;
+
+  window.addEventListener('scroll', function() {
+    if (scrollTicking) return;
+    scrollTicking = true;
+    requestAnimationFrame(function() {
+      const bar = document.getElementById('playing-bar');
+      if (!bar || bar.classList.contains('is-hidden')) {
+        // Si fue ocultado manualmente, no interferir
+        scrollTicking = false;
+        return;
+      }
+
+      const currentScrollY = window.scrollY;
+      const scrolledDown = currentScrollY > lastScrollY;
+      const pastThreshold = currentScrollY > 80;
+
+      if (scrolledDown && pastThreshold) {
+        // Scrolleando hacia abajo: ocultar suavemente
+        bar.classList.add('scroll-hidden');
+      } else if (!scrolledDown) {
+        // Scrolleando hacia arriba: mostrar
+        bar.classList.remove('scroll-hidden');
+      }
+
+      lastScrollY = currentScrollY;
+      scrollTicking = false;
+    });
+  }, { passive: true });
 }
 
 function hidePlayingBar() {
