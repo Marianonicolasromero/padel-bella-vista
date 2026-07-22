@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
@@ -2156,7 +2156,7 @@ function renderZones(zones) {
    ============================================================ */
 function renderBracket(data) {
   const container = document.getElementById('bracket-container');
-  if (!data || (!data.quarterFinals?.length && !data.semiFinals?.length && !data.final)) {
+  if (!data || (!data.quarterFinals?.length && !data.semiFinals?.length && !data.final && !data.octavosFinals?.length)) {
     container.innerHTML = `
       <div class="zone-empty" style="grid-column: 1 / -1; width: 100%; text-align: center; padding: 48px 24px;">
         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--text-muted); margin-bottom:12px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -2165,7 +2165,7 @@ function renderBracket(data) {
     return;
   }
 
-  const { quarterFinals, semiFinals, final } = data;
+  const { octavosFinals, quarterFinals, semiFinals, final } = data;
 
   function slotHTML(pairA, pairB, winner, score, isTbd) {
     if (isTbd || (!pairA && !pairB)) {
@@ -2180,64 +2180,54 @@ function renderBracket(data) {
     const scoreB = (winnerB && score) ? `<span class="bracket-slot__score winner-score">${score}</span>` : (score && !winnerB ? `<span class="bracket-slot__score">${score}</span>` : '');
     return `<div class="bracket-slot">
       <div class="bracket-slot__pair ${winnerA ? 'winner' : ''}">
-        <span class="bracket-slot__name">${pairA || '—'}</span>
+        <span class="bracket-slot__name">${winnerA ? '👑 ' : ''}${pairA || '—'}</span>
         ${scoreA}
       </div>
       <div class="bracket-slot__pair ${winnerB ? 'winner' : ''}">
-        <span class="bracket-slot__name">${pairB || '—'}</span>
+        <span class="bracket-slot__name">${winnerB ? '👑 ' : ''}${pairB || '—'}</span>
         ${scoreB}
       </div>
     </div>`;
   }
 
+  // Octavos column
+  const octHTML = (octavosFinals && octavosFinals.length) ? octavosFinals.map(m => slotHTML(m.pairA, m.pairB, m.winner, m.score)).join('') : '';
+
   // Quarter finals column
-  const qfHTML = quarterFinals.map(m => slotHTML(m.pairA, m.pairB, m.winner, m.score)).join('');
+  const qfHTML = (quarterFinals && quarterFinals.length) ? quarterFinals.map(m => slotHTML(m.pairA, m.pairB, m.winner, m.score)).join('') : '';
 
   // Semi finals column
-  const sfHTML = semiFinals.map(m => slotHTML(m.pairA, m.pairB, m.winner, m.score)).join('');
+  const sfHTML = (semiFinals && semiFinals.length) ? semiFinals.map(m => slotHTML(m.pairA, m.pairB, m.winner, m.score)).join('') : '';
 
   // Final column
-  const finHTML = slotHTML(final.pairA, final.pairB, final.winner, final.score, !final.pairA && !final.pairB);
+  const finHTML = final ? slotHTML(final.pairA, final.pairB, final.winner, final.score, !final.pairA && !final.pairB) : '';
 
   // Champion
   let champName = '?';
-  if (final.winner === 'a' && final.pairA) champName = final.pairA;
-  else if (final.winner === 'b' && final.pairB) champName = final.pairB;
+  if (final && final.winner === 'a' && final.pairA) champName = final.pairA;
+  else if (final && final.winner === 'b' && final.pairB) champName = final.pairB;
   const champHTML = champName !== '?' ? `<div class="champion-box__name">${champName}</div>` :
     `<div class="champion-box__tbd">Por definir</div>`;
 
   container.innerHTML = `
+    ${octHTML ? `
+    <!-- Octavos de Final -->
+    <div class="bracket-round">
+      <div class="bracket-round__label">Octavos de Final</div>
+      <div class="bracket-round__matches" style="gap:12px;">${octHTML}</div>
+    </div>
+    ` : ''}
+
     <!-- Quarter Finals -->
     <div class="bracket-round">
       <div class="bracket-round__label">Cuartos de Final</div>
       <div class="bracket-round__matches" style="gap:20px;">${qfHTML}</div>
     </div>
 
-    <!-- Connector QF->SF -->
-    <div class="bracket-connector" aria-hidden="true">
-      <div style="flex:1;display:flex;flex-direction:column;justify-content:space-around;padding:20px 0;">
-        <div style="flex:1;border-right:1px solid var(--border-default);border-top:1px solid var(--border-default);border-radius:0 8px 0 0;"></div>
-        <div style="flex:1;border-right:1px solid var(--border-default);border-bottom:1px solid var(--border-default);border-radius:0 0 8px 0;"></div>
-        <div style="width:1px;background:var(--border-default);align-self:center;height:calc(50% - 8px);margin:0 auto;position:absolute;right:0;top:50%;transform:translateY(-50%);"></div>
-      </div>
-      <div style="flex:1;display:flex;flex-direction:column;justify-content:space-around;padding:20px 0;">
-        <div style="flex:1;border-right:1px solid var(--border-default);border-top:1px solid var(--border-default);border-radius:0 8px 0 0;"></div>
-        <div style="flex:1;border-right:1px solid var(--border-default);border-bottom:1px solid var(--border-default);border-radius:0 0 8px 0;"></div>
-      </div>
-    </div>
-
     <!-- Semi Finals -->
     <div class="bracket-round">
       <div class="bracket-round__label">Semifinales</div>
       <div class="bracket-round__matches" style="gap:60px;">${sfHTML}</div>
-    </div>
-
-    <!-- Connector SF->F -->
-    <div class="bracket-connector" aria-hidden="true">
-      <div style="flex:1;display:flex;flex-direction:column;justify-content:space-around;padding:40px 0;">
-        <div style="flex:1;border-right:1px solid var(--border-default);border-top:1px solid var(--border-default);border-radius:0 8px 0 0;"></div>
-        <div style="flex:1;border-right:1px solid var(--border-default);border-bottom:1px solid var(--border-default);border-radius:0 0 8px 0;"></div>
-      </div>
     </div>
 
     <!-- Final -->
@@ -2248,14 +2238,11 @@ function renderBracket(data) {
 
     <!-- Champion -->
     <div class="bracket-champion">
-      <div class="bracket-champion__label">Campeon</div>
       <div class="champion-box">
         <div class="champion-box__trophy">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <path d="M8 21h8M12 17v4M17 3H7l1 9a5 5 0 0010 0l1-9z"/>
-            <path d="M7 3H4a1 1 0 00-1 1v1a4 4 0 004 4M17 3h3a1 1 0 011 1v1a4 4 0 01-4 4"/>
-          </svg>
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="color:var(--accent-orange);"><path d="M6 9H4.5a2.5 2.5 0 010-5H6M18 9h1.5a2.5 2.5 0 000-5H18M4 22h16M18 2H6v7a6 6 0 0012 0V2zM12 15v7"/></svg>
         </div>
+        <div class="champion-box__label">Campeón del Torneo</div>
         ${champHTML}
       </div>
     </div>

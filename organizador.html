@@ -273,30 +273,66 @@
 
     /* ── Bracket visual ── */
     .bracket-wrap { overflow-x: auto; padding-bottom: 12px; }
-    .bracket { display: flex; gap: 0; min-width: 700px; }
-    .bracket-round { flex: 1; display: flex; flex-direction: column; justify-content: space-around; }
-    .bracket-round-title { text-align: center; font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); letter-spacing: 1px; text-transform: uppercase; padding: 8px 0 16px; border-bottom: 1px solid var(--border-subtle); margin-bottom: 12px; }
-    .bracket-slots { display: flex; flex-direction: column; gap: 12px; padding: 8px 0; }
+    .bracket { display: flex; gap: 16px; min-width: 850px; }
+    .bracket-round { flex: 1; display: flex; flex-direction: column; min-width: 180px; }
+    .bracket-round-title { text-align: center; font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); letter-spacing: 1px; text-transform: uppercase; padding: 8px 0 12px; border-bottom: 1px solid var(--border-subtle); margin-bottom: 12px; }
+    .bracket-slots { display: flex; flex-direction: column; gap: 12px; padding: 4px 0; justify-content: space-around; flex: 1; }
     .bracket-slot {
       background: var(--bg-elevated);
       border: 1px solid var(--border-subtle);
-      border-radius: 8px;
+      border-radius: 10px;
       overflow: hidden;
       position: relative;
+      transition: all .2s;
     }
+    .bracket-slot:hover { border-color: rgba(0,180,216,.3); }
+    .bracket-slot.is-finished { border-color: rgba(232,132,31,.35); }
     .bracket-pair { display: flex; flex-direction: column; }
     .bracket-team {
-      padding: 8px 12px;
+      padding: 8px 10px;
       font-size: 12px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       border-bottom: 1px solid rgba(255,255,255,.04);
+      gap: 6px;
     }
     .bracket-team:last-child { border-bottom: none; }
-    .bracket-team.winner { background: rgba(232,132,31,.08); color: var(--accent-orange); font-weight: 600; }
-    .bracket-team.tbd { color: var(--text-muted); font-style: italic; }
-    .bracket-score { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); }
+    .bracket-team.winner { background: rgba(232,132,31,.12); color: var(--accent-orange); font-weight: 700; }
+    .bracket-team.tbd { color: var(--text-muted); font-style: italic; opacity: 0.7; }
+    .bracket-score { font-family: var(--font-mono); font-size: 11px; color: var(--accent-primary); font-weight: 600; }
+    .bracket-quick-btn {
+      position: absolute;
+      top: 4px;
+      right: 6px;
+      background: rgba(0, 180, 216, 0.12);
+      color: var(--accent-primary);
+      border: 1px solid rgba(0, 180, 216, 0.3);
+      border-radius: 4px;
+      font-size: 9px;
+      font-family: var(--font-mono);
+      padding: 2px 6px;
+      cursor: pointer;
+      opacity: 0.8;
+      transition: all 0.2s;
+    }
+    .bracket-quick-btn:hover {
+      opacity: 1;
+      background: var(--accent-primary);
+      color: #fff;
+    }
+    .champion-box {
+      background: linear-gradient(135deg, rgba(232,132,31,0.12) 0%, rgba(212,160,23,0.18) 100%);
+      border: 2px solid var(--accent-orange);
+      border-radius: 12px;
+      padding: 16px 12px;
+      text-align: center;
+      margin-top: 4px;
+      box-shadow: 0 0 16px rgba(232,132,31,0.15);
+    }
+    .champion-icon { font-size: 28px; margin-bottom: 4px; }
+    .champion-title { font-size: 9px; font-family: var(--font-mono); letter-spacing: 1.5px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; }
+    .champion-name { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--accent-orange); letter-spacing: 1px; }
 
     /* ── Config tab ── */
     .config-section { background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: 16px; padding: 24px; margin-bottom: 20px; }
@@ -1379,8 +1415,303 @@ function deletePlayerOrg(id) {
 /* =====================
    PARTIDOS
    ===================== */
+/* =====================
+   PARTIDOS Y PASE AUTOMÁTICO DE LLAVES
+   ===================== */
 function saveMatches() {
+  recalculateBracketAdvancement();
   localStorage.setItem('padelbell_matches_' + (currentTournament?.id || ''), JSON.stringify(localMatches));
+}
+
+function recalculateBracketAdvancement() {
+  if (!localMatches || !localMatches.length) return;
+
+  const octavos = localMatches.filter(m => m.phase === 'Octavos de Final');
+  const cuartos = localMatches.filter(m => m.phase === 'Cuartos de Final');
+  const semis   = localMatches.filter(m => m.phase === 'Semifinales');
+  const final   = localMatches.filter(m => m.phase === 'Final');
+
+  // 1. Octavos -> Cuartos
+  if (octavos.length > 0 && cuartos.length > 0) {
+    for (let i = 0; i < octavos.length; i++) {
+      const match = octavos[i];
+      const targetIdx = Math.floor(i / 2);
+      if (cuartos[targetIdx]) {
+        let winnerPair = null;
+        if (match.winner === 'a') winnerPair = match.pairA;
+        else if (match.winner === 'b') winnerPair = match.pairB;
+
+        if (i % 2 === 0) cuartos[targetIdx].pairA = winnerPair;
+        else cuartos[targetIdx].pairB = winnerPair;
+      }
+    }
+  }
+
+  // 2. Cuartos -> Semifinales
+  if (cuartos.length > 0 && semis.length > 0) {
+    for (let i = 0; i < cuartos.length; i++) {
+      const match = cuartos[i];
+      const targetIdx = Math.floor(i / 2);
+      if (semis[targetIdx]) {
+        let winnerPair = null;
+        if (match.winner === 'a') winnerPair = match.pairA;
+        else if (match.winner === 'b') winnerPair = match.pairB;
+
+        if (i % 2 === 0) semis[targetIdx].pairA = winnerPair;
+        else semis[targetIdx].pairB = winnerPair;
+      }
+    }
+  }
+
+  // 3. Semifinales -> Final
+  if (semis.length > 0 && final.length > 0) {
+    for (let i = 0; i < semis.length; i++) {
+      const match = semis[i];
+      const targetMatch = final[0];
+      if (targetMatch) {
+        let winnerPair = null;
+        if (match.winner === 'a') winnerPair = match.pairA;
+        else if (match.winner === 'b') winnerPair = match.pairB;
+
+        if (i % 2 === 0) targetMatch.pairA = winnerPair;
+        else targetMatch.pairB = winnerPair;
+      }
+    }
+  }
+
+  // Sincronizar datos de bracket al objeto global DB del torneo
+  if (currentTournament) {
+    currentTournament.bracket = {
+      octavosFinals: octavos.map(formatBracketMatchData),
+      quarterFinals: cuartos.map(formatBracketMatchData),
+      semiFinals: semis.map(formatBracketMatchData),
+      final: formatBracketMatchData(final[0])
+    };
+    saveCurrentTournament();
+  }
+}
+
+function formatBracketMatchData(m) {
+  if (!m) return { pairA: null, pairB: null, winner: null, score: null };
+  const scoreStr = m.sets && m.sets.length ? m.sets.map(s => `${s.a}-${s.b}`).join(' / ') : null;
+  return {
+    id: m.id,
+    pairA: m.pairA,
+    pairB: m.pairB,
+    winner: m.winner,
+    score: scoreStr,
+    status: m.status
+  };
+}
+
+/* =====================
+   BRACKET GENERATOR & VIEW
+   ===================== */
+function generateBracket() {
+  const activePlayers = DB.players.filter(p => p.active);
+
+  // Armar parejas a partir de los jugadores inscriptos
+  let pairs = [];
+  for (let i = 0; i < activePlayers.length; i += 2) {
+    if (activePlayers[i + 1]) {
+      pairs.push(`${activePlayers[i].first_name} / ${activePlayers[i+1].first_name}`);
+    } else {
+      pairs.push(`${activePlayers[i].first_name} / Jugador Libre`);
+    }
+  }
+
+  // Muestra por defecto si faltan parejas inscriptas
+  const samplePairs = [
+    'Ramírez / Medina', 'Ojeda / Da Silva', 'González / Fernández', 'López / Castro',
+    'Da Silva / Rojas', 'Sosa / Benítez', 'Vargas / Pereyra', 'Ruíz / Álvarez',
+    'Robledo / Matías', 'Diego / Luciana', 'Agustín / Carolina', 'Valentina / Lucas',
+    'Martínez / Gómez', 'Ríos / Torres', 'Blanco / Romero', 'Díaz / Morales'
+  ];
+
+  while (pairs.length < 8) {
+    pairs.push(samplePairs[pairs.length % samplePairs.length]);
+  }
+
+  localMatches = [];
+  const venue = currentTournament?.venue || 'Palmeras Pádel';
+
+  // Si hay más de 8 parejas (hasta 16), armar desde Octavos de Final
+  if (pairs.length > 8) {
+    // 8 Octavos
+    for (let i = 0; i < 8; i++) {
+      localMatches.push({
+        id: 'bo' + (i + 1),
+        phase: 'Octavos de Final',
+        pairA: pairs[i * 2] || 'Por definir',
+        pairB: pairs[i * 2 + 1] || 'Por definir',
+        status: 'scheduled',
+        sets: [],
+        winner: null,
+        court: venue
+      });
+    }
+    // 4 Cuartos (vacíos para recibir pases automáticos)
+    for (let i = 0; i < 4; i++) {
+      localMatches.push({
+        id: 'bc' + (i + 1),
+        phase: 'Cuartos de Final',
+        pairA: null,
+        pairB: null,
+        status: 'scheduled',
+        sets: [],
+        winner: null,
+        court: venue
+      });
+    }
+    // 2 Semis
+    for (let i = 0; i < 2; i++) {
+      localMatches.push({
+        id: 'bs' + (i + 1),
+        phase: 'Semifinales',
+        pairA: null,
+        pairB: null,
+        status: 'scheduled',
+        sets: [],
+        winner: null,
+        court: venue
+      });
+    }
+    // 1 Final
+    localMatches.push({
+      id: 'bf1',
+      phase: 'Final',
+      pairA: null,
+      pairB: null,
+      status: 'scheduled',
+      sets: [],
+      winner: null,
+      court: venue
+    });
+
+  } else {
+    // 4 Cuartos de Final
+    for (let i = 0; i < 4; i++) {
+      localMatches.push({
+        id: 'bc' + (i + 1),
+        phase: 'Cuartos de Final',
+        pairA: pairs[i * 2] || 'Por definir',
+        pairB: pairs[i * 2 + 1] || 'Por definir',
+        status: 'scheduled',
+        sets: [],
+        winner: null,
+        court: venue
+      });
+    }
+    // 2 Semis
+    for (let i = 0; i < 2; i++) {
+      localMatches.push({
+        id: 'bs' + (i + 1),
+        phase: 'Semifinales',
+        pairA: null,
+        pairB: null,
+        status: 'scheduled',
+        sets: [],
+        winner: null,
+        court: venue
+      });
+    }
+    // 1 Final
+    localMatches.push({
+      id: 'bf1',
+      phase: 'Final',
+      pairA: null,
+      pairB: null,
+      status: 'scheduled',
+      sets: [],
+      winner: null,
+      court: venue
+    });
+  }
+
+  saveMatches();
+  renderPartidos();
+  renderBracketView();
+  updateStats();
+  showOrgToast('Bracket generado con pases automáticos entre rondas', 'success');
+}
+
+function renderBracketView() {
+  const container = document.getElementById('bracket-container');
+
+  // Recalcular pases automáticos antes de renderizar
+  recalculateBracketAdvancement();
+
+  const octavos = localMatches.filter(m => m.phase === 'Octavos de Final');
+  const cuartos = localMatches.filter(m => m.phase === 'Cuartos de Final');
+  const semis   = localMatches.filter(m => m.phase === 'Semifinales');
+  const final   = localMatches.filter(m => m.phase === 'Final');
+
+  const rounds = [];
+  if (octavos.length) rounds.push({ title: 'Octavos de Final', matches: octavos });
+  if (cuartos.length) rounds.push({ title: 'Cuartos de Final', matches: cuartos });
+  if (semis.length)   rounds.push({ title: 'Semifinales', matches: semis });
+  if (final.length)   rounds.push({ title: 'Final', matches: final });
+
+  if (!rounds.length) {
+    container.innerHTML = `<div class="empty-org" style="width:100%;"><div class="empty-org-title">Sin bracket</div><div class="empty-org-msg">Usá "Generar Bracket" para armar el cuadro de llaves.</div></div>`;
+    return;
+  }
+
+  const finalMatch = final[0];
+  let championName = null;
+  if (finalMatch && finalMatch.status === 'finished') {
+    championName = finalMatch.winner === 'a' ? finalMatch.pairA : finalMatch.winner === 'b' ? finalMatch.pairB : null;
+  }
+
+  let html = rounds.map(round => {
+    const slots = round.matches.map(m => {
+      const scoreA = m.sets && m.sets.length ? m.sets.map(s => s.a).join('/') : '';
+      const scoreB = m.sets && m.sets.length ? m.sets.map(s => s.b).join('/') : '';
+      const isFinished = m.status === 'finished';
+
+      let quickBtn = '';
+      if (m.pairA && m.pairB && m.pairA !== 'Por definir' && m.pairB !== 'Por definir') {
+        quickBtn = `<button class="bracket-quick-btn" onclick="openResultModal('${m.id}')" title="Cargar / Editar resultado">
+          ${isFinished ? '✎ Editar' : '⚡ Cargar'}
+        </button>`;
+      }
+
+      return `<div class="bracket-slot ${isFinished ? 'is-finished' : ''}">
+        <div class="bracket-pair">
+          <div class="bracket-team ${m.winner === 'a' ? 'winner' : ''} ${!m.pairA || m.pairA === 'Por definir' ? 'tbd' : ''}">
+            <span>${m.winner === 'a' ? '👑 ' : ''}${m.pairA || '— Por definir —'}</span>
+            ${scoreA ? `<span class="bracket-score">${scoreA}</span>` : ''}
+          </div>
+          <div class="bracket-team ${m.winner === 'b' ? 'winner' : ''} ${!m.pairB || m.pairB === 'Por definir' ? 'tbd' : ''}">
+            <span>${m.winner === 'b' ? '👑 ' : ''}${m.pairB || '— Por definir —'}</span>
+            ${scoreB ? `<span class="bracket-score">${scoreB}</span>` : ''}
+          </div>
+        </div>
+        ${quickBtn}
+      </div>`;
+    }).join('');
+
+    return `<div class="bracket-round">
+      <div class="bracket-round-title">${round.title}</div>
+      <div class="bracket-slots">${slots}</div>
+    </div>`;
+  }).join('');
+
+  // Cuadro del Campeón al final del cuadro
+  const championHTML = `
+    <div class="bracket-round champion-round">
+      <div class="bracket-round-title" style="color:var(--accent-orange);">🏆 CAMPEÓN</div>
+      <div class="bracket-slots">
+        <div class="champion-box ${championName ? 'has-champion' : ''}">
+          <div class="champion-icon">🏆</div>
+          <div class="champion-title">GANADOR DEL TORNEO</div>
+          <div class="champion-name">${championName || 'Por definir'}</div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  container.innerHTML = html + championHTML;
 }
 
 function renderPartidos() {
@@ -1563,72 +1894,6 @@ function saveResult() {
   renderBracketView();
   updateStats();
   showOrgToast('Resultado guardado', 'success');
-}
-
-/* =====================
-   BRACKET
-   ===================== */
-function generateBracket() {
-  const pairs = DB.players
-    .filter(p => p.active)
-    .sort(() => Math.random() - .5)
-    .reduce((acc, p, i, arr) => {
-      if (i % 2 === 0 && arr[i+1]) acc.push(`${p.first_name} / ${arr[i+1].first_name}`);
-      return acc;
-    }, []);
-
-  localMatches = [];
-  for (let i = 0; i < Math.min(pairs.length, 4); i += 2) {
-    localMatches.push({ id:'b'+(i/2+1), phase:'Cuartos de Final', pairA: pairs[i]||'Por definir', pairB: pairs[i+1]||'Por definir', status:'scheduled', sets:[], winner:null, court: currentTournament?.venue || 'Sede sin definir' });
-  }
-  localMatches.push(
-    { id:'bs1', phase:'Semifinales', pairA:null, pairB:null, status:'scheduled', sets:[], winner:null, court: currentTournament?.venue || 'Sede sin definir' },
-    { id:'bs2', phase:'Semifinales', pairA:null, pairB:null, status:'scheduled', sets:[], winner:null, court: currentTournament?.venue || 'Sede sin definir' },
-    { id:'bf',  phase:'Final',       pairA:null, pairB:null, status:'scheduled', sets:[], winner:null, court: currentTournament?.venue || 'Sede sin definir' }
-  );
-  saveMatches();
-  renderPartidos();
-  renderBracketView();
-  updateStats();
-  showOrgToast('Bracket generado con los jugadores inscriptos', 'success');
-}
-
-function renderBracketView() {
-  const container = document.getElementById('bracket-container');
-  const rounds = [
-    { title: 'Cuartos de Final', matches: localMatches.filter(m => m.phase === 'Cuartos de Final') },
-    { title: 'Semifinales',      matches: localMatches.filter(m => m.phase === 'Semifinales') },
-    { title: 'Final',            matches: localMatches.filter(m => m.phase === 'Final') },
-  ];
-
-  if (!rounds.some(r => r.matches.length)) {
-    container.innerHTML = `<div class="empty-org" style="width:100%;"><div class="empty-org-title">Sin bracket</div><div class="empty-org-msg">Usá "Generar Bracket" o agregá partidos manualmente.</div></div>`;
-    return;
-  }
-
-  container.innerHTML = rounds.map(round => {
-    if (!round.matches.length) return '';
-    const slots = round.matches.map(m => {
-      const scoreA = m.sets && m.sets.length ? m.sets.map(s=>s.a).join('/') : '';
-      const scoreB = m.sets && m.sets.length ? m.sets.map(s=>s.b).join('/') : '';
-      return `<div class="bracket-slot">
-        <div class="bracket-pair">
-          <div class="bracket-team ${m.winner==='a'?'winner':''}">
-            <span>${m.pairA || '— Por definir —'}</span>
-            ${scoreA ? `<span class="bracket-score">${scoreA}</span>` : ''}
-          </div>
-          <div class="bracket-team ${m.winner==='b'?'winner':''} ${!m.pairB?'tbd':''}">
-            <span>${m.pairB || '— Por definir —'}</span>
-            ${scoreB ? `<span class="bracket-score">${scoreB}</span>` : ''}
-          </div>
-        </div>
-      </div>`;
-    }).join('');
-    return `<div class="bracket-round">
-      <div class="bracket-round-title">${round.title}</div>
-      <div class="bracket-slots">${slots}</div>
-    </div>`;
-  }).join('');
 }
 
 /* =====================
